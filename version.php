@@ -27,4 +27,4 @@ $plugin->version = 2019111600;
 $plugin->requires = 2018051700; // M3.5.
 $plugin->component = 'assignsubmission_collabora';
 $plugin->dependencies = array(); // No longer requires the activity module.
-
+$plugin->release = 'v3.8-r1';
