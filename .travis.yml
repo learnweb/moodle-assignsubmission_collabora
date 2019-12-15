@@ -63,6 +63,7 @@ before_install:
   - composer selfupdate
   - composer create-project -n --no-dev --prefer-dist blackboard-open-source/moodle-plugin-ci ci dev-master #^2
   - export PATH="$(cd ci/bin; pwd):$(cd ci/vendor/bin; pwd):$PATH"
+  - moodle-plugin-ci add-plugin learnweb/moodle-mod_collabora
 
 jobs:
   include:
