@@ -21,7 +21,7 @@
  * @copyright 2019 Benjamin Ellis, Synergy Learning
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-//use mod_collabora\collabora;
+use mod_collabora\collabora;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -42,20 +42,6 @@ class assign_submission_collabora extends assign_submission_plugin {
      */
     const FILEAREA_USER = 'user';
 
-    const FORMAT_UPLOAD = 'upload';
-    const FORMAT_TEXT = 'text';
-    const FORMAT_SPREADSHEET = 'spreadsheet';
-    const FORMAT_WORDPROCESSOR = 'wordprocessor';
-    const FORMAT_PRESENTATION = 'presentation';
-
-    const DISPLAY_CURRENT = 'current';
-    const DISPLAY_NEW = 'new';
-
-    const FILEAREA_INITIAL = 'initial';
-    const FILEAREA_GROUP = 'group';
-
-
-
     /**
      * The default file options.
      *
@@ -66,23 +52,8 @@ class assign_submission_collabora extends assign_submission_plugin {
             'subdirs' => 0,
             'maxbytes' => 0,
             'maxfiles' => 1,
-            'accepted_types' => $this->get_accepted_types()
+            'accepted_types' => \mod_collabora\collabora::get_accepted_types()
         );
-    }
-
-    /**
-     * Function to return accepted file types.
-     *
-     * @return array - file extensions
-     */
-    private function get_accepted_types() {
-        return [
-            '.txt', '.rtf',
-            '.doc', '.docx', '.odt',
-            '.xls', '.xlsx', '.ots',
-            '.ppt', '.pptx', '.otp',
-            '.odg',
-        ];
     }
 
     /**
@@ -94,7 +65,7 @@ class assign_submission_collabora extends assign_submission_plugin {
      * @param string $filepath - we don't use this for our plugin but might do in the future.
      * @return StdClass
      */
-    private function get_filerecord($filename = null, $filearea = self::FILEAREA_INITIAL, $itemid = 0, $filepath = '/') {
+    private function get_filerecord($filename = null, $filearea = collabora::FILEAREA_INITIAL, $itemid = 0, $filepath = '/') {
         $contextid = $this->assignment->get_context()->id;
         return(object) [
             'contextid' => $contextid,
@@ -175,11 +146,11 @@ class assign_submission_collabora extends assign_submission_plugin {
      * @return string
      */
     private function get_discovery_xml() {
-        $baseurl = trim(get_config('assignsubmission_collabora', 'url'));
+        $baseurl = trim(get_config('mod_collabora', 'url'));
         if (!$baseurl) {
             throw new \moodle_exception('collaboraurlnotset', 'mod_collabora');
         }
-        $cache = \cache::make('assignsubmission_collabora', 'discovery');
+        $cache = \cache::make('mod_collabora', 'discovery');
         if (!$xml = $cache->get($baseurl)) {
             $url = rtrim($baseurl, '/').'/hosting/discovery';
             $curl = new \curl();
@@ -283,7 +254,7 @@ class assign_submission_collabora extends assign_submission_plugin {
             // Automatic resize of the height.
             $height = '600px';
             // Can we do this?
-            $PAGE->requires->js_call_amd('assignsubmission_collabora/resizeiframe', 'init');
+            $PAGE->requires->js_call_amd('mod_collabora/resizeiframe', 'init');
         } else {
             // Fixed height.
             $height = $config->height;
@@ -380,16 +351,6 @@ class assign_submission_collabora extends assign_submission_plugin {
         return get_string('pluginname', 'assignsubmission_collabora');
     }
 
-    private function format_menu() {
-        return [
-            self::FORMAT_UPLOAD => get_string(self::FORMAT_UPLOAD, 'assignsubmission_collabora'),
-            self::FORMAT_TEXT => get_string(self::FORMAT_TEXT, 'assignsubmission_collabora'),
-            self::FORMAT_SPREADSHEET => get_string(self::FORMAT_SPREADSHEET, 'assignsubmission_collabora'),
-            self::FORMAT_WORDPROCESSOR => get_string(self::FORMAT_WORDPROCESSOR, 'assignsubmission_collabora'),
-            self::FORMAT_PRESENTATION => get_string(self::FORMAT_PRESENTATION, 'assignsubmission_collabora'),
-        ];
-    }
-
     /**
      * Get the default setting for submission plugin
      *
@@ -402,7 +363,10 @@ class assign_submission_collabora extends assign_submission_plugin {
         } else {
             $pluginconfig = array();
         }
-        $config = (object) (array_merge((array) get_config('assignsubmission_collabora'), $pluginconfig));
+
+        // Use the module's configuration as well as our own.
+        $config = (object) (array_merge((array) get_config('mod_collabora'),
+            (array) get_config('assignsubmission_collabora'), $pluginconfig));
 
         $isexisting = false;
         if (!empty($config->format)) {
@@ -422,20 +386,20 @@ class assign_submission_collabora extends assign_submission_plugin {
 
         // Format section.
         $mform->addElement('select', 'assignsubmission_collabora_format',
-            get_string('format', 'assignsubmission_collabora'), $this->format_menu());
+            get_string('format', 'assignsubmission_collabora'), \mod_collabora\collabora::format_menu());
         $mform->setDefault('assignsubmission_collabora_format',
-            empty($config->format) ? self::FORMAT_WORDPROCESSOR : $config->format);
+            empty($config->format) ? $config->defaultformat : $config->format);
         if ($isexisting) {
             $mform->freeze('assignsubmission_collabora_format');
         }
         $mform->disabledif ('assignsubmission_collabora_format', 'assignsubmission_collabora_enabled', 'notchecked');
 
         // Text File - initial text.
-        if (!$isexisting || $config->format === self::FORMAT_TEXT) {
+        if (!$isexisting || $config->format === \mod_collabora\collabora::FORMAT_TEXT) {
             $mform->addElement('textarea', 'assignsubmission_collabora_initialtext',
                 get_string('initialtext', 'assignsubmission_collabora'));
             $mform->hideif ('assignsubmission_collabora_initialtext',
-                'assignsubmission_collabora_format', 'neq', self::FORMAT_TEXT);
+                'assignsubmission_collabora_format', 'neq', \mod_collabora\collabora::FORMAT_TEXT);
             $mform->setDefault('assignsubmission_collabora_initialtext',
                 empty($config->initialtext) ? '' : $config->initialtext);
             if ($isexisting) {
@@ -452,7 +416,7 @@ class assign_submission_collabora extends assign_submission_plugin {
             $mform->setDefault('assignsubmission_collabora_filename', '');
             $mform->setType('assignsubmission_collabora_filename', PARAM_FILE);
             $mform->hideif ('assignsubmission_collabora_filename',
-                'assignsubmission_collabora_format', 'eq', self::FORMAT_UPLOAD);
+                'assignsubmission_collabora_format', 'eq', \mod_collabora\collabora::FORMAT_UPLOAD);
             if ($isexisting) {
                 $mform->freeze('assignsubmission_collabora_filename');
             }
@@ -465,7 +429,7 @@ class assign_submission_collabora extends assign_submission_plugin {
             $mform->addElement('filemanager', 'assignsubmission_collabora_initialfile_filemanager',
                 get_string('initialfile', 'assignsubmission_collabora'), null, $filemanageropts);
             $mform->hideif ('assignsubmission_collabora_initialfile_filemanager',
-                'assignsubmission_collabora_format', 'neq', self::FORMAT_UPLOAD);
+                'assignsubmission_collabora_format', 'neq', \mod_collabora\collabora::FORMAT_UPLOAD);
             $mform->disabledif ('assignsubmission_collabora_initialfile_filemanager',
                 'assignsubmission_collabora_enabled', 'notchecked');
         } else {
@@ -488,6 +452,20 @@ class assign_submission_collabora extends assign_submission_plugin {
         $mform->setType('assignsubmission_collabora_height', PARAM_INT);
         $mform->setAdvanced('assignsubmission_collabora_height');
         $mform->disabledif ('assignsubmission_collabora_height', 'assignsubmission_collabora_enabled', 'notchecked');
+    }
+
+    /**
+     * Generate a filename where one is not provided.
+     *
+     * Moodle error for assignment plugins is a print_error() which is nasty for users.
+     *
+     * @return string
+     */
+    private function generaterandonfilename() {
+        return ('aaa' .
+            substr(str_shuffle(
+                str_repeat('abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+                    mt_rand(1,10))), 1, 7));
     }
 
     /**
@@ -520,12 +498,14 @@ class assign_submission_collabora extends assign_submission_plugin {
         if ($newrecord) {
             // Work out the filename for all types except Uploads.
             $filename = null;
-            if ($data->assignsubmission_collabora_format !== self::FORMAT_UPLOAD) {
-                if (empty($data->assignsubmission_collabora_filename)) {
-                    $noerror = $this->report_form_error(get_string('requiredforfilename', 'assignsubmission_collabora'));
+            if ($data->assignsubmission_collabora_format !== collabora::FORMAT_UPLOAD) {
+                if (empty(trim($data->assignsubmission_collabora_filename))) {
+                    // $noerror = $this->report_form_error(get_string('requiredforfilename', 'assignsubmission_collabora'));
+                    $data->assignsubmission_collabora_filename = $this->generaterandonfilename();
                 }
                 if (!$filename = clean_filename($data->assignsubmission_collabora_filename)) {
-                    $noerror = $this->report_form_error(get_string('invalidforfilename', 'assignsubmission_collabora'));
+                    // $noerror = $this->report_form_error(get_string('invalidforfilename', 'assignsubmission_collabora'));
+                    $data->assignsubmission_collabora_filename = $this->generaterandonfilename();
                 }
                 if ($noerror) {
                     $this->set_config('filename', $filename);
@@ -537,46 +517,41 @@ class assign_submission_collabora extends assign_submission_plugin {
                 $fs = get_file_storage();
                 $filerec = $this->get_filerecord($filename);
                 switch($data->assignsubmission_collabora_format) {
-                    case self::FORMAT_UPLOAD :
-                        if (empty($data->assignsubmission_collabora_initialfile_filemanager)) {
-                            $noerror = $this->report_form_error(get_string('requiredforupload', 'assignsubmission_collabora'));
-                            break;
-                        } else {
-                            $info = file_get_draft_area_info($data->assignsubmission_collabora_initialfile_filemanager);
-                            if (!$info ['filecount']) {
-                                $noerror = $this->report_form_error(get_string('requiredforupload', 'assignsubmission_collabora'));
-                                break;
-                            }
-                        }
-                        // Save the uploaded file as the initial file.
-                        file_save_draft_area_files($data->assignsubmission_collabora_initialfile_filemanager,
-                            $filerec->contextid, $filerec->component, $filerec->filearea, $filerec->itemid,
+                    case collabora::FORMAT_UPLOAD :
+                        $info = file_get_draft_area_info($data->assignsubmission_collabora_initialfile_filemanager);
+                        if ($info['filecount']) {
+                            // Save the uploaded file as the initial file.
+                            file_save_draft_area_files($data->assignsubmission_collabora_initialfile_filemanager,
+                                $filerec->contextid, $filerec->component, $filerec->filearea, $filerec->itemid,
                                 $this->get_default_fileoptions());
+                        } else {
+                            // We will just save a default file instead - avoiding the print_error() in the calling function.
+                            $filerec->filename .= $this->generaterandonfilename() . '.docx';
+                            $filepath = $CFG->dirroot . '/mod/collabora/blankfiles/blankdocument.docx';
+                            $fs->create_file_from_pathname($filerec, $filepath);
+                        }
                         break;
-                    case self::FORMAT_TEXT :
+                    case collabora::FORMAT_TEXT :
                         if (empty($data->assignsubmission_collabora_initialtext)) {
-                            $noerror = $this->report_form_error(get_string('requiredfortext', 'assignsubmission_collabora'));
-                            break;
-                        } else if (!$data->assignsubmission_collabora_initialtext =
-                                        trim($data->assignsubmission_collabora_initialtext)) {
-                            $noerror = $this->report_form_error(get_string('requiredfortext', 'assignsubmission_collabora'));
-                            break;
+                            $data->assignsubmission_collabora_initialtext = '';
+                            // $noerror = $this->report_form_error(get_string('requiredfortext', 'assignsubmission_collabora'));
+                            // break;
                         }
                         $this->set_config('initialtext', $data->assignsubmission_collabora_initialtext);
                         $filerec->filename .= '.txt';
                         $fs->create_file_from_string($filerec, $data->assignsubmission_collabora_initialtext);
                         break;
-                    case self::FORMAT_WORDPROCESSOR :
+                    case collabora::FORMAT_WORDPROCESSOR :
                         $filerec->filename .= '.docx';
                         $filepath = $CFG->dirroot . '/mod/collabora/blankfiles/blankdocument.docx';
                         $fs->create_file_from_pathname($filerec, $filepath);
                         break;
-                    case self::FORMAT_SPREADSHEET :
+                    case collabora::FORMAT_SPREADSHEET :
                         $filerec->filename .= '.xlsx';
                         $filepath = $CFG->dirroot . '/mod/collabora/blankfiles/blankspreadsheet.xlsx';
                         $fs->create_file_from_pathname($filerec, $filepath);
                         break;
-                    case self::FORMAT_PRESENTATION :
+                    case collabora::FORMAT_PRESENTATION :
                         $filerec->filename .= '.pptx';
                         $filepath = $CFG->dirroot . '/mod/collabora/blankfiles/blankpresentation.pptx';
                         $fs->create_file_from_pathname($filerec, $filepath);
@@ -702,7 +677,7 @@ class assign_submission_collabora extends assign_submission_plugin {
 
         $fs = get_file_storage();
         if ($submission->groupid) { // Group Submission.
-            $filerec = $this->get_filerecord(null, self::FILEAREA_GROUP, $submission->groupid);
+            $filerec = $this->get_filerecord(null, collabora::FILEAREA_GROUP, $submission->groupid);
         } else {
             // We will use the userid.
             $filerec = $this->get_filerecord(null, self::FILEAREA_USER, $submission->userid);
@@ -740,7 +715,7 @@ class assign_submission_collabora extends assign_submission_plugin {
         // Get or Create our submission file base record.
         $fs = get_file_storage();
         if ($submission->groupid) { // Group Submission.
-            $filerec = $this->get_filerecord(null, self::FILEAREA_GROUP, $submission->groupid);
+            $filerec = $this->get_filerecord(null, collabora::FILEAREA_GROUP, $submission->groupid);
         } else {
             // We will use the userid.
             $filerec = $this->get_filerecord(null, self::FILEAREA_USER, $userid);
@@ -791,7 +766,7 @@ class assign_submission_collabora extends assign_submission_plugin {
         // Get or Create our submission file base record.
         $fs = get_file_storage();
         if (!empty($submission->groupid)) { // Group Submission.
-            $filerec = $this->get_filerecord(null, self::FILEAREA_GROUP, $submission->groupid);
+            $filerec = $this->get_filerecord(null, collabora::FILEAREA_GROUP, $submission->groupid);
         } else {
             // We will use the userid.
             $filerec = $this->get_filerecord(null, self::FILEAREA_USER, $submission->userid);
@@ -842,10 +817,10 @@ class assign_submission_collabora extends assign_submission_plugin {
      */
     public function get_file_areas() {
         return array(
-            self::FILEAREA_INITIAL =>
-                ucfirst(get_string('fileareadesc', 'assignsubmission_collabora', self::FILEAREA_INITIAL)),
-            self::FILEAREA_GROUP =>
-                ucfirst(get_string('fileareadesc', 'assignsubmission_collabora', self::FILEAREA_GROUP)),
+            collabora::FILEAREA_INITIAL =>
+                ucfirst(get_string('fileareadesc', 'assignsubmission_collabora', collabora::FILEAREA_INITIAL)),
+            collabora::FILEAREA_GROUP =>
+                ucfirst(get_string('fileareadesc', 'assignsubmission_collabora', collabora::FILEAREA_GROUP)),
             self::FILEAREA_USER =>
                 ucfirst(get_string('fileareadesc', 'assignsubmission_collabora', self::FILEAREA_USER))
         );
@@ -890,7 +865,7 @@ class assign_submission_collabora extends assign_submission_plugin {
     public function is_empty(stdClass $submission) {
         $fs = get_file_storage();
         if (!empty($submission->groupid)) { // Group Submission.
-            $filerec = $this->get_filerecord(null, self::FILEAREA_GROUP, $submission->groupid);
+            $filerec = $this->get_filerecord(null, collabora::FILEAREA_GROUP, $submission->groupid);
         } else {
             // We will use the userid.
             $filerec = $this->get_filerecord(null, self::FILEAREA_USER, $submission->userid);
@@ -922,7 +897,7 @@ class assign_submission_collabora extends assign_submission_plugin {
         $fs = get_file_storage();
 
         if ($submission->groupid) { // Group Submission.
-            $filerec = $this->get_filerecord(null, self::FILEAREA_GROUP, $submission->groupid);
+            $filerec = $this->get_filerecord(null, collabora::FILEAREA_GROUP, $submission->groupid);
         } else {
             // We will use the userid.
             $filerec = $this->get_filerecord(null, self::FILEAREA_USER, $submission->userid);

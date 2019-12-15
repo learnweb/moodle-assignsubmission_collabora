@@ -21,7 +21,7 @@
  * @copyright 2019 Synergy Learning
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-//use mod_collabora\collabora;
+use mod_collabora\collabora;
 
 require_once(__DIR__.'/../../../../config.php');
 

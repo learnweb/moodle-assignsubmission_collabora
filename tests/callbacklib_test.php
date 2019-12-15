@@ -22,6 +22,9 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use mod_collabora\collabora;
+//use Behat\Gherkin\Exception\Exception;
+
 defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
@@ -54,8 +57,8 @@ class assignsubmission_collabora_callback_testcase extends advanced_testcase {
         $this->setUser($teacher->id);
 
         $data = new stdClass();
-        //$plugin::FORMAT_WORDPROCESSOR - example blank file.
-        $data->assignsubmission_collabora_format = $plugin::FORMAT_WORDPROCESSOR;
+        //collabora::FORMAT_WORDPROCESSOR - example blank file.
+        $data->assignsubmission_collabora_format = collabora::FORMAT_WORDPROCESSOR;
         $data->assignsubmission_collabora_filename = 'test_handle_request';
         // Width never empty - required for all formats.
         $data->assignsubmission_collabora_width = 0;
@@ -68,7 +71,7 @@ class assignsubmission_collabora_callback_testcase extends advanced_testcase {
         $files = $fs->get_area_files(
             $assign->get_context()->id,
             'assignsubmission_collabora',
-            $plugin::FILEAREA_INITIAL,
+            collabora::FILEAREA_INITIAL,
             0, '', false, 0, 0, 1);
         $initialfile = reset($files);
         $this->assertNotEmpty($initialfile, 'No initial file created');
@@ -100,7 +103,7 @@ class assignsubmission_collabora_callback_testcase extends advanced_testcase {
 
         /* Proper Tests Start here */
         // For this to work we need to set a Collabora URL
-        set_config('url', 'http://127.0.0.1:9980', 'assignsubmission_collabora');
+        set_config('url', 'http://127.0.0.1:9980', 'mod_collabora');
 
         // Get the URL we need to call the editing.
         $viewurl = $plugin->get_view_url($submission, $file, $student->id);

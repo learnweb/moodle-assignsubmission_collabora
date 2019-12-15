@@ -22,6 +22,8 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use mod_collabora\collabora;
+
 defined('MOODLE_INTERNAL') || die();
 
 global $CFG;

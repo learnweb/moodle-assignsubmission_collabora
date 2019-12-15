@@ -21,6 +21,7 @@
  * @copyright 2019 Benjamin Ellis, Synergy Learning
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+use mod_collabora\collabora;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -75,7 +76,7 @@ class assignsubmission_collabora_locallib_testcase extends advanced_testcase {
         $this->setUser($student->id);       // Won't hurt to make sure.
 
         if($itemid = $submission->groupid) { // Group Submission.
-            $filearea = $plugin::FILEAREA_GROUP;
+            $filearea = collabora::FILEAREA_GROUP;
         } else {
             $filearea = $plugin::FILEAREA_USER;
             $itemid = $student->id;
@@ -140,8 +141,8 @@ class assignsubmission_collabora_locallib_testcase extends advanced_testcase {
         // Recreate the form data.
         $data = new stdClass();
 
-        //$plugin::FORMAT_TEXT.
-        $data->assignsubmission_collabora_format = $plugin::FORMAT_TEXT;
+        //collabora::FORMAT_TEXT.
+        $data->assignsubmission_collabora_format = collabora::FORMAT_TEXT;
         $data->assignsubmission_collabora_filename = 'test_text_upload';
         // Width never empty - required for all formats.
         $data->assignsubmission_collabora_width = 0;
@@ -154,13 +155,13 @@ Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu 
 cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
         $this->assertTrue($plugin->save_settings($data));
 
-        //$plugin::FORMAT_WORDPROCESSOR - example blank file.
+        //collabora::FORMAT_WORDPROCESSOR - example blank file.
         $plugin = $this->get_submissionplugin_instance();
         unset( $data->assignsubmission_collabora_initialtext);
-        $data->assignsubmission_collabora_format = $plugin::FORMAT_WORDPROCESSOR;
+        $data->assignsubmission_collabora_format = collabora::FORMAT_WORDPROCESSOR;
         $this->assertTrue($plugin->save_settings($data));
 
-        //$plugin::FORMAT_UPLOAD.
+        //collabora::FORMAT_UPLOAD.
         $plugin = $this->get_submissionplugin_instance();
         $uploadfile = __DIR__ . '/fixtures/test-upload.odt';
         unset($data->assignsubmission_collabora_filename);
@@ -275,7 +276,7 @@ cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est la
         $submission = $this->assign->get_user_submission($student->id, true);
         $this->create_submission_file($plugin, $student, $submission);
 
-        set_config('url', 'http://127.0.0.1:9980', 'assignsubmission_collabora');
+        set_config('url', 'http://127.0.0.1:9980', 'mod_collabora');
 
         $this->assertNotEmpty($plugin->view($submission));
 
@@ -319,8 +320,8 @@ cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est la
 
         $fileareas = $plugin->get_file_areas();
         $this->assertCount(3, $fileareas);
-        $this->assertArrayHasKey($plugin::FILEAREA_GROUP, $fileareas);
-        $this->assertArrayHasKey($plugin::FILEAREA_INITIAL, $fileareas);
+        $this->assertArrayHasKey(collabora::FILEAREA_GROUP, $fileareas);
+        $this->assertArrayHasKey(collabora::FILEAREA_INITIAL, $fileareas);
         $this->assertArrayHasKey($plugin::FILEAREA_USER, $fileareas);
     }
 
@@ -345,8 +346,8 @@ cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est la
         // We create some settings for the file.
         $data = new stdClass();
 
-        //$plugin::FORMAT_SPREADSHEET - this will be the initial file.
-        $data->assignsubmission_collabora_format = $plugin::FORMAT_SPREADSHEET;
+        //collabora::FORMAT_SPREADSHEET - this will be the initial file.
+        $data->assignsubmission_collabora_format = collabora::FORMAT_SPREADSHEET;
         $data->assignsubmission_collabora_filename = 'test_delete_instance';
         // Width never empty - required for all formats.
         $data->assignsubmission_collabora_width = 0;
@@ -363,7 +364,7 @@ cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est la
         $files = $fs->get_area_files(
             $this->assign->get_context()->id,
             'assignsubmission_collabora',
-            $plugin::FILEAREA_INITIAL,
+            collabora::FILEAREA_INITIAL,
             0, null, false, 0, 0, 1);
         $initialfile = reset($files);
 
@@ -443,8 +444,8 @@ cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est la
         $this->setUser($teacher->id);
 
         $data = new stdClass();
-        //$plugin::FORMAT_WORDPROCESSOR - example blank file.
-        $data->assignsubmission_collabora_format = $plugin::FORMAT_WORDPROCESSOR;
+        //collabora::FORMAT_WORDPROCESSOR - example blank file.
+        $data->assignsubmission_collabora_format = collabora::FORMAT_WORDPROCESSOR;
         $data->assignsubmission_collabora_filename = 'test_handle_request';
         // Width never empty - required for all formats.
         $data->assignsubmission_collabora_width = 0;
@@ -457,7 +458,7 @@ cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est la
         $files = $fs->get_area_files(
             $assign->get_context()->id,
             'assignsubmission_collabora',
-            $plugin::FILEAREA_INITIAL,
+            collabora::FILEAREA_INITIAL,
             0, '', false, 0, 0, 1);
         $initialfile = reset($files);
         $this->assertNotEmpty($initialfile, 'No initial file created');
@@ -489,7 +490,7 @@ cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est la
 
         /* Proper Tests Start here */
         // For this to work we need to set a Collabora URL
-        set_config('url', 'http://127.0.0.1:9980', 'assignsubmission_collabora');
+        set_config('url', 'http://127.0.0.1:9980', 'mod_collabora');
 
         // Get the URL we need to call the editing.
         $viewurl = $plugin->get_view_url($submission, $file, $student->id);

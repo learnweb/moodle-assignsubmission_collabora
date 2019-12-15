@@ -8,7 +8,7 @@ Feature: In an assignment, students can use collabora to make a submission
   Background:
     Given the following config values are set as admin:
       | disabled | 0 | assignsubmission_collabora |
-      | url | http://127.0.0.1:9980 | assignsubmission_collabora |
+      | url | http://127.0.0.1:9980 | mod_collabora |
     # for javascript login to work
     And the following "users" exist:
       | username | firstname | lastname | email                |
