@@ -28,3 +28,4 @@ $plugin->requires = 2018051700; // M3.5.
 $plugin->component = 'assignsubmission_collabora';
 $plugin->dependencies = array('mod_collabora' => 2019042800);
 $plugin->release = 'v3.8-r2';
+$plugin->maturity = MATURITY_STABLE;
