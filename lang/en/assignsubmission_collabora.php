@@ -22,8 +22,6 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 $string['pluginname'] = 'Collaborative submissions';
-$string['collaboraurl'] = 'Collabora URL';
-$string['collaboraurlnotset'] = 'Collabora URL is not configured for this site';
 $string['display'] = 'Display (Collabora)';
 $string['docreadonly'] = 'File is readonly for you.';
 $string['enabled_help'] = 'If enabled, students are able to use collabora for their submission.';

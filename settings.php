@@ -23,5 +23,3 @@
  */
 defined ( 'MOODLE_INTERNAL' ) || die ();
 
-$settings->add(new admin_setting_configtext('assignsubmission_collabora/url',
-    new lang_string('collaboraurl', 'assignsubmission_collabora'), '', '', PARAM_URL));

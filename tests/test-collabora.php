@@ -6,6 +6,7 @@
  * @copyright Sept. 2019 Benjamin Ellis <benellis@mukudu.net>
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+die(); // Uncomment if you need this testing script
 // All the Error Reporting Please //
 @error_reporting ( E_ALL | E_STRICT ); // NOT FOR PRODUCTION SERVERS!
 @ini_set ( 'display_errors', '1' ); // NOT FOR PRODUCTION SERVERS!
