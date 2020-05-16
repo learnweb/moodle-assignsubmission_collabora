@@ -263,7 +263,7 @@ class assign_submission_collabora extends assign_submission_plugin {
         $viewurl = $this->get_view_url($submission, $submissionfile, $userid, $forcereadonly);
 
         $html = '<div><iframe src="' . $viewurl . '" class="collabora-iframe" width="' . $width .
-        '" height="' . $height . '" allow="fullscreen"></iframe></div>';
+        '" height="' . $height . '" allow="fullscreen" allowfullscreen="true"></iframe></div>';
 
         return $html;
     }
