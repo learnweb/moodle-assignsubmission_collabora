@@ -5,7 +5,7 @@ Changes
 -------
 
 ### v3.8-r3
-    2020-05-17 - Fix fullscreen for firefox (PR #4) (Thanks to Andreas Grabs for the PR's)
+    2020-05-17 - Fix fullscreen for firefox (PR #4) (Thanks to Andreas Grabs for this PR)
 
 
 ### v3.8-r2
