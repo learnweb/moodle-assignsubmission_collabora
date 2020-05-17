@@ -8,8 +8,8 @@ This plugin is originally written by  Benjamin Ellis from [Synergy Learning](htt
 - Collabora Online Server (Version 4.0.1 or later) and Moodle Server (Version 3.5 or later) with PHP 7.0 or later.
 
 ## Tested Versions
-- Collabora Online Server: 4.0.8
-- Moodle: 3.5.9
+- Collabora Online Server: 4.2.3
+- Moodle: 3.7.5
 
 ## Installation
 This plugin should go into mod/assign/submission/collabora. Upon installation, several default settings need to be defined for this subplugin (see Settings).
