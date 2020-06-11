@@ -1,4 +1,4 @@
-@mod @mod_assign @assignsubmission_collabora
+@mod @mod_assign @assignsubmission @assignsubmission_collabora
 
 Feature: In an assignment, students can use collabora to make a submission
   In order to complete my assignments using collabora features
@@ -27,7 +27,7 @@ Feature: In an assignment, students can use collabora to make a submission
     And the following "group members" exist:
       | user     | group |
       | student1 | GC11  |
-      
+
   Scenario: Make a collabora submission for an assignment.
     # Create our collabora assignment
     When I log in as "teacher1"
@@ -59,7 +59,7 @@ Feature: In an assignment, students can use collabora to make a submission
     Then I navigate to "View all submissions" in current page administration
     Then "Student 1" row "Status" column of "generaltable" table should contain "Submitted for grading"
     And I log out
-    
+
   @javascript
   Scenario: Make a collabora submission for an assignment as a member of a group.
     # Create our collabora assignment
@@ -95,4 +95,3 @@ Feature: In an assignment, students can use collabora to make a submission
     Then I navigate to "View all submissions" in current page administration
     Then "Student 1" row "Status" column of "generaltable" table should contain "Submitted for grading"
     And I log out
-

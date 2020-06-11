@@ -465,7 +465,7 @@ class assign_submission_collabora extends assign_submission_plugin {
         return ('aaa' .
             substr(str_shuffle(
                 str_repeat('abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ',
-                    mt_rand(1,10))), 1, 7));
+                    mt_rand(1, 10))), 1, 7));
     }
 
     /**
@@ -500,11 +500,9 @@ class assign_submission_collabora extends assign_submission_plugin {
             $filename = null;
             if ($data->assignsubmission_collabora_format !== collabora::FORMAT_UPLOAD) {
                 if (empty(trim($data->assignsubmission_collabora_filename))) {
-                    // $noerror = $this->report_form_error(get_string('requiredforfilename', 'assignsubmission_collabora'));
                     $data->assignsubmission_collabora_filename = $this->generaterandonfilename();
                 }
                 if (!$filename = clean_filename($data->assignsubmission_collabora_filename)) {
-                    // $noerror = $this->report_form_error(get_string('invalidforfilename', 'assignsubmission_collabora'));
                     $data->assignsubmission_collabora_filename = $this->generaterandonfilename();
                 }
                 if ($noerror) {
@@ -534,8 +532,6 @@ class assign_submission_collabora extends assign_submission_plugin {
                     case collabora::FORMAT_TEXT :
                         if (empty($data->assignsubmission_collabora_initialtext)) {
                             $data->assignsubmission_collabora_initialtext = '';
-                            // $noerror = $this->report_form_error(get_string('requiredfortext', 'assignsubmission_collabora'));
-                            // break;
                         }
                         $this->set_config('initialtext', $data->assignsubmission_collabora_initialtext);
                         $filerec->filename .= '.txt';
@@ -903,7 +899,7 @@ class assign_submission_collabora extends assign_submission_plugin {
             $filerec = $this->get_filerecord(null, self::FILEAREA_USER, $submission->userid);
         }
 
-        //delete the submission files.
+        // Delete the submission files.
         $fs->delete_area_files($filerec->contextid, $filerec->component, $filerec->filearea,
             $filerec->itemid);
     }

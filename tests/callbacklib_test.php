@@ -23,7 +23,6 @@
  */
 
 use mod_collabora\collabora;
-//use Behat\Gherkin\Exception\Exception;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -57,7 +56,7 @@ class assignsubmission_collabora_callback_testcase extends advanced_testcase {
         $this->setUser($teacher->id);
 
         $data = new stdClass();
-        //collabora::FORMAT_WORDPROCESSOR - example blank file.
+        // collabora::FORMAT_WORDPROCESSOR - example blank file.
         $data->assignsubmission_collabora_format = collabora::FORMAT_WORDPROCESSOR;
         $data->assignsubmission_collabora_filename = 'test_handle_request';
         // Width never empty - required for all formats.

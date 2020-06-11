@@ -49,7 +49,6 @@ class assignsubmission_collabora_events_testcase extends advanced_testcase {
         $student = $this->getDataGenerator()->create_and_enrol($course, 'student');
         $assign = $this->create_instance($course);
         $context = $assign->get_context();
-        //$cm = $assign->get_course_module();
 
         $this->setUser($student->id);
         $submission = $assign->get_user_submission($student->id, true);

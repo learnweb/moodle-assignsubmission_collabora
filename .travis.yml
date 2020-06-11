@@ -22,7 +22,7 @@ php:
 
 env:
   global:
-   - IGNORE_PATHS="thirdparty,/^classes\/event\/submission_(cre|upd)ated\.php/" BEHAT=yes
+   - IGNORE_PATHS="thirdparty,/^classes\/event\/submission_(cre|upd)ated\.php/,tests/test-collabora.php" BEHAT=yes
   jobs:
    - DB=pgsql MOODLE_BRANCH=MOODLE_35_STABLE
    - DB=pgsql MOODLE_BRANCH=MOODLE_37_STABLE

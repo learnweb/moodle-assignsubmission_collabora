@@ -1,4 +1,18 @@
 <?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
  * Standalone Collabora Test Script
@@ -6,7 +20,7 @@
  * @copyright Sept. 2019 Benjamin Ellis <benellis@mukudu.net>
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-die(); // Uncomment if you need this testing script
+defined('MOODLE_INTERNAL') || die(); // Uncomment if you need this testing script
 // All the Error Reporting Please //
 @error_reporting ( E_ALL | E_STRICT ); // NOT FOR PRODUCTION SERVERS!
 @ini_set ( 'display_errors', '1' ); // NOT FOR PRODUCTION SERVERS!
@@ -18,11 +32,11 @@ $docextensions = array(
     'pptx' => array('type' => 'Presentation', 'template' => 'fixtures/blankpresentation.pptx')
 );
 
-// callback to here //
+// Callback to here //.
 $wopipath = '/wopi/files/';
 $protocol = empty($_SERVER['HTTPS']) ? 'http://' : 'https://';
 $thiscall = $protocol . $_SERVER['HTTP_HOST'] . $_SERVER['SCRIPT_NAME'];
-$callbackurl =  $thiscall . $wopipath;
+$callbackurl = $thiscall . $wopipath;
 
 $htmlcontent = '';
 
@@ -50,22 +64,22 @@ if ($action = empty($_REQUEST['action']) ? null : $_REQUEST['action']) {
                     if ($capurl = $cap[0]->action['urlsrc']) {
                         $capabilities = file_get_contents($capurl);
                     }
-                }else{
+                } else {
                     $htmlcontent .= 'Not an XML reponse';
                 }
-            }else{
+            } else {
                 $htmlcontent .= "Failed to get '$url'";
             }
             break;
         case 'getstartingdoc' :
-            $userid =  uniqid();        //  I know, I know but it will do for now.
+            $userid = uniqid();        // I know, I know but it will do for now.
             $permission = $readonly ? 400 : 600;
             $fileid = "{$userid}_{$docformat}_{$permission}";
             $filename = "{$userid}.{$docformat}";
             $wopisrc = $callbackurl . $fileid;      // ."?$callbackparam";   //NOTE:  Access Token is not part of the WOPI
             $callbackparam = http_build_query(array('access_token' => $userid));    // There are others such as access_token_ttl & permission
             $docdwnlink = $wopisrc . '/contents' ."?$callbackparam";        // Download Link
-            $getfileinfolink =  $wopisrc ."?$callbackparam";
+            $getfileinfolink = $wopisrc ."?$callbackparam";
             $params = http_build_query(array(
                 'WOPISrc' => $wopisrc,
                 'access_token' => $userid
@@ -78,19 +92,19 @@ if ($action = empty($_REQUEST['action']) ? null : $_REQUEST['action']) {
                 $filelink = '';
                 if (file_exists($file)) {
                     $filelink = $thiscall . '?action=sendbacknewfile&filename=' . $filename;
-                }else{
+                } else {
                     if ($fileid) {
                         list($userfileid, $docformat, $permission) = explode('_', $fileid);
                         if ($canedit = ($permission == 600)) {
                             $htmlcontent = "You have not saved your file - no file to return.";
-                        }else{
+                        } else {
                             $htmlcontent = "Read-only file, please start again";
                         }
-                    }else{
+                    } else {
                         die("File Name is maybe incorrect - file not found - $file");
                     }
                 }
-            }else{
+            } else {
                 die('Missing filename');
             }
             break;
@@ -109,14 +123,14 @@ if ($action = empty($_REQUEST['action']) ? null : $_REQUEST['action']) {
                     flush();
                     readfile($file);
                     exit;
-                }else{
+                } else {
                     die("File no longer exists '$file'");
                 }
-            }else{
+            } else {
                 die("File Id is incorrect - file not found - $filename");
             }
     }
-}else{
+} else {
     // this will handle all the Collabora calls
     if ($relativepath = empty($_SERVER['PATH_INFO']) ? null : $_SERVER['PATH_INFO']) {
         error_log("Seen Collabora Call " . $_SERVER['REQUEST_URI']);
@@ -143,7 +157,7 @@ if ($action = empty($_REQUEST['action']) ? null : $_REQUEST['action']) {
             $initialfile = $docextensions[$docformat]['template'];
             if (file_exists(__DIR__ . '/' . $initialfile)) {
                 $sendfile = __DIR__ . '/' . $initialfile;
-            }else{
+            } else {
                 die('Template file missing');
             }
         }
@@ -170,7 +184,7 @@ if ($action = empty($_REQUEST['action']) ? null : $_REQUEST['action']) {
             header("Content-Type: application/json");
             echo(json_encode($ret));     // Send back JSON Response.
             exit;
-        }else if ($iscontentcall && !$filedata) {
+        } else if ($iscontentcall && !$filedata) {
             // This is a GET request - send back the file.
             // send the right headers - at least for browsers.
             error_log("This is a GET file request - '$sendfile'");
@@ -182,11 +196,11 @@ if ($action = empty($_REQUEST['action']) ? null : $_REQUEST['action']) {
             flush();
             if (($bytesent = readfile($sendfile)) === false) {
                 error_log('Failed to send file');
-            }else{
+            } else {
                 error_log("Sent $bytesent bytes for file size " . filesize($sendfile));
             }
             exit;
-        }else if ($iscontentcall && $filedata) {
+        } else if ($iscontentcall && $filedata) {
             // we get the file and save it for the next call.
             error_log('This is a PUT file request');
             $savefile = rtrim(sys_get_temp_dir(), '/') . '/' . "{$userfileid}.{$docformat}";
@@ -201,111 +215,115 @@ if ($action = empty($_REQUEST['action']) ? null : $_REQUEST['action']) {
 
 ?>
 <html>
-    <body>
-        <div>
-            <h1>Collabora Test</h1>
-        </div>
-        <?php if (!$action) :?>
-        <!--  Default action - Original Form -->
-        <div>
-            <form method="POST">
-                <input type="hidden" name="action" value="getwopiurlsrc" />
-                <div>
-                    Collabora URL: &nbsp;
-                    <input type="url" name="collaboraurl" value="http://127.0.0.1:9980" />
-                </div>
-                <div>
-                    Type of Document : &nbsp;
-                    <select name="docformat">
-                        <?php foreach ($docextensions as $ext => $dets): ?>
-                            <option value="<?php echo $ext; ?>"><?php echo $dets['type']; ?></option>
-                        <?php endforeach;?>
-                    </select>
-                </div>
-                <div>
-                    Read-Only? &nbsp;
-                    <input type="checkbox" name="readonly" value="1"></input>
-                </div>
-                <div>&nbsp;<input type="submit" name="submit" value="Get Discovery URL" /></div>
-            </form>
-        </div>
-        <?php elseif ($action == 'getwopiurlsrc') :?>
-        <!-- Report Back that we have the discovery XML and can ascertain the right URI for our doc. -->
-		<?php if ($capabilities) :?>
-		<div>
-			<h4>Server Capabilities</h4>
-			<p><pre><?php echo print_r((json_decode($capabilities)), true); ?></pre></p>
-		</div>
-		<?php endif; ?>
+<body>
+<div>
+    <h1>Collabora Test</h1>
+</div>
+<?php if (!$action) { ?>
+    <!--  Default action - Original Form -->
+    <div>
         <form method="POST">
+            <input type="hidden" name="action" value="getwopiurlsrc"/>
             <div>
-                <input type="hidden" name="urlsrc" value="<?php echo $urlsrc; ?>" />
-                <input type="hidden" name="action" value="getstartingdoc" />
-                <?php foreach ($_REQUEST as $key => $value) :?>
-                    <?php if ($key !== 'action' && $key !== 'submit') : ?>
-                    <input type = "hidden" name="<?php echo $key; ?>" value="<?php echo $value; ?>" />
-                    <?php endif; ?>
-                <?php endforeach;?>
+                Collabora URL: &nbsp;
+                <input type="url" name="collaboraurl" value="http://127.0.0.1:9980"/>
             </div>
             <div>
-                <p><?php echo $htmlcontent; ?></p>
+                Type of Document : &nbsp;
+                <select name="docformat">
+                    <?php foreach ($docextensions as $ext => $dets) { ?>
+                        <option value="<?php echo $ext; ?>"><?php echo $dets['type']; ?></option>
+                    <?php } ?>
+                </select>
             </div>
-            <div><input type="submit" name="submit" value="Get Initial Document" /></div>
+            <div>
+                Read-Only? &nbsp;
+                <input type="checkbox" name="readonly" value="1"></input>
+            </div>
+            <div>&nbsp;<input type="submit" name="submit" value="Get Discovery URL"/></div>
         </form>
-        <?php elseif ($action == 'getstartingdoc') :?>
-        <!--  Here we load the collabora frame and report what we have set. -->
-            <div>
-                <p><strong>UserId:</strong> <?php echo $userid; ?> <strong>FileId:</strong> <?php echo $fileid; ?></p>
-            </div>
-            <div>
-                <!-- Attempt to do what Collabora should be doing in another window -->
-                <div>
-                    <h4>WOPI Tests Against this script.</h4>
-                </div>
-                <div>
-                    <p><a target="_blank" href="<?php echo $getfileinfolink; ?>">View WOPI File Information.</a>  (<?php echo htmlentities($getfileinfolink); ?>)</p>
-                </div>
-                <div>
-                    <p><a target="_blank" href="<?php echo $docdwnlink; ?>">Download Initial File.</a> (<?php echo htmlentities($docdwnlink); ?>)</p>
-                </div>
-            </div>
-            <div>
-                <h3>Collabora Frame.</h3>
-                <p>Frame URL: <?php echo $doccollaboraurl; ?></p>
-                <div>
-                    <iframe src="<?php echo $doccollaboraurl; ?>" class="collabora-iframe" width="100%" height="600px" allow="fullscreen">
-                    </iframe>
-                </div>
-            </div>
-            <div>
-                <p><br/>Please press the 'Done' button to complete the process.</p>
-                <form method="POST">
-                    <input type="hidden" name="action" value="getdownloadlink" />
-                    <input type="hidden" name="filename" value="<?php echo $filename; ?>" />
-                    <input type="hidden" name="fileid" value="<?php echo $fileid; ?>" />
-                    <div><input type="submit" name="submit" value="Done" /></div>
-                </form>
-            </div>
-        <?php elseif ($action == 'getdownloadlink') :?>
-        <!-- After Saving the document, we can download it to check we have indeed saved an updated file. -->
-            <div>
-            	<?php if ($filelink): ?>
-                	<p>Click <a href="<?php echo $filelink; ?>">here to download the file</a> you have just saved.</p>
-                <?php else: ?>
-                	<p><?php echo $htmlcontent; ?></p>
-                <?php endif; ?>
-            </div>
-        <?php else: ?>
-            <div>
-                <p>Not A valid request for this script.</p>
-            </div>
-        <?php endif; ?>
-
-        <?php if ($action): ?>
+    </div>
+<?php } else if ($action == 'getwopiurlsrc') { ?>
+    <!-- Report Back that we have the discovery XML and can ascertain the right URI for our doc. -->
+    <?php if ($capabilities) { ?>
         <div>
-        	<p><a href="<?php echo $thiscall; ?>">Start Again</a></p>
+            <h4>Server Capabilities</h4>
+            <p>
+            <pre><?php echo print_r((json_decode($capabilities)), true); ?></pre>
+            </p>
         </div>
-        <?php endif;?>
+    <?php } ?>
+    <form method="POST">
+        <div>
+            <input type="hidden" name="urlsrc" value="<?php echo $urlsrc; ?>"/>
+            <input type="hidden" name="action" value="getstartingdoc"/>
+            <?php foreach ($_REQUEST as $key => $value) { ?>
+                <?php if ($key !== 'action' && $key !== 'submit') { ?>
+                    <input type="hidden" name="<?php echo $key; ?>" value="<?php echo $value; ?>"/>
+                <?php } ?>
+            <?php } ?>
+        </div>
+        <div>
+            <p><?php echo $htmlcontent; ?></p>
+        </div>
+        <div><input type="submit" name="submit" value="Get Initial Document"/></div>
+    </form>
+<?php } else if ($action == 'getstartingdoc') { ?>
+    <!--  Here we load the collabora frame and report what we have set. -->
+    <div>
+        <p><strong>UserId:</strong> <?php echo $userid; ?> <strong>FileId:</strong> <?php echo $fileid; ?></p>
+    </div>
+    <div>
+        <!-- Attempt to do what Collabora should be doing in another window -->
+        <div>
+            <h4>WOPI Tests Against this script.</h4>
+        </div>
+        <div>
+            <p><a target="_blank" href="<?php echo $getfileinfolink; ?>">View WOPI File Information.</a>
+                (<?php echo htmlentities($getfileinfolink); ?>)</p>
+        </div>
+        <div>
+            <p><a target="_blank" href="<?php echo $docdwnlink; ?>">Download Initial File.</a>
+                (<?php echo htmlentities($docdwnlink); ?>)</p>
+        </div>
+    </div>
+    <div>
+        <h3>Collabora Frame.</h3>
+        <p>Frame URL: <?php echo $doccollaboraurl; ?></p>
+        <div>
+            <iframe src="<?php echo $doccollaboraurl; ?>" class="collabora-iframe" width="100%" height="600px" allow="fullscreen">
+            </iframe>
+        </div>
+    </div>
+    <div>
+        <p><br/>Please press the 'Done' button to complete the process.</p>
+        <form method="POST">
+            <input type="hidden" name="action" value="getdownloadlink"/>
+            <input type="hidden" name="filename" value="<?php echo $filename; ?>"/>
+            <input type="hidden" name="fileid" value="<?php echo $fileid; ?>"/>
+            <div><input type="submit" name="submit" value="Done"/></div>
+        </form>
+    </div>
+<?php } else if ($action == 'getdownloadlink') { ?>
+    <!-- After Saving the document, we can download it to check we have indeed saved an updated file. -->
+    <div>
+        <?php if ($filelink) { ?>
+            <p>Click <a href="<?php echo $filelink; ?>">here to download the file</a> you have just saved.</p>
+        <?php } else { ?>
+            <p><?php echo $htmlcontent; ?></p>
+        <?php } ?>
+    </div>
+<?php } else { ?>
+    <div>
+        <p>Not A valid request for this script.</p>
+    </div>
+<?php } ?>
 
-    </body>
+<?php if ($action) { ?>
+    <div>
+        <p><a href="<?php echo $thiscall; ?>">Start Again</a></p>
+    </div>
+<?php } ?>
+
+</body>
 </html>
