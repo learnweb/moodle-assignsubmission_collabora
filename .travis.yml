@@ -83,6 +83,7 @@ jobs:
 # Unit tests and behat tests against full matrix.
 install:
   - docker run -d -p 127.0.0.1:4444:4444 --net=host -v /dev/shm:/dev/shm selenium/standalone-firefox:2.53.1
+  - docker run -t -d -p 127.0.0.1:9980:9980 --net=host -e "extra_params=--o:ssl.enable=false" collabora/code
   - moodle-plugin-ci install
 script:
   - moodle-plugin-ci phpunit --coverage-clover
