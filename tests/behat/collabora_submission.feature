@@ -24,6 +24,12 @@ Feature: In an assignment, students can use collabora to make a submission
     And the following "groups" exist:
       | name    | course | idnumber |
       | Group1 | C1     | GC11     |
+    And the following "groupings" exist:
+      | name        | course | idnumber |
+      | Grouping 1  | C1     | GG1      |
+    And the following "grouping groups" exist:
+      | grouping | group |
+      | GG1      | GC11  |
     And the following "group members" exist:
       | user     | group |
       | student1 | GC11  |
@@ -75,7 +81,7 @@ Feature: In an assignment, students can use collabora to make a submission
       | assignsubmission_collabora_filename | testcollaborafile |
       | teamsubmission | 1 |
       | preventsubmissionnotingroup | 1 |
-      | teamsubmissiongroupingid | Group1 |
+      | teamsubmissiongroupingid | Grouping 1 |
     And I log out
     # Make the collabora assignment submission
     And I log in as "student1"
