@@ -40,9 +40,10 @@ class assignsubmission_collabora_events_testcase extends advanced_testcase {
     use mod_assign_test_generator;
 
     /**
-     * Test that the assessable_uploaded event is fired when a file submission has been made.
+     * Setup Method for test_assessable_uploaded(), test_submission_created() and test_submission_updated()
+     * @return array ($file, $plugin, $assign, $submission, $sink, $dummy, $course)
      */
-    public function test_assessable_uploaded() {
+    public function setup_submission() {
         $this->resetAfterTest();
 
         $course = $this->getDataGenerator()->create_course();
@@ -65,8 +66,15 @@ class assignsubmission_collabora_events_testcase extends advanced_testcase {
             'filename' => 'myassignmnent.docx'
         );
         $file = $fs->create_file_from_string($dummy, 'Content of ' . $dummy->filename);
-
         $sink = $this->redirectEvents();
+        return array($file, $plugin, $assign, $submission, $sink, $dummy, $course);
+    }
+
+    /**
+     * Test that the assessable_uploaded event is fired when a file submission has been made.
+     */
+    public function test_assessable_uploaded() {
+        list($file, $plugin, $assign, $submission, $sink) = $this->setup_submission();
         $data = new stdClass();
         $data->submpathnamehash = $file->get_pathnamehash();
         $data->submfilename = $file->get_filename();
@@ -78,7 +86,7 @@ class assignsubmission_collabora_events_testcase extends advanced_testcase {
         $this->assertCount(2, $events);  // There are 2 events in the save() method.
         $event = $events[0];    // We want the 1st event
         $this->assertInstanceOf('\assignsubmission_file\event\assessable_uploaded', $event);
-        $this->assertEquals($context->id, $event->contextid);
+        $this->assertEquals($assign->get_context()->id, $event->contextid);
         $this->assertEquals($submission->id, $event->objectid);
         $this->assertCount(1, $event->other['pathnamehashes']); // Only ever 1 file.
         $this->assertEquals($file->get_pathnamehash(), $event->other['pathnamehashes'][0]);
@@ -89,30 +97,7 @@ class assignsubmission_collabora_events_testcase extends advanced_testcase {
      * Test that the submission_created event is fired when a file submission is saved.
      */
     public function test_submission_created() {
-        $this->resetAfterTest();
-
-        $course = $this->getDataGenerator()->create_course();
-        $student = $this->getDataGenerator()->create_and_enrol($course, 'student');
-        $assign = $this->create_instance($course);
-        $context = $assign->get_context();
-
-        $this->setUser($student->id);
-        $submission = $assign->get_user_submission($student->id, true);
-        $plugin = $assign->get_submission_plugin_by_type('collabora');
-        $filearea = $plugin::FILEAREA_USER;
-
-        $fs = get_file_storage();
-        $dummy = (object) array(
-            'contextid' => $context->id,
-            'component' => 'assignsubmission_collabora',
-            'filearea' => $filearea,
-            'itemid' => $student->id,
-            'filepath' => '/',
-            'filename' => 'myassignmnent.docx'
-        );
-        $file = $fs->create_file_from_string($dummy, 'Content of ' . $dummy->filename);
-
-        $sink = $this->redirectEvents();        // Catch Events.
+        list($file, $plugin, $assign, $submission, $sink, $dummy) = $this->setup_submission();
         $data = new stdClass();
         $data->submpathnamehash = $file->get_pathnamehash();
         $data->submfilename = $dummy->filename;
@@ -123,7 +108,7 @@ class assignsubmission_collabora_events_testcase extends advanced_testcase {
         $this->assertCount(2, $events);
         $event = array_pop($events);        // Last event.
         $this->assertInstanceOf('\assignsubmission_collabora\event\submission_created', $event);
-        $this->assertEquals($context->id, $event->contextid);
+        $this->assertEquals($assign->get_context()->id, $event->contextid);
         $this->assertEquals($event->other['submissionid'], $submission->id);
         $this->assertEquals($event->other['submissionattempt'], $submission->attemptnumber);
         $this->assertEquals($event->other['submissionstatus'], $submission->status);
@@ -136,36 +121,12 @@ class assignsubmission_collabora_events_testcase extends advanced_testcase {
      * Test that the submission_updated event is fired when a file submission is saved when an existing submission already exists.
      */
     public function test_submission_updated() {
-        $this->resetAfterTest();
-
-        $course = $this->getDataGenerator()->create_course();
-        $student = $this->getDataGenerator()->create_and_enrol($course, 'student');
-        $assign = $this->create_instance($course);
-        $context = $assign->get_context();
-
-        $this->setUser($student->id);
-        $submission = $assign->get_user_submission($student->id, true);
-        $plugin = $assign->get_submission_plugin_by_type('collabora');
-        $filearea = $plugin::FILEAREA_USER;
-
-        $fs = get_file_storage();
-        $dummy = (object) array(
-            'contextid' => $context->id,
-            'component' => 'assignsubmission_collabora',
-            'filearea' => $filearea,
-            'itemid' => $student->id,
-            'filepath' => '/',
-            'filename' => 'myassignmnent.docx'
-        );
-        $file = $fs->create_file_from_string($dummy, 'Content of ' . $dummy->filename);
-
+        list($file, , $assign, $submission, $sink, $dummy, $course) = $this->setup_submission();
         $plugin = $assign->get_submission_plugin_by_type('collabora');
         $data = new stdClass();
         $data->submpathnamehash = $file->get_pathnamehash();
         $data->submfilename = $dummy->filename;
         $data->subnewsubmssn = 1;           // New file.
-
-        $sink = $this->redirectEvents();
         // Create a submission.
         $plugin->save($submission, $data);
         // Update a submission.
@@ -177,7 +138,7 @@ class assignsubmission_collabora_events_testcase extends advanced_testcase {
         // We want to test the last event fired.
         $event = array_pop($events);
         $this->assertInstanceOf('\assignsubmission_collabora\event\submission_updated', $event);
-        $this->assertEquals($context->id, $event->contextid);
+        $this->assertEquals($assign->get_context()->id, $event->contextid);
         $this->assertEquals($course->id, $event->courseid);
         $this->assertEquals($submission->id, $event->other['submissionid']);
         $this->assertEquals($submission->attemptnumber, $event->other['submissionattempt']);
