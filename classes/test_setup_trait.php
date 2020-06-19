@@ -42,7 +42,7 @@ trait test_setup_trait {
      * Test Setup method.
      * @return array ($viewurl, $file, $fs, $assign, $plugin, $student).
      */
-    public function setup_view_url() {
+    public function setup_and_basic_tests_for_view_url() {
         $this->resetAfterTest();
 
         $course = $this->getDataGenerator()->create_course();

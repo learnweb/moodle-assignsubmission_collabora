@@ -436,7 +436,7 @@ cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est la
      */
     public function test_get_view_url() {
         global $CFG;
-        list($viewurl) = $this->setup_view_url();
+        list($viewurl) = $this->setup_and_basic_tests_for_view_url();
         $this->assertContains(urlencode($CFG->wwwroot), $viewurl);
 
         // Extract our WOPI parameter

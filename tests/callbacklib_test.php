@@ -46,7 +46,7 @@ class assignsubmission_collabora_callback_testcase extends advanced_testcase {
     use test_setup_trait;
 
     public function test_handle_request() {
-        list($viewurl, $file, $fs, $assign, $plugin, $student) = $this->setup_view_url();
+        list($viewurl, $file, $fs, $assign, $plugin, $student) = $this->setup_and_basic_tests_for_view_url();
 
         $qry = html_entity_decode(parse_url($viewurl, PHP_URL_QUERY));
         $params = array();
