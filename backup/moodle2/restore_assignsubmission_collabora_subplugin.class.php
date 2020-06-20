@@ -58,8 +58,6 @@ class restore_assignsubmission_collabora_subplugin extends restore_subplugin {
      * @return void
      */
     public function process_assignsubmission_collabora_submission($data) {
-        global $DB;
-
         $data = (object)$data;
         $data->assignment = $this->get_new_parentid('assign');
         $oldsubmissionid = $data->submission;

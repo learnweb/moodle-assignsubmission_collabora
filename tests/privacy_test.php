@@ -119,9 +119,10 @@ class assignsubmission_collabora_privacy_testcase extends \mod_assign\tests\mod_
     }
 
     /**
-     * Test that all submission files are deleted for this context.
+     * Setupmethod for test_delete_submission_for_context() and test_delete_submission_for_userid().
+     * @return array ($assign, $plugin, $submission, $plugin2, $submission2, $user1).
      */
-    public function test_delete_submission_for_context() {
+    public function setup_privacy_tests() {
         $this->resetAfterTest();
         // Create course, assignment, submission, and then a submission comment.
         $course = $this->getDataGenerator()->create_course();
@@ -134,15 +135,20 @@ class assignsubmission_collabora_privacy_testcase extends \mod_assign\tests\mod_
 
         $assign = $this->create_instance(['course' => $course]);
 
-        $context = $assign->get_context();
-
         $studentfilename = 'user1file.ods';
         list($plugin, $submission) = $this->create_file_submission($assign, $user1, $studentfilename);
         $student2filename = 'user2file.ods';
         list($plugin2, $submission2) = $this->create_file_submission($assign, $user2, $studentfilename);
+        return array($assign, $plugin, $submission, $plugin2, $submission2, $user1);
+    }
 
+    /**
+     * Test that all submission files are deleted for this context.
+     */
+    public function test_delete_submission_for_context() {
+        list($assign, $plugin, $submission, $plugin2, $submission2) = $this->setup_privacy_tests();
         // Only need the context and assign object in this plugin for this operation.
-        $requestdata = new \mod_assign\privacy\assign_plugin_request_data($context, $assign);
+        $requestdata = new \mod_assign\privacy\assign_plugin_request_data($assign->get_context(), $assign);
         \assignsubmission_collabora\privacy\provider::delete_submission_for_context($requestdata);
         // This checks that there are no files in this submission.
         $this->assertTrue($plugin->is_empty($submission));
@@ -153,27 +159,9 @@ class assignsubmission_collabora_privacy_testcase extends \mod_assign\tests\mod_
      * TODO Test that the comments for a user are deleted.
      */
     public function test_delete_submission_for_userid() {
-        $this->resetAfterTest();
-        // Create course, assignment, submission, and then a submission comment.
-        $course = $this->getDataGenerator()->create_course();
-        // Student.
-        $user1 = $this->getDataGenerator()->create_user();
-        $user2 = $this->getDataGenerator()->create_user();
-
-        $this->getDataGenerator()->enrol_user($user1->id, $course->id, 'student');
-        $this->getDataGenerator()->enrol_user($user2->id, $course->id, 'student');
-
-        $assign = $this->create_instance(['course' => $course]);
-
-        $context = $assign->get_context();
-
-        $studentfilename = 'user1file.ods';
-        list($plugin, $submission) = $this->create_file_submission($assign, $user1, $studentfilename);
-        $student2filename = 'user2file.ods';
-        list($plugin2, $submission2) = $this->create_file_submission($assign, $user2, $student2filename);
-
+        list($assign, $plugin, $submission, $plugin2, $submission2, $user1) = $this->setup_privacy_tests();
         // Only need the context and assign object in this plugin for this operation.
-        $requestdata = new \mod_assign\privacy\assign_plugin_request_data($context, $assign, $submission, [], $user1);
+        $requestdata = new \mod_assign\privacy\assign_plugin_request_data($assign->get_context(), $assign, $submission, [], $user1);
         \assignsubmission_collabora\privacy\provider::delete_submission_for_userid($requestdata);
 
         // This checks that there are no files in this submission.
