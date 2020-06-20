@@ -24,7 +24,10 @@ This plugin should go into mod/assign/submission/collabora. Upon installation, s
 ## Assignsubmission Types
 ![assignsubmission_collabora_submission_types](https://user-images.githubusercontent.com/2102425/85206192-9cd8ca00-b320-11ea-9b38-dc21c5bcb6d8.png)
 
-# Testing the plugin
+## View of the Collabora Office Editor
+![assignsubmission_collabora_office_document](https://user-images.githubusercontent.com/2102425/85206194-9ea28d80-b320-11ea-8184-9cc64c39bf77.png)
+
+## Testing the plugin
 
 If you want to test the collabora plugin on a local Moodle installation and a local Collabora Online Server via docker then you may find the [Collabora-Config.md](https://github.com/learnweb/moodle-mod_collabora/blob/master/Collabora-Config.md) file helpful.
 
