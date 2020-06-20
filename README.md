@@ -1,6 +1,6 @@
 # ![moodle-assignsubmission_collabora](pix/icon.png) An assigment submission plugin with Collabora Online integration for Moodle
 
-[![Build Status](https://travis-ci.org/github/learnweb/moodle-assignsubmission_collabora.svg?branch=master)](https://travis-ci.org/github/learnweb/moodle-assignsubmission_collabora)
+[![Build Status](https://travis-ci.org/learnweb/moodle-assignsubmission_collabora.svg?branch=master)](https://travis-ci.org/learnweb/moodle-assignsubmission_collabora)
 
 This submodule enables Moodle users to create documents (simple text files, word, spreadsheet and presentation documents) or upload a document via a selfhosted Collabora Online Server i.e. [CODE](https://www.collaboraoffice.com/code/) using the so called WOPI protocol and work collaboratively on this documents and submit it to an assignment.
 
