@@ -17,8 +17,8 @@ This plugin is originally written by  Benjamin Ellis from [Synergy Learning](htt
 This plugin should go into mod/assign/submission/collabora. Upon installation, several default settings need to be defined for this subplugin (see Settings).
 
 ## Administrative Settings of the submodule:
+![assignsubmission_collabora_administration_submission](https://user-images.githubusercontent.com/2102425/85206162-61d69680-b320-11ea-9a39-7f03864f18b5.png)
 
-#todo
 
 # Testing the plugin
 
