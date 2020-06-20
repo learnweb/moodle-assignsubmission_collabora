@@ -20,6 +20,10 @@ This plugin should go into mod/assign/submission/collabora. Upon installation, s
 
 #todo
 
+# Testing the plugin
+
+If you want to test the collabora plugin on a local Moodle installation and a local Collabora Online Server via docker then you may find the [Collabora-Config.md](https://github.com/learnweb/moodle-mod_collabora/blob/master/Collabora-Config.md) file helpful.
+
 ## Use of Collabora trademarks
 
 The name "Collabora" is used to indicate that the plugin provides an integration facility for use of Collabora Online from within Moodle.
