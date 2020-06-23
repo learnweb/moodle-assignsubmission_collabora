@@ -24,7 +24,7 @@ This plugin should go into mod/assign/submission/collabora. Upon installation, s
 ## Assignsubmission Types
 ![assignsubmission_collabora_submission_types](https://user-images.githubusercontent.com/2102425/85206192-9cd8ca00-b320-11ea-9b38-dc21c5bcb6d8.png)
 
-## View of the Collabora Office Editor
+## View of the Collabora Online Editor
 ![assignsubmission_collabora_office_document](https://user-images.githubusercontent.com/2102425/85206194-9ea28d80-b320-11ea-8184-9cc64c39bf77.png)
 
 ## Testing the plugin
