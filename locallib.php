@@ -228,7 +228,8 @@ class assign_submission_collabora extends assign_submission_plugin {
 
         $params = http_build_query(array(
             'WOPISrc' => $callbackurl->out(),
-            'access_token' => $usertoken
+            'access_token' => $usertoken,
+            'lang' => collabora::get_collabora_lang(),
         ));
 
         $viewurl = $collaboraurl . $params;
