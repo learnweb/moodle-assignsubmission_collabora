@@ -4,6 +4,10 @@ moodle-assignsubmission_collabora
 Changes
 -------
 
+### v3.9-r4
+
+* 2020-10-03 - add simple multi lang support (#7)
+
 ### v3.9-r1
 
 * 2020-06-24 - updated version.php, CHANGES.md & README.md
