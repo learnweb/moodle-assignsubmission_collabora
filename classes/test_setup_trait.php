@@ -105,7 +105,7 @@ trait test_setup_trait {
         // Get the URL we need to call the editing.
         $viewurl = $plugin->get_view_url($submission, $file, $student->id);
 
-        return array($viewurl, $file, $fs, $assign, $plugin, $student);
+        return array($viewurl-out(false), $file, $fs, $assign, $plugin, $student);
     }
 
 }
