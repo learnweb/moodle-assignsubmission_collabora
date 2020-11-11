@@ -59,6 +59,6 @@ class behat_assignsubmission_collabora extends behat_base {
      */
     private function find_collabora_frame() {
         $exception = new ExpectationException('Collabora frame was not found', $this->getSession());
-        return $this->find('css', '.collabora-iframe', $exception);
+        return $this->find('css', '.collabora-frame iframe', $exception);
     }
 }
