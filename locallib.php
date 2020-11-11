@@ -197,12 +197,19 @@ class assign_submission_collabora extends assign_submission_plugin {
      * STOLEN FROM collabora class - added minor alterations.
      *
      * @param stored_file $submissionfile - the file
-     * @return string - url.
+     * @return \moodle_url - url.
      */
     private function get_collabora_url(stored_file $submissionfile) {
         $mimetype = $submissionfile->get_mimetype(); // Changed Line.
         $discoveryxml = $this->get_discovery_xml();
-        return $this->get_url_from_mimetype($discoveryxml, $mimetype);
+
+        return new \moodle_url(
+            $this->get_url_from_mimetype(
+                $discoveryxml,
+                $mimetype
+            )
+        );
+
     }
 
     /**
@@ -214,7 +221,7 @@ class assign_submission_collabora extends assign_submission_plugin {
      * @param stored_file $submissionfile
      * @param int $userid - the user id of the person viewing the submission.
      * @param bool $forcereadonly - force the file to be read only.
-     * @return string $viewurl - A URL
+     * @return \moodle_url $viewurl - A URL
      */
     public function get_view_url(stdClass $submission, stored_file $submissionfile, $userid, $forcereadonly = false) {
 
@@ -226,47 +233,35 @@ class assign_submission_collabora extends assign_submission_plugin {
 
         $callbackurl = new \moodle_url($this->callbackurl . $fileid);
 
-        $params = http_build_query(array(
+        $params = array(
             'WOPISrc' => $callbackurl->out(),
             'access_token' => $usertoken,
             'lang' => collabora::get_collabora_lang(),
-        ));
+        );
 
-        $viewurl = $collaboraurl . $params;
-        return $viewurl;
+        $collaboraurl->params($params);
+        return $collaboraurl;
     }
 
     /**
      * Return the view url wrapped in the html frame.
      *
      * @param stdClass $submission
-     * @param stdClass $submissionfile - the file object.
+     * @param \stored_file $submissionfile - the file object.
      * @param int $userid
      * @param boolean $forcereadonly - If the file should be readonly.
      * @return string - HTML
      */
     private function get_view_htmlframe($submission, $submissionfile, $userid, $forcereadonly = false) {
-        global $PAGE;
+        global $OUTPUT;
 
         $config = $this->get_config();
-        // Handle the width / height - stolen from mod collabora.
-        $width = empty($config->width) ? '100%' : $config->width;
-        if (empty($config->height)) {
-            // Automatic resize of the height.
-            $height = '600px';
-            // Can we do this?
-            $PAGE->requires->js_call_amd('mod_collabora/resizeiframe', 'init');
-        } else {
-            // Fixed height.
-            $height = $config->height;
-        }
 
         $viewurl = $this->get_view_url($submission, $submissionfile, $userid, $forcereadonly);
+        $id = uniqid();
+        $widget = new \assignsubmission_collabora\output\content($id, $submissionfile->get_filename(), $viewurl, $config);
 
-        $html = '<div><iframe src="' . $viewurl . '" class="collabora-iframe" width="' . $width .
-        '" height="' . $height . '" allow="fullscreen" allowfullscreen="true"></iframe></div>';
-
-        return $html;
+        return $OUTPUT->render($widget);
     }
 
     /**
@@ -393,20 +388,20 @@ class assign_submission_collabora extends assign_submission_plugin {
         if ($isexisting) {
             $mform->freeze('assignsubmission_collabora_format');
         }
-        $mform->disabledif ('assignsubmission_collabora_format', 'assignsubmission_collabora_enabled', 'notchecked');
+        $mform->hideif('assignsubmission_collabora_format', 'assignsubmission_collabora_enabled', 'notchecked');
 
         // Text File - initial text.
         if (!$isexisting || $config->format === \mod_collabora\collabora::FORMAT_TEXT) {
             $mform->addElement('textarea', 'assignsubmission_collabora_initialtext',
                 get_string('initialtext', 'assignsubmission_collabora'));
-            $mform->hideif ('assignsubmission_collabora_initialtext',
+            $mform->hideif('assignsubmission_collabora_initialtext',
                 'assignsubmission_collabora_format', 'neq', \mod_collabora\collabora::FORMAT_TEXT);
             $mform->setDefault('assignsubmission_collabora_initialtext',
                 empty($config->initialtext) ? '' : $config->initialtext);
             if ($isexisting) {
                 $mform->freeze('assignsubmission_collabora_initialtext');
             }
-            $mform->disabledif ('assignsubmission_collabora_initialtext',
+            $mform->hideif('assignsubmission_collabora_initialtext',
                 'assignsubmission_collabora_enabled', 'notchecked');
         }
 
@@ -416,12 +411,12 @@ class assign_submission_collabora extends assign_submission_plugin {
                 get_string('filename', 'assignsubmission_collabora'), array('size' => '60'));
             $mform->setDefault('assignsubmission_collabora_filename', '');
             $mform->setType('assignsubmission_collabora_filename', PARAM_FILE);
-            $mform->hideif ('assignsubmission_collabora_filename',
+            $mform->hideif('assignsubmission_collabora_filename',
                 'assignsubmission_collabora_format', 'eq', \mod_collabora\collabora::FORMAT_UPLOAD);
             if ($isexisting) {
                 $mform->freeze('assignsubmission_collabora_filename');
             }
-            $mform->disabledif ('assignsubmission_collabora_filename',
+            $mform->hideif('assignsubmission_collabora_filename',
                 'assignsubmission_collabora_enabled', 'notchecked');
         }
 
@@ -431,7 +426,7 @@ class assign_submission_collabora extends assign_submission_plugin {
                 get_string('initialfile', 'assignsubmission_collabora'), null, $filemanageropts);
             $mform->hideif ('assignsubmission_collabora_initialfile_filemanager',
                 'assignsubmission_collabora_format', 'neq', \mod_collabora\collabora::FORMAT_UPLOAD);
-            $mform->disabledif ('assignsubmission_collabora_initialfile_filemanager',
+            $mform->hideif ('assignsubmission_collabora_initialfile_filemanager',
                 'assignsubmission_collabora_enabled', 'notchecked');
         } else {
             $file = $this->get_initial_file();
@@ -444,15 +439,13 @@ class assign_submission_collabora extends assign_submission_plugin {
             get_string('width', 'assignsubmission_collabora'));
         $mform->setDefault('assignsubmission_collabora_width', 0);
         $mform->setType('assignsubmission_collabora_width', PARAM_INT);
-        $mform->setAdvanced('assignsubmission_collabora_width');
-        $mform->disabledif ('assignsubmission_collabora_width', 'assignsubmission_collabora_enabled', 'notchecked');
+        $mform->hideif('assignsubmission_collabora_width', 'assignsubmission_collabora_enabled', 'notchecked');
 
         // Height.
         $mform->addElement('text', 'assignsubmission_collabora_height', get_string('height', 'assignsubmission_collabora'));
         $mform->setDefault('assignsubmission_collabora_height', 0);
         $mform->setType('assignsubmission_collabora_height', PARAM_INT);
-        $mform->setAdvanced('assignsubmission_collabora_height');
-        $mform->disabledif ('assignsubmission_collabora_height', 'assignsubmission_collabora_enabled', 'notchecked');
+        $mform->hideif('assignsubmission_collabora_height', 'assignsubmission_collabora_enabled', 'notchecked');
     }
 
     /**
@@ -571,7 +564,10 @@ class assign_submission_collabora extends assign_submission_plugin {
      * @return string view text.
      */
     public function view_summary(stdClass $submission, & $showviewlink) {
-        global $USER;
+        global $USER, $DB;
+        if (!empty($submission)) {
+            $submission = $DB->get_record('assign_submission', array('id' => $submission->id));
+        }
         $showviewlink = false;      // Default do not show view link.
         if (self::is_empty($submission)) {
             return get_string('nosubmission', 'assignsubmission_collabora');

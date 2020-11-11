@@ -43,6 +43,10 @@ before_install:
   - composer create-project -n --no-dev --prefer-dist blackboard-open-source/moodle-plugin-ci ci dev-master #^2
   - export PATH="$(cd ci/bin; pwd):$(cd ci/vendor/bin; pwd):$PATH"
   - moodle-plugin-ci add-plugin learnweb/moodle-mod_collabora
+# npm
+  - npm install eslint@latest
+  - npm install eslint-plugin-babel@latest
+  - npm install eslint-plugin-promise@latest
 
 jobs:
   fast_finish: true
@@ -85,6 +89,7 @@ install:
   - docker run -d -p 127.0.0.1:4444:4444 --net=host -v /dev/shm:/dev/shm selenium/standalone-firefox:2.53.1
   - docker run -t -d -p 127.0.0.1:9980:9980 --net=host -e "extra_params=--o:ssl.enable=false" collabora/code
   - moodle-plugin-ci install
+
 script:
   - moodle-plugin-ci phpunit --coverage-clover
   - moodle-plugin-ci behat
