@@ -55,7 +55,7 @@ trait test_setup_trait {
         $this->setUser($teacher->id);
 
         $data = new stdClass();
-        // collabora::FORMAT_WORDPROCESSOR - example blank file.
+        // We use collabora::FORMAT_WORDPROCESSOR as example blank file.
         $data->assignsubmission_collabora_format = collabora::FORMAT_WORDPROCESSOR;
         $data->assignsubmission_collabora_filename = 'test_handle_request';
         // Width never empty - required for all formats.
@@ -74,13 +74,13 @@ trait test_setup_trait {
         $initialfile = reset($files);
         $this->assertNotEmpty($initialfile, 'No initial file created');
 
-        // Get a student to make a submission
+        // Get a student to make a submission.
         $student = $this->getDataGenerator()->create_and_enrol($course, 'student');
         $this->setUser($student->id);
 
         $newassignment = true;
         $submission = $assign->get_user_submission($student->id, $newassignment);
-        // we have to create the submission file - as per get_form_elements();
+        // We have to create the submission file - as per get_form_elements();
         $submissionfilerec = (object) [
             'contextid' => $initialfile->get_contextid(),
             'component' => $initialfile->get_component(),
@@ -99,13 +99,13 @@ trait test_setup_trait {
         $data->subnewsubmssn = $newassignment;
         $this->assertTrue($plugin->save($submission, $data));
 
-        // For this to work we need to set a Collabora URL
+        // For this to work we need to set a Collabora URL.
         set_config('url', 'http://127.0.0.1:9980', 'mod_collabora');
 
         // Get the URL we need to call the editing.
         $viewurl = $plugin->get_view_url($submission, $file, $student->id);
 
-        return array($viewurl, $file, $fs, $assign, $plugin, $student);
+        return array($viewurl->out(false), $file, $fs, $assign, $plugin, $student);
     }
 
 }

@@ -1,0 +1,57 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template assignsubmission_collabora/content
+
+    Displays etherpad content
+
+    Example context (json):
+    {
+        "id" : 46876,
+        "legacy" : 1,
+        "viewurl" : "https://nodomain.local",
+        "filename" : "example.docx",
+        "name" : "example",
+        "framewidth" : "900px",
+        "frameheight" : "500px"
+    }
+
+}}
+<span class="ml-3">{{filename}}</span> <a href="#"
+   title="{{#str}}fullscreen, mod_collabora{{/str}}"
+   class="text-decoration-none text-primary collaboramodal"
+   data-toggle="modal"
+   data-target="#collaboramodal_{{id}}"
+>
+    <span class="fa-stack" title="{{title}}">
+        <i class="fa fa-square-o fa-stack-2x"></i>
+        <i class="fa fa-expand fa-stack-1x"></i>
+    </span>
+</a>
+{{#legacy}}
+    {{> mod_collabora/iframe_legacy}}
+{{/legacy}}
+{{^legacy}}
+    {{> mod_collabora/iframe}}
+{{/legacy}}
+{{> mod_collabora/modal}}
+
+{{#js}}
+    require(['assignsubmission_collabora/modal_iframe'], function(mod) {
+        mod.init("{{{viewurl}}}", "{{{id}}}");
+    });
+{{/js}}
