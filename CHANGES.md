@@ -4,6 +4,12 @@ moodle-assignsubmission_collabora
 Changes
 -------
 
+### v3.9-r5
+
+* 2020-11-12 - Fix problems with loading the iframe (#8)
+* 2020-11-12 - Add fullscreen mode like mod_collabora (#8)
+* 2020-11-12 - Fix visibility of instance settings when not active (#8)
+
 ### v3.9-r4
 
 * 2020-10-03 - add simple multi lang support (#7)
