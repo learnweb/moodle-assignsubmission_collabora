@@ -4,6 +4,10 @@ moodle-assignsubmission_collabora
 Changes
 -------
 
+### v3.10-r1
+
+* 2020-10-13 - adjust .travis.yml to check moodle 3.10 properly
+
 ### v3.9-r5
 
 * 2020-11-12 - Fix problems with loading the iframe (#8)
