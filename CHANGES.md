@@ -4,6 +4,10 @@ moodle-assignsubmission_collabora
 Changes
 -------
 
+### Unreleased
+
+* 2021-07-21 - Move Moodle Plugin CI from Travis CI to Github actions
+
 ### v3.10-r1
 
 * 2020-10-13 - adjust .travis.yml to check moodle 3.10 properly
