@@ -4,6 +4,10 @@ moodle-assignsubmission_collabora
 Changes
 -------
 
+### v3.11-r1
+
+* 2021-10-26 - use mod_collabora to load discovery xml into cache
+
 ### v3.10-r1
 
 * 2020-10-13 - adjust .travis.yml to check moodle 3.10 properly

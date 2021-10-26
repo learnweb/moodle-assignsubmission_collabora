@@ -145,22 +145,9 @@ class assign_submission_collabora extends assign_submission_plugin {
      *
      * @return string
      */
-    private function get_discovery_xml() {
-        $baseurl = trim(get_config('mod_collabora', 'url'));
-        if (!$baseurl) {
-            throw new \moodle_exception('collaboraurlnotset', 'mod_collabora');
-        }
-        $cache = \cache::make('mod_collabora', 'discovery');
-        if (!$xml = $cache->get($baseurl)) {
-            $url = rtrim($baseurl, '/').'/hosting/discovery';
-            $curl = new \curl();
-            $xml = $curl->get($url);
-            $cache->set($baseurl, $xml);
-        }
-        if (!$xml) {        // BEN Add.
-            debugging('Failed to get Dicovery XML', DEBUG_DEVELOPER);
-        }
-        return $xml;
+    private function load_discovery_xml() {
+        $collaboracfg = get_config('mod_collabora');
+        return \mod_collabora\collabora::get_discovery_xml($collaboracfg);
     }
 
     /**
@@ -201,7 +188,7 @@ class assign_submission_collabora extends assign_submission_plugin {
      */
     private function get_collabora_url(stored_file $submissionfile) {
         $mimetype = $submissionfile->get_mimetype(); // Changed Line.
-        $discoveryxml = $this->get_discovery_xml();
+        $discoveryxml = $this->load_discovery_xml();
 
         return new \moodle_url(
             $this->get_url_from_mimetype(
