@@ -23,8 +23,6 @@
  */
 use mod_collabora\collabora;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Library class for collabora submission plugin extending submission plugin base class
  *
@@ -156,6 +154,17 @@ class assign_submission_collabora extends assign_submission_plugin {
      * @return string
      */
     private function load_discovery_xml() {
+        global $CFG;
+
+        // If we are running automated testing we fake the collabora server installation by using a predifined discovery.xml.
+        if (defined('BEHAT_SITE_RUNNING') | (defined('PHPUNIT_TEST') AND PHPUNIT_TEST)) {
+            $baseurl = 'https://example.org/';
+            set_config('url', $baseurl, 'mod_collabora');
+            $cache = \cache::make('mod_collabora', 'discovery');
+            $xml = file_get_contents($CFG->dirroot.'/mod/assign/submission/collabora/tests/fixtures/discovery.xml');
+            $cache->set($baseurl, $xml);
+        }
+
         $collaboracfg = get_config('mod_collabora');
         return \mod_collabora\collabora::get_discovery_xml($collaboracfg);
     }
@@ -644,9 +653,11 @@ class assign_submission_collabora extends assign_submission_plugin {
 
         if ($data->subnewsubmssn) {
             // A new submission.
+            /** @var \assignsubmission_collabora\event\submission_created $event */
             $event = \assignsubmission_collabora\event\submission_created::create($params);
         } else {
             // An updated submission.
+            /** @var \assignsubmission_collabora\event\submission_created $event */
             $event = \assignsubmission_collabora\event\submission_updated::create($params);
         }
         $event->set_assign($this->assignment);

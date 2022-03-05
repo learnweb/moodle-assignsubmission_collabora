@@ -22,8 +22,6 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * The collabora callback lib file - created to make it testable.
  *
@@ -42,7 +40,7 @@ class callbacklib {
      * @throws \moodle_exception
      * @return string | void - json, binary contents of file to edit or nothing after file save.
      */
-    static public function handle_request($relativepath, $accesstoken, $postdata) {
+    public static function handle_request($relativepath, $accesstoken, $postdata) {
         global $CFG;
 
         list($shastr, $userid) = explode('_', $accesstoken);

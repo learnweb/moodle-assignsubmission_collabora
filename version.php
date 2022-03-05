@@ -23,9 +23,9 @@
  */
 defined ( 'MOODLE_INTERNAL' ) || die ();
 
-$plugin->version = 2021102600;
+$plugin->version = 2022030500;
 $plugin->requires = 2019051100; // M3.7.
 $plugin->component = 'assignsubmission_collabora';
 $plugin->dependencies = array('mod_collabora' => 2021102600);
-$plugin->release = 'v3.11-r1';
+$plugin->release = 'v3.11-r2';
 $plugin->maturity = MATURITY_STABLE;

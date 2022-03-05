@@ -22,12 +22,13 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+namespace assignsubmission_collabora;
 use mod_collabora\collabora;
 
 defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
-require_once($CFG->dirroot . '/mod/assign/tests/privacy_test.php');
+require_once($CFG->dirroot . '/mod/assign/tests/privacy/provider_test.php');
 
 /**
  * Unit tests for mod/assign/submission/file/classes/collabora/
@@ -35,7 +36,7 @@ require_once($CFG->dirroot . '/mod/assign/tests/privacy_test.php');
  * @copyright 2019 Benjamin Ellis, Synergy Learning
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class assignsubmission_collabora_privacy_testcase extends \mod_assign\tests\mod_assign_privacy_testcase {
+class privacy_test extends \mod_assign\privacy\provider_test {
 
     /**
      * Convenience function for creating submission data.
@@ -100,19 +101,21 @@ class assignsubmission_collabora_privacy_testcase extends \mod_assign\tests\mod_
         $this->getDataGenerator()->enrol_user($user1->id, $course->id, 'student');
         $this->getDataGenerator()->enrol_user($user2->id, $course->id, 'editingteacher');
 
+        /** @var \assign $assign */
         $assign = $this->create_instance(['course' => $course]);
         $context = $assign->get_context();
 
         $studentfilename = 'user1file.odt';
         list($plugin, $submission) = $this->create_file_submission($assign, $user1, $studentfilename);
 
+        /** @var \core_privacy\tests\request\content_writer $writer */
         $writer = \core_privacy\local\request\writer::with_context($context);
         $this->assertFalse($writer->has_any_data());
 
         // The student should have a file submission.
         $exportdata = new \mod_assign\privacy\assign_plugin_request_data($context, $assign, $submission, ['Attempt 1']);
         \assignsubmission_collabora\privacy\provider::export_submission_user_data($exportdata);
-        // print_object($writer);
+
         $storedfile = $writer->get_files(['Attempt 1'])[$studentfilename];
         $this->assertInstanceOf('stored_file', $storedfile);
         $this->assertEquals($studentfilename, $storedfile->get_filename());
@@ -190,6 +193,7 @@ class assignsubmission_collabora_privacy_testcase extends \mod_assign\tests\mod_
         $this->getDataGenerator()->enrol_user($user3->id, $course->id, 'student');
         $this->getDataGenerator()->enrol_user($user4->id, $course->id, 'student');
 
+        /** @var \assign $assign1 */
         $assign1 = $this->create_instance(['course' => $course]);
         $assign2 = $this->create_instance(['course' => $course]);
 

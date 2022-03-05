@@ -27,8 +27,6 @@ namespace assignsubmission_collabora;
 use mod_collabora\collabora;
 use stdClass;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Test Setup Trait for callbacklib_test.php and locallib_test.php
  *
@@ -43,6 +41,7 @@ trait test_setup_trait {
      * @return array ($viewurl, $file, $fs, $assign, $plugin, $student).
      */
     public function setup_and_basic_tests_for_view_url() {
+        global $CFG;
         $this->resetAfterTest();
 
         $course = $this->getDataGenerator()->create_course();
@@ -80,7 +79,7 @@ trait test_setup_trait {
 
         $newassignment = true;
         $submission = $assign->get_user_submission($student->id, $newassignment);
-        // We have to create the submission file - as per get_form_elements();
+        // We have to create the submission file - as per get_form_elements().
         $submissionfilerec = (object) [
             'contextid' => $initialfile->get_contextid(),
             'component' => $initialfile->get_component(),
@@ -98,9 +97,6 @@ trait test_setup_trait {
         $data->submfilename = $file->get_filename();
         $data->subnewsubmssn = $newassignment;
         $this->assertTrue($plugin->save($submission, $data));
-
-        // For this to work we need to set a Collabora URL.
-        set_config('url', 'http://127.0.0.1:9980', 'mod_collabora');
 
         // Get the URL we need to call the editing.
         $viewurl = $plugin->get_view_url($submission, $file, $student->id);

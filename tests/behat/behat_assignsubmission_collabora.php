@@ -43,12 +43,11 @@ class behat_assignsubmission_collabora extends behat_base {
      * @When /^I edit my collabora assign submission document$/
      */
     public function i_edit_my_collabora_assign_submission_document() {
-        // Find the frame by by css selector
+        // Find the frame by by css selector.
         $this->find_collabora_frame();
 
         // Check the frame URL - Maybe???
-
-        // Cannot do much more than that :(
+        // Cannot do much more than that :(.
 
     }
 

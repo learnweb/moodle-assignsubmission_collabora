@@ -23,8 +23,6 @@
  */
 namespace assignsubmission_collabora\event;
 
-defined ( 'MOODLE_INTERNAL' ) || die ();
-
 /**
  * The assignsubmission_collabora submission_updated event class.
  *
