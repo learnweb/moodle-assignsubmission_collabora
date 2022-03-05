@@ -57,6 +57,16 @@ class assign_submission_collabora extends assign_submission_plugin {
     }
 
     /**
+     * Get a list of file areas associated with the plugin configuration.
+     * This is used for backup/restore.
+     *
+     * @return array names of the fileareas, can be an empty array
+     */
+    public function get_config_file_areas() {
+        return array('initial');
+    }
+
+    /**
      * Function to return the file record object.
      *
      * @param string $filename - might be empty to be filled by caller.
