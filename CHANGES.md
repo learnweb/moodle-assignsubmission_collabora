@@ -4,6 +4,11 @@ moodle-assignsubmission_collabora
 Changes
 -------
 
+### v3.9-r9
+
+* 2022-03-04 - fix backup restore - missing inital file
+* 2022-03-05 - switch releases to Moodle version dependend releases. v3.9 can be used in Moodle 3.9 and 3.10
+
 ### v3.11-r1
 
 * 2021-10-26 - use mod_collabora to load discovery xml into cache
