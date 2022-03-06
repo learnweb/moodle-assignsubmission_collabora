@@ -14,8 +14,8 @@ Feature: In an assignment, students can use collabora to make a submission
       | teacher1 | Teacher   | 1        | teacher1@example.com |
       | student1 | Student   | 1        | student1@example.com |
     And the following "courses" exist:
-      | fullname | shortname | category | groupmode |
-      | Course 1 | C1        | 0        | 1         |
+      | fullname | shortname | category | groupmode | format | coursedisplay |
+      | Course 1 | C1        | 0        | 1         | topics | 0             |
     And the following "course enrolments" exist:
       | user     | course | role           |
       | teacher1 | C1     | editingteacher |
@@ -50,19 +50,19 @@ Feature: In an assignment, students can use collabora to make a submission
     # Make the collabora assignment submission
     And I log in as "student1"
     And I am on "Course 1" course homepage
-    And I follow "Collabora Test Assignment"
-    When I press "Add submission"
+    And I click on "Collabora Test Assignment" "link" in the "#section-1" "css_element"
+    And I press "Add submission"
     And I edit my collabora assign submission document
     And I press "Save changes"
-    Then I should see "Submitted for grading"
+    And I should see "Submitted for grading"
     And I should see "Not graded"
     And I log out
     # View the grading status of the collabora assignment submission
     # So that it can be graded - Grading is tested by the assignment module.
     And I log in as "teacher1"
     And I am on "Course 1" course homepage
-    And I follow "Collabora Test Assignment"
-    Then I navigate to "View all submissions" in current page administration
+    And I click on "Collabora Test Assignment" "link" in the "#section-1" "css_element"
+    And I click on "View all submissions" "link" in the "#region-main" "css_element"
     Then "Student 1" row "Status" column of "generaltable" table should contain "Submitted for grading"
     And I log out
 
@@ -86,18 +86,18 @@ Feature: In an assignment, students can use collabora to make a submission
     # Make the collabora assignment submission
     And I log in as "student1"
     And I am on "Course 1" course homepage
-    And I follow "Collabora Test Assignment"
-    When I press "Add submission"
+    And I click on "Collabora Test Assignment" "link" in the "#section-1" "css_element"
+    And I press "Add submission"
     And I edit my collabora assign submission document
     And I press "Save changes"
-    Then I should see "Submitted for grading"
+    And I should see "Submitted for grading"
     And I should see "Not graded"
     And I log out
     # View the grading status of the collabora assignment submission
     # So that it can be graded - Grading is tested by the assignment module.
     And I log in as "teacher1"
     And I am on "Course 1" course homepage
-    And I follow "Collabora Test Assignment"
-    Then I navigate to "View all submissions" in current page administration
+    And I click on "Collabora Test Assignment" "link" in the "#section-1" "css_element"
+    And I click on "View all submissions" "link" in the "#region-main" "css_element"
     Then "Student 1" row "Status" column of "generaltable" table should contain "Submitted for grading"
     And I log out
