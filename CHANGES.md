@@ -4,6 +4,10 @@ moodle-assignsubmission_collabora
 Changes
 -------
 
+### v3.9-r10
+
+* 2022-03-06 - update requirements
+
 ### v3.9-r9
 
 * 2022-03-04 - fix backup restore - missing inital file
