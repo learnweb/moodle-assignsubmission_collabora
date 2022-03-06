@@ -22,6 +22,7 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+namespace assignsubmission_collabora;
 use mod_collabora\collabora;
 use assignsubmission_collabora\test_setup_trait;
 
@@ -36,12 +37,11 @@ require_once($CFG->dirroot . '/mod/assign/tests/generator.php');
  * @copyright 2019 Benjamin Ellis, Synergy Learning
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class assignsubmission_collabora_locallib_testcase extends advanced_testcase {
+class locallib_test extends \advanced_testcase {
 
     // Use the generator helper.
-    use mod_assign_test_generator;
-
-    use test_setup_trait;
+    use \mod_assign_test_generator;
+    use \assignsubmission_collabora\test_setup_trait;
 
     /** @var $course - The course object */
     protected $course;
@@ -58,7 +58,7 @@ class assignsubmission_collabora_locallib_testcase extends advanced_testcase {
      * @return stdClass $plugin assignsubmission_collabora instance.
      */
     protected function get_submissionplugin_instance() {
-        if (empty($this->assign)) {     // new plugin
+        if (empty($this->assign)) {     // The new plugin.
             $this->course = $this->getDataGenerator()->create_course();
             $this->assign = $this->create_instance($this->course);
         }
@@ -98,19 +98,13 @@ class assignsubmission_collabora_locallib_testcase extends advanced_testcase {
 
         $content = "\nLorem ipsum dolor sit amet, consectetur adipiscing elit,
                         sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-                        Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-                        Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat
+                        Ut enim ad minim veniam, quis nostrud exercitation ullamco
+                        laboris nisi ut aliquip ex ea commodo consequat.
+                        Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+                        Excepteur sint occaecat
                         cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.\n";
 
         $file = $fs->create_file_from_string($dummy, 'Content of ' . $dummy->filename . $content);
-        /*
-        // Don't need $plugin->save as submission file has been created above here.
-        $data = new stdClass();
-        $data->submpathnamehash = $file->get_pathnamehash();
-        $data->submfilename = $dummy->filename;
-        $data->subnewsubmssn = 1;           // New file.
-        $plugin->save($submission, $data);
-        */
         return $file;
     }
 
@@ -119,7 +113,7 @@ class assignsubmission_collabora_locallib_testcase extends advanced_testcase {
      */
     public function test_get_name() {
         $this->resetAfterTest();
-        // get the relevant plugin
+        // Get the relevant plugin.
         $plugin = $this->get_submissionplugin_instance();
         $this->assertEquals(get_string('pluginname', 'assignsubmission_collabora'), $plugin->get_name());
     }
@@ -143,9 +137,9 @@ class assignsubmission_collabora_locallib_testcase extends advanced_testcase {
         $this->setUser($teacher->id);
 
         // Recreate the form data.
-        $data = new stdClass();
+        $data = new \stdClass();
 
-        // collabora::FORMAT_TEXT.
+        // The initial format: collabora::FORMAT_TEXT.
         $data->assignsubmission_collabora_format = collabora::FORMAT_TEXT;
         $data->assignsubmission_collabora_filename = 'test_text_upload';
         // Width never empty - required for all formats.
@@ -159,13 +153,13 @@ Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu 
 cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
         $this->assertTrue($plugin->save_settings($data));
 
-        // collabora::FORMAT_WORDPROCESSOR - example blank file.
+        // The example blank file: collabora::FORMAT_WORDPROCESSOR.
         $plugin = $this->get_submissionplugin_instance();
         unset($data->assignsubmission_collabora_initialtext);
         $data->assignsubmission_collabora_format = collabora::FORMAT_WORDPROCESSOR;
         $this->assertTrue($plugin->save_settings($data));
 
-        // collabora::FORMAT_UPLOAD.
+        // This will be the initial format: collabora::FORMAT_UPLOAD.
         $plugin = $this->get_submissionplugin_instance();
         $uploadfile = __DIR__ . '/fixtures/test-upload.odt';
         unset($data->assignsubmission_collabora_filename);
@@ -174,7 +168,7 @@ cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est la
         $fs = get_file_storage();
         $itemid = file_get_unused_draft_itemid();
         $filerecord = array(
-            'contextid' => context_user::instance($teacher->id)->id,
+            'contextid' => \context_user::instance($teacher->id)->id,
             'component' => 'user',
             'filearea' => 'draft',
             'filepath' => '/',
@@ -206,7 +200,7 @@ cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est la
         // Now we we resubmit our submission.
         $newassignment = false;
         $submission = $this->assign->get_user_submission($student->id, $newassignment);
-        // We need to save a submission file to change the report
+        // We need to save a submission file to change the report.
         $this->create_submission_file($plugin, $student, $submission);
         $submissiontxt = $submission->status;
         $this->assertEquals($submissiontxt, strtolower($plugin->view_summary($submission, $newassignment)));
@@ -236,7 +230,7 @@ cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est la
         $submission = $this->assign->get_user_submission($student->id, $newassignment);
         $file = $this->create_submission_file($plugin, $student, $submission);
 
-        $data = new stdClass();
+        $data = new \stdClass();
         $data->submpathnamehash = $file->get_pathnamehash();
         $data->submfilename = $file->get_filename();
         $data->submfileid = $file->get_id();
@@ -271,6 +265,8 @@ cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est la
      * Test view() function - This returns a HTML string - How do we assert.
      */
     public function test_view() {
+        global $CFG;
+
         $this->resetAfterTest();
         $plugin = $this->get_submissionplugin_instance();
 
@@ -280,7 +276,13 @@ cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est la
         $submission = $this->assign->get_user_submission($student->id, true);
         $this->create_submission_file($plugin, $student, $submission);
 
-        set_config('url', 'http://127.0.0.1:9980', 'mod_collabora');
+        // For this to work we need to set a Collabora URL.
+        // Put the discovery.xml into the cache to make the test independend to an existing collabora server.
+        $baseurl = 'https://example.org/';
+        set_config('url', $baseurl, 'mod_collabora');
+        $cache = \cache::make('mod_collabora', 'discovery');
+        $xml = file_get_contents($CFG->dirroot.'/mod/assign/submission/collabora/tests/fixtures/discovery.xml');
+        $cache->set($baseurl, $xml);
 
         $this->assertNotEmpty($plugin->view($submission));
 
@@ -348,9 +350,9 @@ cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est la
         $this->setUser($teacher->id);
 
         // We create some settings for the file.
-        $data = new stdClass();
+        $data = new \stdClass();
 
-        // collabora::FORMAT_SPREADSHEET - this will be the initial file.
+        // This will be the initial file: collabora::FORMAT_SPREADSHEET.
         $data->assignsubmission_collabora_format = collabora::FORMAT_SPREADSHEET;
         $data->assignsubmission_collabora_filename = 'test_delete_instance';
         // Width never empty - required for all formats.
@@ -415,7 +417,7 @@ cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est la
         $submission = $this->assign->get_user_submission($student->id, false);
         $this->create_submission_file($plugin, $student, $submission);
 
-        // We need to save a submission file to change the report
+        // We need to save a submission file to change the report.
         $this->assertFalse($plugin->is_empty($submission));
     }
 
@@ -436,14 +438,18 @@ cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est la
      */
     public function test_get_view_url() {
         global $CFG;
+        // Get the viewurl.
+        // The returned elements are: $viewurl, $file, $fs, $assign, $plugin, $student.
+        // We only need the $viewurl. All the other elements returned are not needed.
         list($viewurl) = $this->setup_and_basic_tests_for_view_url();
-        $this->assertContains(urlencode($CFG->wwwroot), $viewurl);
+        $partofwoipsrc = 'WOPISrc='.urlencode($CFG->wwwroot);
+        $this->assertStringContainsString($partofwoipsrc, $viewurl);
 
-        // Extract our WOPI parameter
+        // Extract our WOPI parameter.
         $qry = parse_url($viewurl, PHP_URL_QUERY);
         list($wopisrc, $callpath) = explode('=', $qry);
         $callpath = urldecode($callpath);
-        $this->assertContains('wopi/file', $callpath);
+        $this->assertStringContainsString('wopi/file', $callpath);
 
         $params = parse_url($callpath);
         $this->assertNotEmpty($params['path']);

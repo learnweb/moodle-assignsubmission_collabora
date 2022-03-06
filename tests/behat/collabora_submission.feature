@@ -8,7 +8,6 @@ Feature: In an assignment, students can use collabora to make a submission
   Background:
     Given the following config values are set as admin:
       | disabled | 0 | assignsubmission_collabora |
-      | url | http://127.0.0.1:9980 | mod_collabora |
     # for javascript login to work
     And the following "users" exist:
       | username | firstname | lastname | email                |
@@ -16,17 +15,17 @@ Feature: In an assignment, students can use collabora to make a submission
       | student1 | Student   | 1        | student1@example.com |
     And the following "courses" exist:
       | fullname | shortname | category | groupmode |
-      | Course 1 | C1 | 0 | 1 |
+      | Course 1 | C1        | 0        | 1         |
     And the following "course enrolments" exist:
-      | user | course | role |
-      | teacher1 | C1 | editingteacher |
-      | student1 | C1 | student |
+      | user     | course | role           |
+      | teacher1 | C1     | editingteacher |
+      | student1 | C1     | student        |
     And the following "groups" exist:
-      | name    | course | idnumber |
+      | name   | course | idnumber |
       | Group1 | C1     | GC11     |
     And the following "groupings" exist:
-      | name        | course | idnumber |
-      | Grouping 1  | C1     | GG1      |
+      | name       | course | idnumber |
+      | Grouping 1 | C1     | GG1      |
     And the following "grouping groups" exist:
       | grouping | group |
       | GG1      | GC11  |
@@ -34,18 +33,19 @@ Feature: In an assignment, students can use collabora to make a submission
       | user     | group |
       | student1 | GC11  |
 
+  @javascript
   Scenario: Make a collabora submission for an assignment.
     # Create our collabora assignment
     When I log in as "teacher1"
     And I am on "Course 1" course homepage with editing mode on
     And I add a "Assignment" to section "1" and I fill the form with:
-      | Assignment name | Collabora Test Assignment |
-      | Description | "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."|
-      | assignsubmission_onlinetext_enabled | 0 |
-      | assignsubmission_file_enabled | 0 |
-      | assignsubmission_collabora_enabled | 1 |
-      | assignsubmission_collabora_format | spreadsheet |
-      | assignsubmission_collabora_filename | testcollaborafile |
+      | Assignment name                     | Collabora Test Assignment                                 |
+      | Description                         | "Lorem ipsum dolor sit amet, consectetur adipiscing elit" |
+      | assignsubmission_onlinetext_enabled | 0                                                         |
+      | assignsubmission_file_enabled       | 0                                                         |
+      | assignsubmission_collabora_enabled  | 1                                                         |
+      | assignsubmission_collabora_format   | spreadsheet                                               |
+      | assignsubmission_collabora_filename | testcollaborafile                                         |
     And I log out
     # Make the collabora assignment submission
     And I log in as "student1"
@@ -72,16 +72,16 @@ Feature: In an assignment, students can use collabora to make a submission
     When I log in as "teacher1"
     And I am on "Course 1" course homepage with editing mode on
     And I add a "Assignment" to section "1" and I fill the form with:
-      | Assignment name | Collabora Test Assignment |
-      | Description | "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."|
-      | assignsubmission_onlinetext_enabled | 0 |
-      | assignsubmission_file_enabled | 0 |
-      | assignsubmission_collabora_enabled | 1 |
-      | assignsubmission_collabora_format | spreadsheet |
-      | assignsubmission_collabora_filename | testcollaborafile |
-      | teamsubmission | 1 |
-      | preventsubmissionnotingroup | 1 |
-      | teamsubmissiongroupingid | Grouping 1 |
+      | Assignment name                     | Collabora Test Assignment                                 |
+      | Description                         | "Lorem ipsum dolor sit amet, consectetur adipiscing elit" |
+      | assignsubmission_onlinetext_enabled | 0                                                         |
+      | assignsubmission_file_enabled       | 0                                                         |
+      | assignsubmission_collabora_enabled  | 1                                                         |
+      | assignsubmission_collabora_format   | spreadsheet                                               |
+      | assignsubmission_collabora_filename | testcollaborafile                                         |
+      | teamsubmission                      | 1                                                         |
+      | preventsubmissionnotingroup         | 1                                                         |
+      | teamsubmissiongroupingid            | Grouping 1                                                |
     And I log out
     # Make the collabora assignment submission
     And I log in as "student1"

@@ -22,6 +22,8 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+namespace assignsubmission_collabora;
+
 defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
@@ -34,10 +36,10 @@ require_once($CFG->dirroot . '/mod/assign/tests/generator.php');
  * @copyright 2019 Benjamin Ellis, Synergy Learning
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class assignsubmission_collabora_events_testcase extends advanced_testcase {
+class events_test extends \advanced_testcase {
 
     // Use the generator helper.
-    use mod_assign_test_generator;
+    use \mod_assign_test_generator;
 
     /**
      * Setup Method for test_assessable_uploaded(), test_submission_created() and test_submission_updated()
@@ -75,7 +77,7 @@ class assignsubmission_collabora_events_testcase extends advanced_testcase {
      */
     public function test_assessable_uploaded() {
         list($file, $plugin, $assign, $submission, $sink) = $this->setup_submission();
-        $data = new stdClass();
+        $data = new \stdClass();
         $data->submpathnamehash = $file->get_pathnamehash();
         $data->submfilename = $file->get_filename();
         $data->submfileid = $file->get_id();
@@ -84,7 +86,7 @@ class assignsubmission_collabora_events_testcase extends advanced_testcase {
         $events = $sink->get_events();
 
         $this->assertCount(2, $events);  // There are 2 events in the save() method.
-        $event = $events[0];    // We want the 1st event
+        $event = $events[0];    // We want the 1st event.
         $this->assertInstanceOf('\assignsubmission_file\event\assessable_uploaded', $event);
         $this->assertEquals($assign->get_context()->id, $event->contextid);
         $this->assertEquals($submission->id, $event->objectid);
@@ -98,7 +100,7 @@ class assignsubmission_collabora_events_testcase extends advanced_testcase {
      */
     public function test_submission_created() {
         list($file, $plugin, $assign, $submission, $sink, $dummy) = $this->setup_submission();
-        $data = new stdClass();
+        $data = new \stdClass();
         $data->submpathnamehash = $file->get_pathnamehash();
         $data->submfilename = $dummy->filename;
         $data->subnewsubmssn = 1;           // New file.
@@ -123,7 +125,7 @@ class assignsubmission_collabora_events_testcase extends advanced_testcase {
     public function test_submission_updated() {
         list($file, , $assign, $submission, $sink, $dummy, $course) = $this->setup_submission();
         $plugin = $assign->get_submission_plugin_by_type('collabora');
-        $data = new stdClass();
+        $data = new \stdClass();
         $data->submpathnamehash = $file->get_pathnamehash();
         $data->submfilename = $dummy->filename;
         $data->subnewsubmssn = 1;           // New file.

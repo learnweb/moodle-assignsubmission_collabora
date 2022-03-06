@@ -24,8 +24,6 @@
 
 namespace assignsubmission_collabora\output;
 
-defined('MOODLE_INTERNAL') || die();
-
 class content implements \renderable, \templatable {
     /** @var \stdClass $data */
     private $data;

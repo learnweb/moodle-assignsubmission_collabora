@@ -26,5 +26,4 @@ require_once(__DIR__ . '/../../config.php');
 
 require_login();        // To keep codechecker happy.
 
-print_error('No Access');
-
+throw new \moodle_exception('No Access');

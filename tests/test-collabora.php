@@ -20,11 +20,15 @@
  * @copyright Sept. 2019 Benjamin Ellis <benellis@mukudu.net>
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-defined('MOODLE_INTERNAL') || die(); // Uncomment if you need this testing script
-// All the Error Reporting Please //
-@error_reporting ( E_ALL | E_STRICT ); // NOT FOR PRODUCTION SERVERS!
-@ini_set ( 'display_errors', '1' ); // NOT FOR PRODUCTION SERVERS!
-//
+
+require_once(dirname(__FILE__).'/../../../../../config.php');
+require_login();
+if (!is_siteadmin()) {
+    throw new \moodle_exception('this page is not allowed');
+}
+
+$debuggingout = 'print_r';
+$errorlog = 'error_log';
 
 $docextensions = array(
     'xlsx' => array('type' => 'Spreadsheet', 'template' => 'fixtures/blankspreadsheet.xlsx'),
@@ -76,9 +80,12 @@ if ($action = empty($_REQUEST['action']) ? null : $_REQUEST['action']) {
             $permission = $readonly ? 400 : 600;
             $fileid = "{$userid}_{$docformat}_{$permission}";
             $filename = "{$userid}.{$docformat}";
-            $wopisrc = $callbackurl . $fileid;      // ."?$callbackparam";   //NOTE:  Access Token is not part of the WOPI
-            $callbackparam = http_build_query(array('access_token' => $userid));    // There are others such as access_token_ttl & permission
-            $docdwnlink = $wopisrc . '/contents' ."?$callbackparam";        // Download Link
+            $wopisrc = $callbackurl . $fileid;
+            // NOTE:  Access Token is not part of the WOPI
+            // There are others such as access_token_ttl & permission.
+            $callbackparam = http_build_query(array('access_token' => $userid));
+            // Download Link.
+            $docdwnlink = $wopisrc . '/contents' ."?$callbackparam";
             $getfileinfolink = $wopisrc ."?$callbackparam";
             $params = http_build_query(array(
                 'WOPISrc' => $wopisrc,
@@ -132,13 +139,13 @@ if ($action = empty($_REQUEST['action']) ? null : $_REQUEST['action']) {
             }
     }
 } else {
-    // this will handle all the Collabora calls
+    // This will handle all the Collabora calls.
     if ($relativepath = empty($_SERVER['PATH_INFO']) ? null : $_SERVER['PATH_INFO']) {
-        error_log("Seen Collabora Call " . $_SERVER['REQUEST_URI']);
+        $errorlog("Seen Collabora Call " . $_SERVER['REQUEST_URI']);
         $matches = array();
         preg_match('|/wopi/files/([^/]*)(/contents)?|', $relativepath, $matches);
         if (empty($matches)) {
-            error_log("No matches in request path - $relativepath");
+            $errorlog("No matches in request path - $relativepath");
             die("Invalid WOPI Call");
         }
         if ($fileid = $matches[1]) {
@@ -166,11 +173,11 @@ if ($action = empty($_REQUEST['action']) ? null : $_REQUEST['action']) {
         $filedata = file_get_contents('php://input');
 
         if (!$iscontentcall && !$filedata) {
-            error_log('This is a checkfile Info request');
+            $errorlog('This is a checkfile Info request');
             // This is a checkfile request.
             $ret = (object) array(
                 'BaseFileName' => $fileid . ".$docformat",
-                'OwnerId' => md5($_SERVER['HTTP_HOST']),          // always the same
+                'OwnerId' => md5($_SERVER['HTTP_HOST']), // Always the same.
                 'Size' => filesize($sendfile),
                 'UserId' => $userid,
                 'UserFriendlyName' => 'Just Another User',
@@ -181,14 +188,14 @@ if ($action = empty($_REQUEST['action']) ? null : $_REQUEST['action']) {
                 'LastModifiedTime' => date('c', filemtime($sendfile)),
                 'Version' => (string) time(),
             );
-            error_log("Returning: " . print_r($ret, true));
+            $errorlog("Returning: " . $debuggingout($ret, true));
             header("Content-Type: application/json");
             echo(json_encode($ret));     // Send back JSON Response.
             exit;
         } else if ($iscontentcall && !$filedata) {
             // This is a GET request - send back the file.
             // send the right headers - at least for browsers.
-            error_log("This is a GET file request - '$sendfile'");
+            $errorlog("This is a GET file request - '$sendfile'");
             header("Content-Type: " . mime_content_type($sendfile));
             header("Content-Length: " . filesize($sendfile));
             $savefilename = "{$userfileid}.{$docformat}";
@@ -196,22 +203,22 @@ if ($action = empty($_REQUEST['action']) ? null : $_REQUEST['action']) {
             ob_clean();
             flush();
             if (($bytesent = readfile($sendfile)) === false) {
-                error_log('Failed to send file');
+                $errorlog('Failed to send file');
             } else {
-                error_log("Sent $bytesent bytes for file size " . filesize($sendfile));
+                $errorlog("Sent $bytesent bytes for file size " . filesize($sendfile));
             }
             exit;
         } else if ($iscontentcall && $filedata) {
-            // we get the file and save it for the next call.
-            error_log('This is a PUT file request');
+            // We get the file and save it for the next call.
+            $errorlog('This is a PUT file request');
             $savefile = rtrim(sys_get_temp_dir(), '/') . '/' . "{$userfileid}.{$docformat}";
-            error_log('This is a PUT file request: Filename : ' . $savefile);
+            $errorlog('This is a PUT file request: Filename : ' . $savefile);
             $fp = fopen($savefile, 'w');
             fwrite($fp, $filedata);
             fclose($fp);
             exit;
         }
-    } // and if not this is our default call
+    }
 }
 
 ?>
@@ -250,7 +257,7 @@ if ($action = empty($_REQUEST['action']) ? null : $_REQUEST['action']) {
         <div>
             <h4>Server Capabilities</h4>
             <p>
-            <pre><?php echo print_r((json_decode($capabilities)), true); ?></pre>
+            <pre><?php echo $debuggingout((json_decode($capabilities)), true); ?></pre>
             </p>
         </div>
     <?php } ?>

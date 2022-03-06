@@ -22,6 +22,7 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+namespace assignsubmission_collabora;
 use mod_collabora\collabora;
 use assignsubmission_collabora\test_setup_trait;
 
@@ -38,12 +39,11 @@ require_once($CFG->dirroot . '/mod/assign/submission/collabora/classes/callbackl
  * @copyright 2019 Benjamin Ellis, Synergy Learning
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class assignsubmission_collabora_callback_testcase extends advanced_testcase {
+class callbacklib_test extends \advanced_testcase {
 
     // Use the generator helper.
-    use mod_assign_test_generator;
-
-    use test_setup_trait;
+    use \mod_assign_test_generator;
+    use \assignsubmission_collabora\test_setup_trait;
 
     public function test_handle_request() {
         list($viewurl, $file, $fs, $assign, $plugin, $student) = $this->setup_and_basic_tests_for_view_url();
@@ -58,17 +58,17 @@ class assignsubmission_collabora_callback_testcase extends advanced_testcase {
 
         /* Create the request - $relativepath, $accesstoken, $postdata. */
         // Get File Info JSON.
-        $fileinfo = json_decode(callbacklib::handle_request($relativepath, $accesstoken, $postdata));
+        $fileinfo = json_decode(\callbacklib::handle_request($relativepath, $accesstoken, $postdata));
 
         // Assert a few things about our $fileinfo.
         $this->assertEquals($file->get_filename(), $fileinfo->BaseFileName);
         $this->assertEquals($accesstoken, $fileinfo->UserId);
         $this->assertEquals($file->get_filesize(), $fileinfo->Size);
 
-        // assert Get File 2nd - need to add contents onto the relative path
+        // Assert Get File 2nd - need to add contents onto the relative path.
         $relativepath .= '/contents';
         ob_start();
-        callbacklib::handle_request($relativepath, $accesstoken, $postdata);
+        \callbacklib::handle_request($relativepath, $accesstoken, $postdata);
         $contentsize = ob_get_length();
         $filecontentshash = sha1(ob_get_contents());    // File contents hashed.
         ob_end_clean();
@@ -82,11 +82,10 @@ class assignsubmission_collabora_callback_testcase extends advanced_testcase {
         $postdata = file_get_contents($uploadfile);
 
         // Update our file record - note the filerecord is changed.
-        callbacklib::handle_request($relativepath, $accesstoken, $postdata);
-        sleep(2);   // give us some time to complete.
+        \callbacklib::handle_request($relativepath, $accesstoken, $postdata);
+        sleep(2);   // Give us some time to complete.
 
         // Now lets get the new file.
-        // $fs = get_file_storage();
         $files = $fs->get_area_files(
             $assign->get_context()->id,
             'assignsubmission_collabora',

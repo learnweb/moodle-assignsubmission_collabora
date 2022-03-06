@@ -23,6 +23,9 @@
  */
 use mod_collabora\collabora;
 
+// This script is called by the Collabora server and does not need cookies!
+define('NO_MOODLE_COOKIES', true);
+
 require_once(__DIR__.'/../../../../config.php');
 
 global $CFG;
@@ -35,4 +38,3 @@ $postdata = file_get_contents('php://input');
 
 // Functionality moved to class for testing.
 callbacklib::handle_request($relativepath, $accesstoken, $postdata);
-
