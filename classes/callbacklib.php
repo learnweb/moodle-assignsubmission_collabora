@@ -121,6 +121,8 @@ class callbacklib {
             if (!$filename = clean_filename($file->get_filename())) {   // Weird issue with filenames.
                 $filename = preg_replace("/\W/", '', $file->get_filename());
             }
+            $tz = date_default_timezone_get();
+            date_default_timezone_set('UTC');
             $ret = (object) array(
                 'BaseFileName' => $filename,
                 'OwnerId' => $CFG->siteidentifier,      // Always the same.
@@ -134,6 +136,7 @@ class callbacklib {
                 'LastModifiedTime' => date('c', $file->get_timemodified()),
                 'Version' => (string) $file->get_timemodified(),
             );
+            date_default_timezone_set($tz);
             if (defined('PHPUNIT_TEST') && PHPUNIT_TEST) {       // Catch a PHP Unit Test.
                 return json_encode($ret);
             } else {
