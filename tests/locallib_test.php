@@ -23,7 +23,6 @@
  */
 
 namespace assignsubmission_collabora;
-use mod_collabora\collabora;
 use assignsubmission_collabora\test_setup_trait;
 
 defined('MOODLE_INTERNAL') || die();
@@ -80,7 +79,7 @@ class locallib_test extends \advanced_testcase {
         $this->setUser($student->id);       // Won't hurt to make sure.
 
         if ($itemid = $submission->groupid) { // Group Submission.
-            $filearea = collabora::FILEAREA_GROUP;
+            $filearea = \mod_collabora\api\collabora_fs::FILEAREA_GROUP;
         } else {
             $filearea = $plugin::FILEAREA_USER;
             $itemid = $student->id;
@@ -140,7 +139,7 @@ class locallib_test extends \advanced_testcase {
         $data = new \stdClass();
 
         // The initial format: collabora::FORMAT_TEXT.
-        $data->assignsubmission_collabora_format = collabora::FORMAT_TEXT;
+        $data->assignsubmission_collabora_format = \mod_collabora\api\collabora_fs::FORMAT_TEXT;
         $data->assignsubmission_collabora_filename = 'test_text_upload';
         // Width never empty - required for all formats.
         $data->assignsubmission_collabora_width = 0;
@@ -153,10 +152,10 @@ Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu 
 cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
         $this->assertTrue($plugin->save_settings($data));
 
-        // The example blank file: collabora::FORMAT_WORDPROCESSOR.
+        // The example blank file: \mod_collabora\api\collabora_fs::FORMAT_WORDPROCESSOR.
         $plugin = $this->get_submissionplugin_instance();
         unset($data->assignsubmission_collabora_initialtext);
-        $data->assignsubmission_collabora_format = collabora::FORMAT_WORDPROCESSOR;
+        $data->assignsubmission_collabora_format = \mod_collabora\api\collabora_fs::FORMAT_WORDPROCESSOR;
         $this->assertTrue($plugin->save_settings($data));
 
         // This will be the initial format: collabora::FORMAT_UPLOAD.
@@ -326,8 +325,8 @@ cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est la
 
         $fileareas = $plugin->get_file_areas();
         $this->assertCount(3, $fileareas);
-        $this->assertArrayHasKey(collabora::FILEAREA_GROUP, $fileareas);
-        $this->assertArrayHasKey(collabora::FILEAREA_INITIAL, $fileareas);
+        $this->assertArrayHasKey(\mod_collabora\api\collabora_fs::FILEAREA_GROUP, $fileareas);
+        $this->assertArrayHasKey(\mod_collabora\api\collabora_fs::FILEAREA_INITIAL, $fileareas);
         $this->assertArrayHasKey($plugin::FILEAREA_USER, $fileareas);
     }
 
@@ -353,7 +352,7 @@ cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est la
         $data = new \stdClass();
 
         // This will be the initial file: collabora::FORMAT_SPREADSHEET.
-        $data->assignsubmission_collabora_format = collabora::FORMAT_SPREADSHEET;
+        $data->assignsubmission_collabora_format = \mod_collabora\api\collabora_fs::FORMAT_SPREADSHEET;
         $data->assignsubmission_collabora_filename = 'test_delete_instance';
         // Width never empty - required for all formats.
         $data->assignsubmission_collabora_width = 0;
@@ -370,7 +369,7 @@ cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est la
         $files = $fs->get_area_files(
             $this->assign->get_context()->id,
             'assignsubmission_collabora',
-            collabora::FILEAREA_INITIAL,
+            \mod_collabora\api\collabora_fs::FILEAREA_INITIAL,
             0, null, false, 0, 0, 1);
         $initialfile = reset($files);
 

@@ -55,7 +55,7 @@ trait test_setup_trait {
 
         $data = new stdClass();
         // We use collabora::FORMAT_WORDPROCESSOR as example blank file.
-        $data->assignsubmission_collabora_format = collabora::FORMAT_WORDPROCESSOR;
+        $data->assignsubmission_collabora_format = \mod_collabora\api\collabora_fs::FORMAT_WORDPROCESSOR;
         $data->assignsubmission_collabora_filename = 'test_handle_request';
         // Width never empty - required for all formats.
         $data->assignsubmission_collabora_width = 0;
@@ -68,7 +68,7 @@ trait test_setup_trait {
         $files = $fs->get_area_files(
             $assign->get_context()->id,
             'assignsubmission_collabora',
-            collabora::FILEAREA_INITIAL,
+            \mod_collabora\api\collabora_fs::FILEAREA_INITIAL,
             0, '', false, 0, 0, 1);
         $initialfile = reset($files);
         $this->assertNotEmpty($initialfile, 'No initial file created');

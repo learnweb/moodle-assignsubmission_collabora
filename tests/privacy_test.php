@@ -23,7 +23,6 @@
  */
 
 namespace assignsubmission_collabora;
-use mod_collabora\collabora;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -80,6 +79,7 @@ class privacy_test extends \mod_assign\privacy\provider_test {
 
     /**
      * Test to make sure that get_metadata returns something.
+     * @covers \assignsubmission_collabora\privacy\provider::get_metadata
      */
     public function test_get_metadata() {
         $collection = new \core_privacy\local\metadata\collection('assignsubmission_collabora');
@@ -89,6 +89,7 @@ class privacy_test extends \mod_assign\privacy\provider_test {
 
     /**
      * Test that submission files are exported for a user.
+     * @covers \assignsubmission_collabora\privacy\provider::export_submission_user_data
      */
     public function test_export_submission_user_data() {
         $this->resetAfterTest();
@@ -147,6 +148,7 @@ class privacy_test extends \mod_assign\privacy\provider_test {
 
     /**
      * Test that all submission files are deleted for this context.
+     * @covers \assignsubmission_collabora\privacy\provider::delete_submission_for_context
      */
     public function test_delete_submission_for_context() {
         list($assign, $plugin, $submission, $plugin2, $submission2) = $this->setup_privacy_tests();
@@ -160,6 +162,7 @@ class privacy_test extends \mod_assign\privacy\provider_test {
 
     /**
      * TODO Test that the comments for a user are deleted.
+     * @covers \assignsubmission_collabora\privacy\provider::delete_submission_for_userid
      */
     public function test_delete_submission_for_userid() {
         list($assign, $plugin, $submission, $plugin2, $submission2, $user1) = $this->setup_privacy_tests();
@@ -175,6 +178,7 @@ class privacy_test extends \mod_assign\privacy\provider_test {
 
     /**
      * Test deletion of bulk submissions for a context.
+     * @covers \assignsubmission_collabora\privacy\provider::delete_submissions
      */
     public function test_delete_submissions() {
         global $DB;

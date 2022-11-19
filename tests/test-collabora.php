@@ -90,7 +90,7 @@ if ($action = empty($_REQUEST['action']) ? null : $_REQUEST['action']) {
             $params = http_build_query(array(
                 'WOPISrc' => $wopisrc,
                 'access_token' => $userid,
-                'lang' => \mod_collabora\collabora::get_collabora_lang(),
+                'lang' => \mod_collabora\api\collabora_fs::get_collabora_lang(),
             ));
             $doccollaboraurl = $urlsrc . $params;
             break;
