@@ -22,7 +22,7 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use \mod_collabora\api\collabora_fs;
+use \assignsubmission_collabora\api\collabora_fs;
 
 /**
  * Library class for collabora submission plugin extending submission plugin base class
@@ -32,11 +32,6 @@ use \mod_collabora\api\collabora_fs;
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class assign_submission_collabora extends assign_submission_plugin {
-
-    /**
-     *  Could do with this being defined in the collabora class.
-     */
-    const FILEAREA_USER = 'user';
 
     /**
      * The default file options.
@@ -59,7 +54,8 @@ class assign_submission_collabora extends assign_submission_plugin {
      * @return array names of the fileareas, can be an empty array
      */
     public function get_config_file_areas() {
-        return array('initial');
+        // return array('initial', 'user', 'group');
+        return array(collabora_fs::FILEAREA_INITIAL);
     }
 
     /**
@@ -164,64 +160,16 @@ class assign_submission_collabora extends assign_submission_plugin {
         $user = $DB->get_record('user', array('id' => $userid), '*', MUST_EXIST);
 
         $config = $this->get_config();
-        $permission = $this->get_submission_permission_for_user($submission, $userid, $forcereadonly);
-        $collabora = new \assignsubmission_collabora\api\collabora_fs($user, $submissionfile, $permission);
+        $collabora = new \assignsubmission_collabora\api\collabora_fs($user, $submissionfile);
+        if ($forcereadonly) {
+            $collabora->force_readonly();
+        }
 
         $viewurl = $collabora->get_view_url();
         $id = uniqid();
         $widget = new \assignsubmission_collabora\output\content($id, $submissionfile->get_filename(), $viewurl, $config);
 
         return $OUTPUT->render($widget);
-    }
-
-    /**
-     * Function to work out permissions for the submission in question.
-     *
-     * Owner + Group + Others (Site Admin)
-     *  400 = Owner can read
-     *  440 = Group can read
-     *  444 = All Read only
-     *  600 = Owner Can Edit - No Group
-     *  660 = Group can Edit
-     *  666 = All can Edit - site admin
-     *
-     * @param stdClass $submission
-     * @param int $userid
-     * @param bool $forcereadonly - force the document to be readonly
-     * @return number = permissions mask
-     */
-    private function get_submission_permission_for_user($submission, $userid = null, $forcereadonly = false) {
-        global $USER;
-
-        if (!$userid) {
-            $userid = $USER->id;
-        }
-
-        $permission  = 444;     // Default - All can read - User will not get here if they cannot view submissions at least.
-
-        // Site Admins && graders (teachers/managers) cannot edit the file - irrespective of submission status.
-        if (!is_siteadmin() && !$this->assignment->can_grade()) {
-            // Is the submission editable by the current user? - The lock status is enough to tell us.
-            if ($this->assignment->submissions_open($userid, null, $submission)) {
-                if (!empty($submission->groupid)) {       // Group membership checked in submissions_open() call.
-                    $permission = $forcereadonly ? 440 : 660;
-                } else if ($submission->userid == $userid) {
-                    $permission = $forcereadonly ? 400 : 600;
-                }
-            }
-        }
-        return $permission;
-    }
-
-    /**
-     * Function to set the form input error.
-     *
-     * @param string $msg - the error message.
-     * @return boolean - always false to set the error tracking flag.
-     */
-    private function report_form_error($msg) {
-        $this->set_error($msg);
-        return false; // Return false for error tracking.
     }
 
     /**
@@ -585,7 +533,7 @@ class assign_submission_collabora extends assign_submission_plugin {
             $filerec = $this->get_filerecord(null, collabora_fs::FILEAREA_GROUP, $submission->groupid);
         } else {
             // We will use the userid.
-            $filerec = $this->get_filerecord(null, self::FILEAREA_USER, $submission->userid);
+            $filerec = $this->get_filerecord(null, collabora_fs::FILEAREA_USER, $user->id);
         }
 
         $files = $fs->get_area_files($filerec->contextid, $filerec->component, $filerec->filearea,
@@ -623,7 +571,7 @@ class assign_submission_collabora extends assign_submission_plugin {
             $filerec = $this->get_filerecord(null, collabora_fs::FILEAREA_GROUP, $submission->groupid);
         } else {
             // We will use the userid.
-            $filerec = $this->get_filerecord(null, self::FILEAREA_USER, $userid);
+            $filerec = $this->get_filerecord(null, collabora_fs::FILEAREA_USER, $userid);
         }
 
         // For now we check for the submission file existance 1st.
@@ -674,7 +622,7 @@ class assign_submission_collabora extends assign_submission_plugin {
             $filerec = $this->get_filerecord(null, collabora_fs::FILEAREA_GROUP, $submission->groupid);
         } else {
             // We will use the userid.
-            $filerec = $this->get_filerecord(null, self::FILEAREA_USER, $submission->userid);
+            $filerec = $this->get_filerecord(null, collabora_fs::FILEAREA_USER, $submission->userid);
         }
 
         $files = $fs->get_area_files($filerec->contextid, $filerec->component, $filerec->filearea,
@@ -724,10 +672,10 @@ class assign_submission_collabora extends assign_submission_plugin {
         return array(
             collabora_fs::FILEAREA_INITIAL =>
                 ucfirst(get_string('fileareadesc', 'assignsubmission_collabora', collabora_fs::FILEAREA_INITIAL)),
-                collabora_fs::FILEAREA_GROUP =>
+            collabora_fs::FILEAREA_GROUP =>
                 ucfirst(get_string('fileareadesc', 'assignsubmission_collabora', collabora_fs::FILEAREA_GROUP)),
-            self::FILEAREA_USER =>
-                ucfirst(get_string('fileareadesc', 'assignsubmission_collabora', self::FILEAREA_USER))
+            collabora_fs::FILEAREA_USER =>
+                ucfirst(get_string('fileareadesc', 'assignsubmission_collabora', collabora_fs::FILEAREA_USER)),
         );
     }
 
@@ -773,7 +721,7 @@ class assign_submission_collabora extends assign_submission_plugin {
             $filerec = $this->get_filerecord(null, collabora_fs::FILEAREA_GROUP, $submission->groupid);
         } else {
             // We will use the userid.
-            $filerec = $this->get_filerecord(null, self::FILEAREA_USER, $submission->userid);
+            $filerec = $this->get_filerecord(null, collabora_fs::FILEAREA_USER, $submission->userid);
         }
 
         $files = $fs->get_area_files($filerec->contextid, $filerec->component, $filerec->filearea,
@@ -805,7 +753,7 @@ class assign_submission_collabora extends assign_submission_plugin {
             $filerec = $this->get_filerecord(null, collabora_fs::FILEAREA_GROUP, $submission->groupid);
         } else {
             // We will use the userid.
-            $filerec = $this->get_filerecord(null, self::FILEAREA_USER, $submission->userid);
+            $filerec = $this->get_filerecord(null, collabora_fs::FILEAREA_USER, $submission->userid);
         }
 
         // Delete the submission files.

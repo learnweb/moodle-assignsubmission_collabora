@@ -16,6 +16,8 @@
 
 namespace assignsubmission_collabora\api;
 
+require_once($CFG->dirroot . '/mod/assign/locallib.php');
+
 /**
  * Main support functions
  *
@@ -24,9 +26,23 @@ namespace assignsubmission_collabora\api;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class collabora_fs extends \mod_collabora\api\base_filesystem {
+    /** Define the filearea for group submission files */
+    public const FILEAREA_SUBMIT = 'submission_file';
+    /** Define the filearea for user submission files */
+    public const FILEAREA_USER = 'user';
+
+
     private $userpermission;
     /** @var string */
     private $accesstoken;
+    /** @var \context */
+    private $context;
+    /** @var bool */
+    private $writable;
+    /** @var \stdClass */
+    private $submission;
+    /** @var \assign */
+    private $assign;
 
     /**
      * Get the moodle user id from the collabora_token table
@@ -48,7 +64,8 @@ class collabora_fs extends \mod_collabora\api\base_filesystem {
         $userid = static::get_userid_from_token($accesstoken);
         $user = $DB->get_record('user', array('id' => $userid), '*', MUST_EXIST);
 
-        list($filehash, $userpermission) = explode('_', $fileid);
+        list($filehash, $writable) = explode('_', $fileid);
+        // $filehash = $fileid;
         // Get the stored file.
         $fs = get_file_storage();
         if ($file = $fs->get_file_by_hash($filehash)) {
@@ -60,7 +77,40 @@ class collabora_fs extends \mod_collabora\api\base_filesystem {
             throw new \moodle_exception('invalidrequestfile', 'assignsubmission_collabora');
         }
 
-        return new static($user, $file, $userpermission);
+        $instance = new static($user, $file);
+        if (empty($writable)) {
+            $instance->force_readonly();
+        }
+        return $instance;
+    }
+
+    /**
+     * Check the write permission
+     *
+     * @param \assign $assign
+     * @param \stdClass $submission
+     * @param int $userid
+     * @param \stored_file $file
+     * @return bool
+     */
+    public static function check_writable($assign, $submission, $userid, $file) {
+
+        $permission  = 444;     // Default - All can read.
+
+        // Site Admins && graders (teachers/managers) cannot edit the file - irrespective of submission status.
+        if (is_siteadmin() || $assign->can_grade()) {
+            return true;
+        }
+        // Is the submission editable by the current user? - The lock status is enough to tell us.
+        if ($assign->submissions_open($userid, null, $submission)) {
+            if (!empty($submission->groupid)) {
+                return $file->get_itemid() == $submission->groupid;
+            }
+            if (!empty($submission->userid)) {
+                return $file->get_itemid() == $submission->userid;
+            }
+        }
+        return false;
 
     }
 
@@ -69,44 +119,28 @@ class collabora_fs extends \mod_collabora\api\base_filesystem {
      *
      * @param \stdClass $user
      * @param \stored_file $file
-     * @param int $userpermission
      */
-    public function __construct($user, $file, $userpermission) {
-        $this->userpermission = $userpermission;
+    public function __construct($user, $file) {
+        $this->context = \context::instance_by_id($file->get_contextid());
+
+        list ($course, $cm) = get_course_and_cm_from_cmid($this->context->instanceid, 'assign');
+        $this->assign = new \assign($this->context, $cm, $course);
+        if ($this->assign->get_instance()->teamsubmission) {
+            $this->submission = $this->assign->get_group_submission($user->id, 0, false);
+        } else {
+            $this->submission = $this->assign->get_user_submission($user->id, false);
+        }
+
         // Userid is unique to our installation. - Id will always be the same.
         $this->accesstoken = md5($user->id) . '_'. $user->id;
         $callbackurl = new \moodle_url('/mod/assign/submission/collabora/callback.php');
         parent::__construct($user, $file, $callbackurl);
+
+        $this->writable = $this->check_writable($this->assign, $this->submission, $user->id, $file);
     }
 
-    public function deeper_check_permissions() {
-        global $CFG;
-
-        require_once($CFG->dirroot . '/mod/assign/locallib.php');
-
-        $userid = $this->user->id;
-
-        $context = \context::instance_by_id($this->get_file()->get_contextid());
-        $cm = get_coursemodule_from_id('assign', $context->instanceid);
-        list ($course, $cm) = get_course_and_cm_from_cmid($context->instanceid, 'assign');
-        $assign = new \assign($context, $cm, $course);
-        $submission = $assign->get_user_submission($userid, false);
-
-        $permission  = 444;     // Default - All can read.
-
-        // Site Admins && graders (teachers/managers) cannot edit the file - irrespective of submission status.
-        if (!is_siteadmin() && !$assign->can_grade()) {
-            // Is the submission editable by the current user? - The lock status is enough to tell us.
-            if ($assign->submissions_open($userid, null, $submission)) {
-                if (!empty($submission->groupid)) {       // Group membership checked in submissions_open() call.
-                    $permission = 660;
-                } else if ($submission->userid == $userid) {
-                    $permission = 600;
-                }
-            }
-        }
-        return $permission >= 600;
-
+    public function force_readonly() {
+        $this->writable = false;
     }
 
     /* Methods from interface i_filesystem
@@ -118,23 +152,7 @@ class collabora_fs extends \mod_collabora\api\base_filesystem {
      * @return bool
      */
     public function is_readonly() {
-        // Check if the file is a group file and if the user is a member of the relevant group.
-        if (!empty($this->userpermission)) {
-            // Work out the permissions.
-            /*
-             * - Owner + Group + Others (Site Admin)
-             400 = Owner can read
-             440 = Group can read
-             444 = All Read only
-             600 = Owner Can Edit - No Group
-             660 = Group can Edit
-             666 = All can Edit - site admin
-             */
-            if ($this->userpermission >= 600) {
-                return !$this->deeper_check_permissions();
-            }
-        }
-        return true;
+        return !$this->writable;
     }
 
     /**
@@ -143,7 +161,7 @@ class collabora_fs extends \mod_collabora\api\base_filesystem {
      * @return string
      */
     public function get_file_id() {
-        return $this->file->get_pathnamehash() . '_' . $this->userpermission;
+        return $this->file->get_pathnamehash().'_' . $this->writable;
     }
 
     /**
@@ -155,7 +173,28 @@ class collabora_fs extends \mod_collabora\api\base_filesystem {
         return $this->accesstoken;
     }
 
+    /**
+     * Retrieve the existing unique user token.
+     *
+     * @return string
+     */
     public function get_user_token() {
         return $this->accesstoken;
+    }
+
+    /**
+     * Update the stored file and set the timemodified timestamp.
+     *
+     * @param string $content
+     * @return void
+     */
+    public function update_file($postdata) {
+        /** @var \moodle_database $DB */
+        global $DB;
+
+        parent::update_file($postdata);
+        // if (!empty($this->submission)) {
+        //     $DB->set_field('assign_submission', 'timemodified', time(), array('id' => $this->submission->id));
+        // }
     }
 }

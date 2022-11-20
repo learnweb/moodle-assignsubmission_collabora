@@ -152,8 +152,8 @@ class provider implements
 
         $filearea = $deletedata->get_assign()->get_plugin_by_type('assignsubmission', 'collabora')::FILEAREA_USER;
 
-        $fs = get_file_storage();
-        $fs->delete_area_files($deletedata->get_context()->id, 'assignsubmission_collabora', $filearea, $userid);
+        // $fs = get_file_storage();
+        // $fs->delete_area_files($deletedata->get_context()->id, 'assignsubmission_collabora', $filearea, $userid);
 
     }
 
