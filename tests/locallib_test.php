@@ -79,9 +79,9 @@ class locallib_test extends \advanced_testcase {
         $this->setUser($student->id);       // Won't hurt to make sure.
 
         if ($itemid = $submission->groupid) { // Group Submission.
-            $filearea = \mod_collabora\api\collabora_fs::FILEAREA_GROUP;
+            $filearea = \mod_collabora\api\collabora_fs::FILEAREA_SUBMIT;
         } else {
-            $filearea = $plugin::FILEAREA_USER;
+            $filearea = $plugin::FILEAREA_SUBMIT;
             $itemid = $student->id;
         }
 
@@ -325,9 +325,9 @@ cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est la
 
         $fileareas = $plugin->get_file_areas();
         $this->assertCount(3, $fileareas);
-        $this->assertArrayHasKey(\mod_collabora\api\collabora_fs::FILEAREA_GROUP, $fileareas);
+        $this->assertArrayHasKey(\mod_collabora\api\collabora_fs::FILEAREA_SUBMIT, $fileareas);
         $this->assertArrayHasKey(\mod_collabora\api\collabora_fs::FILEAREA_INITIAL, $fileareas);
-        $this->assertArrayHasKey($plugin::FILEAREA_USER, $fileareas);
+        $this->assertArrayHasKey($plugin::FILEAREA_SUBMIT, $fileareas);
     }
 
     /**

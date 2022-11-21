@@ -89,7 +89,7 @@ class callbacklib_test extends \advanced_testcase {
         $files = $fs->get_area_files(
             $assign->get_context()->id,
             'assignsubmission_collabora',
-            $plugin::FILEAREA_USER,
+            $plugin::FILEAREA_SUBMIT,
             $student->id,
             '', false, 0, 0, 1);
         $newfile = reset($files);

@@ -56,6 +56,8 @@ class restore_assignsubmission_collabora_subplugin extends restore_subplugin {
      * @return void
      */
     public function process_assignsubmission_collabora_submission($data) {
+        global $DB;
+
         $data = (object)$data;
         $data->assignment = $this->get_new_parentid('assign');
         $oldsubmissionid = $data->submission;
@@ -63,8 +65,10 @@ class restore_assignsubmission_collabora_subplugin extends restore_subplugin {
         // when a submission node is processed.
         $data->submission = $this->get_mappingid('submission', $data->submission);
 
+        $DB->insert_record('assignsubmission_collabora', $data);
+
         $this->add_related_files('assignsubmission_collabora',
-                                 'submission_collabora',
+                                 \assignsubmission_collabora\api\collabora_fs::FILEAREA_SUBMIT,
                                  'submission',
                                  null,
                                  $oldsubmissionid);

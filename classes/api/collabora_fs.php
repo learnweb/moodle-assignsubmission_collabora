@@ -26,11 +26,8 @@ require_once($CFG->dirroot . '/mod/assign/locallib.php');
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class collabora_fs extends \mod_collabora\api\base_filesystem {
-    /** Define the filearea for group submission files */
+    /** Define the filearea for submission files */
     public const FILEAREA_SUBMIT = 'submission_file';
-    /** Define the filearea for user submission files */
-    public const FILEAREA_USER = 'user';
-
 
     private $userpermission;
     /** @var string */
@@ -103,12 +100,13 @@ class collabora_fs extends \mod_collabora\api\base_filesystem {
         }
         // Is the submission editable by the current user? - The lock status is enough to tell us.
         if ($assign->submissions_open($userid, null, $submission)) {
-            if (!empty($submission->groupid)) {
-                return $file->get_itemid() == $submission->groupid;
-            }
-            if (!empty($submission->userid)) {
-                return $file->get_itemid() == $submission->userid;
-            }
+            return $file->get_itemid() == $submission->id;
+            // if (!empty($submission->groupid)) {
+            //     return $file->get_itemid() == $submission->groupid;
+            // }
+            // if (!empty($submission->userid)) {
+            //     return $file->get_itemid() == $submission->userid;
+            // }
         }
         return false;
 

@@ -83,7 +83,7 @@ trait test_setup_trait {
         $submissionfilerec = (object) [
             'contextid' => $initialfile->get_contextid(),
             'component' => $initialfile->get_component(),
-            'filearea' => $plugin::FILEAREA_USER,
+            'filearea' => $plugin::FILEAREA_SUBMIT,
             'itemid' => $submission->id,
             'filepath' => '/',
             'filename' => $initialfile->get_filename()

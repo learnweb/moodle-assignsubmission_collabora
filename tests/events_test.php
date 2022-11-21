@@ -56,7 +56,7 @@ class events_test extends \advanced_testcase {
         $this->setUser($student->id);
         $submission = $assign->get_user_submission($student->id, true);
         $plugin = $assign->get_submission_plugin_by_type('collabora');
-        $filearea = $plugin::FILEAREA_USER;
+        $filearea = $plugin::FILEAREA_SUBMIT;
 
         $fs = get_file_storage();
         $dummy = (object) array(

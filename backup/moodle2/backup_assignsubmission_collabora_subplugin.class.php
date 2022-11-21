@@ -50,9 +50,13 @@ class backup_assignsubmission_collabora_subplugin extends backup_subplugin {
         $subplugin->add_child($subpluginwrapper);
         $subpluginwrapper->add_child($subpluginelement);
 
+        // Set source to populate the data.
+        $subpluginelement->set_source_table('assignsubmission_collabora',
+                                            array('submission' => backup::VAR_PARENTID));
+
         // The parent is the submission.
         $subpluginelement->annotate_files('assignsubmission_collabora',
-                                          'submission_collabora',
+                                          \assignsubmission_collabora\api\collabora_fs::FILEAREA_SUBMIT,
                                           'submission');
         return $subplugin;
     }

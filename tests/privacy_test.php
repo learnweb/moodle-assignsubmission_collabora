@@ -59,7 +59,7 @@ class privacy_test extends \mod_assign\privacy\provider_test {
         $submissionfile = (object) array(
             'contextid' => $assign->get_context()->id,
             'component' => 'assignsubmission_collabora',
-            'filearea' => $plugin::FILEAREA_USER,
+            'filearea' => $plugin::FILEAREA_SUBMIT,
             'itemid' => $student->id,
             'filepath' => '/',
             'filename' => $filename

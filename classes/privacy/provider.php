@@ -133,7 +133,7 @@ class provider implements
 
         \core_plagiarism\privacy\provider::delete_plagiarism_for_context($requestdata->get_context());
 
-        $filearea = $requestdata->get_assign()->get_plugin_by_type('assignsubmission', 'collabora')::FILEAREA_USER;
+        $filearea = $requestdata->get_assign()->get_plugin_by_type('assignsubmission', 'collabora')::FILEAREA_SUBMIT;
         $fs = get_file_storage();
         $fs->delete_area_files($requestdata->get_context()->id, 'assignsubmission_collabora', $filearea);
 
@@ -150,7 +150,7 @@ class provider implements
 
         \core_plagiarism\privacy\provider::delete_plagiarism_for_user($userid, $deletedata->get_context());
 
-        $filearea = $deletedata->get_assign()->get_plugin_by_type('assignsubmission', 'collabora')::FILEAREA_USER;
+        $filearea = $deletedata->get_assign()->get_plugin_by_type('assignsubmission', 'collabora')::FILEAREA_SUBMIT;
 
         // $fs = get_file_storage();
         // $fs->delete_area_files($deletedata->get_context()->id, 'assignsubmission_collabora', $filearea, $userid);
@@ -171,7 +171,7 @@ class provider implements
 
         \core_plagiarism\privacy\provider::delete_plagiarism_for_users($deletedata->get_userids(), $deletedata->get_context());
 
-        $filearea = $deletedata->get_assign()->get_plugin_by_type('assignsubmission', 'collabora')::FILEAREA_USER;
+        $filearea = $deletedata->get_assign()->get_plugin_by_type('assignsubmission', 'collabora')::FILEAREA_SUBMIT;
 
         $fs = get_file_storage();
         list($sql, $params) = $DB->get_in_or_equal($deletedata->get_userids(), SQL_PARAMS_NAMED);
