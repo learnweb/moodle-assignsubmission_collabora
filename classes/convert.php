@@ -33,7 +33,6 @@ namespace assignsubmission_collabora;
  */
 class convert {
     public static function run() {
-        /** @var \moodle_database $DB */
         global $DB;
 
         // Get all assigns with enabled collabora submission.
@@ -85,7 +84,7 @@ class convert {
                         $file->itemid = $submission->id;
                         $DB->update_record('files', $file);
                     }
-                    // Create an entry for assignsubmission_collabora
+                    // Create an entry for assignsubmission_collabora.
                     $rec = new \stdClass();
                     $rec->assignment = $assignid;
                     $rec->submission = $submission->id;
@@ -126,7 +125,7 @@ class convert {
                         $file->itemid = $submission->id;
                         $DB->update_record('files', $file);
                     }
-                    // Create an entry for assignsubmission_collabora
+                    // Create an entry for assignsubmission_collabora.
                     $rec = new \stdClass();
                     $rec->assignment = $assignid;
                     $rec->submission = $submission->id;

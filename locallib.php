@@ -89,7 +89,7 @@ class assign_submission_collabora extends assign_submission_plugin {
      */
     private function get_file_submission($submissionid) {
         global $DB;
-        return $DB->get_record('assignsubmission_collabora', array('submission'=>$submissionid));
+        return $DB->get_record('assignsubmission_collabora', array('submission' => $submissionid));
     }
 
     /**
@@ -548,12 +548,7 @@ class assign_submission_collabora extends assign_submission_plugin {
         $result = array();
 
         $fs = get_file_storage();
-        if ($submission->groupid) { // Group Submission.
-            $filerec = $this->get_filerecord(null, collabora_fs::FILEAREA_SUBMIT, $submission->id);
-        } else {
-            // We will use the userid.
-            $filerec = $this->get_filerecord(null, collabora_fs::FILEAREA_SUBMIT, $submission->id);
-        }
+        $filerec = $this->get_filerecord(null, collabora_fs::FILEAREA_SUBMIT, $submission->id);
 
         $files = $fs->get_area_files($filerec->contextid, $filerec->component, $filerec->filearea,
             $filerec->itemid, '', false, 0, 0, 1);
@@ -586,12 +581,7 @@ class assign_submission_collabora extends assign_submission_plugin {
 
         // Get or Create our submission file base record.
         $fs = get_file_storage();
-        if ($submission->groupid) { // Group Submission.
-            $filerec = $this->get_filerecord(null, collabora_fs::FILEAREA_SUBMIT, $submission->id);
-        } else {
-            // We will use the userid.
-            $filerec = $this->get_filerecord(null, collabora_fs::FILEAREA_SUBMIT, $submission->id);
-        }
+        $filerec = $this->get_filerecord(null, collabora_fs::FILEAREA_SUBMIT, $submission->id);
 
         // For now we check for the submission file existance 1st.
         $isnewsubmission = 0;
@@ -638,12 +628,7 @@ class assign_submission_collabora extends assign_submission_plugin {
 
         // Get or Create our submission file base record.
         $fs = get_file_storage();
-        if (!empty($submission->groupid)) { // Group Submission.
-            $filerec = $this->get_filerecord(null, collabora_fs::FILEAREA_SUBMIT, $submission->id);
-        } else {
-            // We will use the userid.
-            $filerec = $this->get_filerecord(null, collabora_fs::FILEAREA_SUBMIT, $submission->id);
-        }
+        $filerec = $this->get_filerecord(null, collabora_fs::FILEAREA_SUBMIT, $submission->id);
 
         $files = $fs->get_area_files($filerec->contextid, $filerec->component, $filerec->filearea,
             $filerec->itemid, '', false, 0, 0, 1);
@@ -700,29 +685,20 @@ class assign_submission_collabora extends assign_submission_plugin {
     /**
      * Copy the plugin specific submission data to a new submission record.
      *
-     * @param stdClass $sourcesubmission - Old submission record
-     * @param stdClass $destsubmission - New submission record
+     * @param stdClass $submission - Old submission record
+     * @param stdClass $newsubmission - New submission record
      * @return bool
      */
-    public function copy_submission(stdClass $sourcesubmission, stdClass $destsubmission) {
+    public function copy_submission(stdClass $submission, stdClass $newsubmission) {
         global $DB;
 
-        // $filesubmission = $this->get_file_submission($sourcesubmission->id);
-        // unset($filesubmission->id);
-        // $filesubmission->submission = $destsubmission->id;
-        // $DB->insert_record('assignsubmission_collabora', $filesubmission);
-        // TODO: Check whether or not we have to copy the file too!!!!
         $fs = get_file_storage();
-        if (!empty($sourcesubmission->groupid)) { // Group Submission.
-            $filerec = $this->get_filerecord(null, collabora_fs::FILEAREA_SUBMIT, $sourcesubmission->id);
-        } else {
-            // We will use the userid.
-            $filerec = $this->get_filerecord(null, collabora_fs::FILEAREA_SUBMIT, $sourcesubmission->id);
-        }
+        $filerec = $this->get_filerecord(null, collabora_fs::FILEAREA_SUBMIT, $submission->id);
+
         $files = $fs->get_area_files($filerec->contextid, $filerec->component, $filerec->filearea,
             $filerec->itemid, '', false, 0, 0, 1);
         if ($file = reset($files)) {
-            $fieldupdates = array('itemid' => $destsubmission->id);
+            $fieldupdates = array('itemid' => $newsubmission->id);
             $fs->create_file_from_storedfile($fieldupdates, $file);
         }
 
@@ -737,7 +713,7 @@ class assign_submission_collabora extends assign_submission_plugin {
     public function delete_instance() {
         global $DB;
         $this->unset_config();
-        $DB->delete_records('assignsubmission_collabora', array('assignment'=>$this->assignment->get_instance()->id));
+        $DB->delete_records('assignsubmission_collabora', array('assignment' => $this->assignment->get_instance()->id));
 
         return true;
     }
@@ -760,12 +736,7 @@ class assign_submission_collabora extends assign_submission_plugin {
      */
     public function is_empty(stdClass $submission) {
         $fs = get_file_storage();
-        if (!empty($submission->groupid)) { // Group Submission.
-            $filerec = $this->get_filerecord(null, collabora_fs::FILEAREA_SUBMIT, $submission->id);
-        } else {
-            // We will use the userid.
-            $filerec = $this->get_filerecord(null, collabora_fs::FILEAREA_SUBMIT, $submission->id);
-        }
+        $filerec = $this->get_filerecord(null, collabora_fs::FILEAREA_SUBMIT, $submission->id);
 
         $files = $fs->get_area_files($filerec->contextid, $filerec->component, $filerec->filearea,
             $filerec->itemid, '', false, 0, 0, 1);
@@ -793,19 +764,13 @@ class assign_submission_collabora extends assign_submission_plugin {
         global $DB;
 
         $fs = get_file_storage();
-
-        if ($submission->groupid) { // Group Submission.
-            $filerec = $this->get_filerecord(null, collabora_fs::FILEAREA_SUBMIT, $submission->id);
-        } else {
-            // We will use the userid.
-            $filerec = $this->get_filerecord(null, collabora_fs::FILEAREA_SUBMIT, $submission->id);
-        }
+        $filerec = $this->get_filerecord(null, collabora_fs::FILEAREA_SUBMIT, $submission->id);
 
         // Delete the submission files.
         $fs->delete_area_files($filerec->contextid, $filerec->component, $filerec->filearea,
             $filerec->itemid);
 
-        $DB->delete_records('assignsubmission_collabora', array('submission'=>$submission->id));
+        $DB->delete_records('assignsubmission_collabora', array('submission' => $submission->id));
     }
 
 

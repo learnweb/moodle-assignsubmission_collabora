@@ -16,8 +16,6 @@
 
 namespace assignsubmission_collabora\api;
 
-require_once($CFG->dirroot . '/mod/assign/locallib.php');
-
 /**
  * Main support functions
  *
@@ -62,7 +60,7 @@ class collabora_fs extends \mod_collabora\api\base_filesystem {
         $user = $DB->get_record('user', array('id' => $userid), '*', MUST_EXIST);
 
         list($filehash, $writable) = explode('_', $fileid);
-        // $filehash = $fileid;
+
         // Get the stored file.
         $fs = get_file_storage();
         if ($file = $fs->get_file_by_hash($filehash)) {
@@ -91,22 +89,18 @@ class collabora_fs extends \mod_collabora\api\base_filesystem {
      * @return bool
      */
     public static function check_writable($assign, $submission, $userid, $file) {
-
-        $permission  = 444;     // Default - All can read.
+        global $CFG, $USER;
+        require_once($CFG->dirroot . '/mod/assign/locallib.php');
 
         // Site Admins && graders (teachers/managers) cannot edit the file - irrespective of submission status.
         if (is_siteadmin() || $assign->can_grade()) {
-            return true;
+            if ($USER->id != $userid) {
+                return false;
+            }
         }
         // Is the submission editable by the current user? - The lock status is enough to tell us.
         if ($assign->submissions_open($userid, null, $submission)) {
             return $file->get_itemid() == $submission->id;
-            // if (!empty($submission->groupid)) {
-            //     return $file->get_itemid() == $submission->groupid;
-            // }
-            // if (!empty($submission->userid)) {
-            //     return $file->get_itemid() == $submission->userid;
-            // }
         }
         return false;
 
@@ -119,6 +113,9 @@ class collabora_fs extends \mod_collabora\api\base_filesystem {
      * @param \stored_file $file
      */
     public function __construct($user, $file) {
+        global $CFG;
+        require_once($CFG->dirroot . '/mod/assign/locallib.php');
+
         $this->context = \context::instance_by_id($file->get_contextid());
 
         list ($course, $cm) = get_course_and_cm_from_cmid($this->context->instanceid, 'assign');
@@ -178,21 +175,5 @@ class collabora_fs extends \mod_collabora\api\base_filesystem {
      */
     public function get_user_token() {
         return $this->accesstoken;
-    }
-
-    /**
-     * Update the stored file and set the timemodified timestamp.
-     *
-     * @param string $content
-     * @return void
-     */
-    public function update_file($postdata) {
-        /** @var \moodle_database $DB */
-        global $DB;
-
-        parent::update_file($postdata);
-        // if (!empty($this->submission)) {
-        //     $DB->set_field('assign_submission', 'timemodified', time(), array('id' => $this->submission->id));
-        // }
     }
 }

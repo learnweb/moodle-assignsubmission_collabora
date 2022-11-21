@@ -23,9 +23,9 @@
  */
 defined ( 'MOODLE_INTERNAL' ) || die ();
 
-$plugin->version = 2022030604;
-$plugin->release = 'v4.0-beta-3 (2022-04-04)';
+$plugin->version = 2022042000;
+$plugin->release = 'v4.1-r1 (2022-11-21)';
 $plugin->requires = 2022011100; // Moodle 4.0.
-$plugin->dependencies = array('mod_collabora' => 2022030601);
+$plugin->dependencies = array('mod_collabora' => 2022042000);
 $plugin->component = 'assignsubmission_collabora';
 $plugin->maturity = MATURITY_BETA;

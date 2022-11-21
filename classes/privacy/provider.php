@@ -104,11 +104,11 @@ class provider implements
         $assign = $exportdata->get_assign();
         $plugin = $assign->get_plugin_by_type('assignsubmission', 'collabora');
         $submission = $exportdata->get_pluginobject();
-        if (!$submission->userid) {     // Then this is a group submission - We cannot delete that!
-            $files = array();
-        } else {
-            $files = $plugin->get_files($submission, $user);
+        // We can not use group submissions here!
+        if (empty($submission->userid) && !empty($submission->groupid)) {
+            return;
         }
+        $files = $plugin->get_files($submission, $user);
         foreach ($files as $file) {
             $userid = $exportdata->get_pluginobject()->userid;
             writer::with_context($exportdata->get_context())->export_file($exportdata->get_subcontext(), $file);
@@ -133,7 +133,7 @@ class provider implements
 
         \core_plagiarism\privacy\provider::delete_plagiarism_for_context($requestdata->get_context());
 
-        $filearea = $requestdata->get_assign()->get_plugin_by_type('assignsubmission', 'collabora')::FILEAREA_SUBMIT;
+        $filearea = \assignsubmission_collabora\api\collabora_fs::FILEAREA_SUBMIT;
         $fs = get_file_storage();
         $fs->delete_area_files($requestdata->get_context()->id, 'assignsubmission_collabora', $filearea);
 
@@ -145,16 +145,27 @@ class provider implements
      * @param  assign_plugin_request_data $deletedata Details about the user and context to focus the deletion.
      */
     public static function delete_submission_for_userid(assign_plugin_request_data $deletedata) {
+        global $DB;
 
-        $userid = $deletedata->get_user()->id;
+        \core_plagiarism\privacy\provider::delete_plagiarism_for_user($deletedata->get_user()->id, $deletedata->get_context());
 
-        \core_plagiarism\privacy\provider::delete_plagiarism_for_user($userid, $deletedata->get_context());
+        $submissionid = $deletedata->get_pluginobject()->id;
 
-        $filearea = $deletedata->get_assign()->get_plugin_by_type('assignsubmission', 'collabora')::FILEAREA_SUBMIT;
+        $fs = get_file_storage();
+        $fs->delete_area_files(
+            $deletedata->get_context()->id,
+            'assignsubmission_collabora',
+            \assignsubmission_collabora\api\collabora_fs::FILEAREA_SUBMIT,
+            $submissionid
+        );
 
-        // $fs = get_file_storage();
-        // $fs->delete_area_files($deletedata->get_context()->id, 'assignsubmission_collabora', $filearea, $userid);
-
+        $DB->delete_records(
+            'assignsubmission_collabora',
+            array(
+                'assignment' => $deletedata->get_assignid(),
+                'submission' => $submissionid,
+            )
+        );
     }
 
     /**
@@ -165,17 +176,22 @@ class provider implements
     public static function delete_submissions(assign_plugin_request_data $deletedata) {
         global $DB;
 
-        if (empty($deletedata->get_userids())) {
-            return;
-        }
-
         \core_plagiarism\privacy\provider::delete_plagiarism_for_users($deletedata->get_userids(), $deletedata->get_context());
 
-        $filearea = $deletedata->get_assign()->get_plugin_by_type('assignsubmission', 'collabora')::FILEAREA_SUBMIT;
-
+        if (empty($deletedata->get_submissionids())) {
+            return;
+        }
         $fs = get_file_storage();
-        list($sql, $params) = $DB->get_in_or_equal($deletedata->get_userids(), SQL_PARAMS_NAMED);
-        $fs->delete_area_files_select($deletedata->get_context()->id, 'assignsubmission_collabora', $filearea, $sql, $params);
+        list($sql, $params) = $DB->get_in_or_equal($deletedata->get_submissionids(), SQL_PARAMS_NAMED);
+        $fs->delete_area_files_select(
+            $deletedata->get_context()->id,
+            'assignsubmission_collabora',
+            \assignsubmission_collabora\api\collabora_fs::FILEAREA_SUBMIT,
+            $sql,
+            $params
+        );
 
+        $params['assignid'] = $deletedata->get_assignid();
+        $DB->delete_records_select('assignsubmission_collabora', "assignment = :assignid AND submission $sql", $params);
     }
 }

@@ -31,7 +31,7 @@
     }
 
 }}
-<span class="ml-3">{{filename}}</span> <a href="#"
+<a href="#"
    title="{{#str}}fullscreen, mod_collabora{{/str}}"
    class="text-decoration-none text-primary collaboramodal"
    data-toggle="modal"
@@ -41,7 +41,7 @@
         <i class="fa fa-square-o fa-stack-2x"></i>
         <i class="fa fa-expand fa-stack-1x"></i>
     </span>
-</a>
+</a><span class="ml-1">{{filename}}</span>
 {{#legacy}}
     {{> mod_collabora/iframe_legacy}}
 {{/legacy}}

@@ -17,12 +17,10 @@
 /**
  * Upgrade code for install
  *
- * @package   assignsubmission_file
- * @copyright 2012 NetSpot {@link http://www.netspot.com.au}
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package   assignsubmission_collabora
+ * @copyright Andreas Grabs <moodle@grabs-edv.de>
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
-defined('MOODLE_INTERNAL') || die();
 
 /**
  * Stub for upgrade code
