@@ -75,6 +75,7 @@ class events_test extends \advanced_testcase {
 
     /**
      * Test that the assessable_uploaded event is fired when a file submission has been made.
+     * @covers \assignsubmission_collabora\event\assessable_uploaded
      */
     public function test_assessable_uploaded() {
         list($file, $plugin, $assign, $submission, $sink) = $this->setup_submission();
@@ -98,6 +99,7 @@ class events_test extends \advanced_testcase {
 
     /**
      * Test that the submission_created event is fired when a file submission is saved.
+     * @covers \assignsubmission_collabora\event\submission_created
      */
     public function test_submission_created() {
         list($file, $plugin, $assign, $submission, $sink, $dummy) = $this->setup_submission();
@@ -122,6 +124,7 @@ class events_test extends \advanced_testcase {
 
     /**
      * Test that the submission_updated event is fired when a file submission is saved when an existing submission already exists.
+     * @covers \assignsubmission_collabora\event\submission_updated
      */
     public function test_submission_updated() {
         list($file, , $assign, $submission, $sink, $dummy, $course) = $this->setup_submission();

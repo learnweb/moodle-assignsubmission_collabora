@@ -22,6 +22,7 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 namespace assignsubmission_collabora;
+use assignsubmission_collabora\api\collabora_fs;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -42,6 +43,7 @@ class locallib_test extends \advanced_testcase {
     /**
      * Test submission_is_empty
      *
+     * @covers \assignsubmission_collabora\assign_submission_collabora::submission_is_empty
      * @dataProvider submission_is_empty_testcases
      * @param \stdClass $data The collabora submission data
      * @param bool $expected The expected return value
@@ -51,12 +53,12 @@ class locallib_test extends \advanced_testcase {
 
         $course = $this->getDataGenerator()->create_course();
         $student = $this->getDataGenerator()->create_and_enrol($course, 'student');
-        /** @var \mod_assign_testable_assign */
+
         $assign = $this->create_instance(
             $course,
             array(
                 'assignsubmission_collabora_enabled' => 1,
-                'assignsubmission_collabora_format' => \assignsubmission_collabora\api\collabora_fs::FORMAT_WORDPROCESSOR,
+                'assignsubmission_collabora_format' => collabora_fs::FORMAT_WORDPROCESSOR,
                 'assignsubmission_collabora_width' => 0,
                 'assignsubmission_collabora_height' => 0,
                 'assignsubmission_collabora_filename' => 'initialfile.docx',
@@ -72,7 +74,7 @@ class locallib_test extends \advanced_testcase {
         $submissiondata->userid = $student->id;
 
         if ($data) {
-            $filerecord = $plugin->get_filerecord('test.txt', \assignsubmission_collabora\api\collabora_fs::FILEAREA_SUBMIT, $submission->id);
+            $filerecord = $plugin->get_filerecord('test.txt', collabora_fs::FILEAREA_SUBMIT, $submission->id);
             $fs = get_file_storage();
             // Store the new file - This will change the ID and automtically unlock it.
             $fs->create_file_from_string($filerecord, $data['content']);
@@ -84,6 +86,7 @@ class locallib_test extends \advanced_testcase {
 
     /**
      * Test submission form
+     * @covers \assignsubmission_collabora\assign_submission_collabora::get_form_elements
      */
     public function test_submissionform() {
         global $CFG;
@@ -99,12 +102,12 @@ class locallib_test extends \advanced_testcase {
 
         $course = $this->getDataGenerator()->create_course();
         $student = $this->getDataGenerator()->create_and_enrol($course, 'student');
-        /** @var \mod_assign_testable_assign */
+
         $assign = $this->create_instance(
             $course,
             array(
                 'assignsubmission_collabora_enabled' => 1,
-                'assignsubmission_collabora_format' => \assignsubmission_collabora\api\collabora_fs::FORMAT_WORDPROCESSOR,
+                'assignsubmission_collabora_format' => collabora_fs::FORMAT_WORDPROCESSOR,
                 'assignsubmission_collabora_width' => 0,
                 'assignsubmission_collabora_height' => 0,
                 'assignsubmission_collabora_filename' => 'initialfile.docx',

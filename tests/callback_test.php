@@ -45,6 +45,12 @@ class callback_test extends \advanced_testcase {
     use \mod_assign_test_generator;
     use \assignsubmission_collabora_test_api_setup;
 
+    /**
+     * Test the collabora api to see requests are handled right.
+     * @covers \mod_collabora\api\api::handle_request
+     *
+     * @return void
+     */
     public function test_handle_request() {
         list($viewurl, $file, $fs, $assign, $plugin, $student) = $this->setup_and_basic_tests_for_view_url();
 

@@ -19,15 +19,14 @@ namespace assignsubmission_collabora\api;
 /**
  * Main support functions
  *
- * @package   mod_collabora
- * @copyright 2019 Davo Smith, Synergy Learning
+ * @package   assignsubmission_collabora
+ * @copyright 2022 Andreas Grabs <moodle@grabs-edv.de>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class collabora_fs extends \mod_collabora\api\base_filesystem {
     /** Define the filearea for submission files */
     public const FILEAREA_SUBMIT = 'submission_file';
 
-    private $userpermission;
     /** @var string */
     private $accesstoken;
     /** @var \context */
@@ -53,6 +52,13 @@ class collabora_fs extends \mod_collabora\api\base_filesystem {
         return $userid;
     }
 
+    /**
+     * Get an instance of this class by using the fileid and the accesstoken comming from the request (collabora server).
+     *
+     * @param string $fileid
+     * @param string $accesstoken
+     * @return static
+     */
     public static function get_instance_by_fileid($fileid, $accesstoken) {
         global $DB;
 
@@ -134,6 +140,11 @@ class collabora_fs extends \mod_collabora\api\base_filesystem {
         $this->writable = $this->check_writable($this->assign, $this->submission, $user->id, $file);
     }
 
+    /**
+     * Set the filesystem as readonly for the collabora server.
+     *
+     * @return void
+     */
     public function force_readonly() {
         $this->writable = false;
     }

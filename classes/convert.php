@@ -32,6 +32,14 @@ namespace assignsubmission_collabora;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class convert {
+    /**
+     * The method converts the old structure into the new one and
+     * is used while upgrade to the new data structure which provides backup and restore with userdata.
+     * A new table assignsubmission_collabora is needed therefore and also we do not use the filearea "group" and "user" anymore.
+     * Instead we use the filearea "submission_file" for all submissions.
+     *
+     * @return void
+     */
     public static function run() {
         global $DB;
 
