@@ -23,14 +23,14 @@
  */
 
 namespace assignsubmission_collabora;
-use mod_collabora\collabora;
-use assignsubmission_collabora\test_setup_trait;
+use \mod_collabora\api\api;
+use \assignsubmission_collabora\api\collabora_fs;
 
 defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
 require_once($CFG->dirroot . '/mod/assign/tests/generator.php');
-require_once($CFG->dirroot . '/mod/assign/submission/collabora/classes/callbacklib.php');
+require_once($CFG->dirroot . '/mod/assign/submission/collabora/tests/lib/api_setup.php');
 
 /**
  * Contains the callback tests for the plugin.
@@ -39,11 +39,11 @@ require_once($CFG->dirroot . '/mod/assign/submission/collabora/classes/callbackl
  * @copyright 2019 Benjamin Ellis, Synergy Learning
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class callbacklib_test extends \advanced_testcase {
+class callback_test extends \advanced_testcase {
 
     // Use the generator helper.
     use \mod_assign_test_generator;
-    use \assignsubmission_collabora\test_setup_trait;
+    use \assignsubmission_collabora_test_api_setup;
 
     public function test_handle_request() {
         list($viewurl, $file, $fs, $assign, $plugin, $student) = $this->setup_and_basic_tests_for_view_url();
@@ -56,9 +56,13 @@ class callbacklib_test extends \advanced_testcase {
         $accesstoken = $params['access_token'];
         $postdata = null;
 
+        list($requesttyp, $fileid) = api::get_request_and_fileid_from_path($relativepath, $postdata);
+        $collaborafs = collabora_fs::get_instance_by_fileid($fileid, $accesstoken);
+        $api = new api($requesttyp, $collaborafs, $postdata);
+
         /* Create the request - $relativepath, $accesstoken, $postdata. */
         // Get File Info JSON.
-        $fileinfo = json_decode(\callbacklib::handle_request($relativepath, $accesstoken, $postdata));
+        $fileinfo = json_decode($api->handle_request(true));
 
         // Assert a few things about our $fileinfo.
         $this->assertEquals($file->get_filename(), $fileinfo->BaseFileName);
@@ -67,11 +71,12 @@ class callbacklib_test extends \advanced_testcase {
 
         // Assert Get File 2nd - need to add contents onto the relative path.
         $relativepath .= '/contents';
-        ob_start();
-        \callbacklib::handle_request($relativepath, $accesstoken, $postdata);
-        $contentsize = ob_get_length();
-        $filecontentshash = sha1(ob_get_contents());    // File contents hashed.
-        ob_end_clean();
+        list($requesttyp, $fileid) = api::get_request_and_fileid_from_path($relativepath, $postdata);
+        $collaborafs = collabora_fs::get_instance_by_fileid($fileid, $accesstoken);
+        $api = new api($requesttyp, $collaborafs, $postdata);
+        $content = $api->handle_request(true);
+        $contentsize = strlen($content);
+        $filecontentshash = sha1($content);    // File contents hashed.
 
         $this->assertEquals($file->get_filesize(), $contentsize);   // Same Size.
         // Compare the contents.
@@ -82,17 +87,15 @@ class callbacklib_test extends \advanced_testcase {
         $postdata = file_get_contents($uploadfile);
 
         // Update our file record - note the filerecord is changed.
-        \callbacklib::handle_request($relativepath, $accesstoken, $postdata);
+        list($requesttyp, $fileid) = api::get_request_and_fileid_from_path($relativepath, $postdata);
+        $collaborafs = collabora_fs::get_instance_by_fileid($fileid, $accesstoken);
+        $api = new api($requesttyp, $collaborafs, $postdata);
+        $api->handle_request(true);
+
         sleep(2);   // Give us some time to complete.
 
-        // Now lets get the new file.
-        $files = $fs->get_area_files(
-            $assign->get_context()->id,
-            'assignsubmission_collabora',
-            $plugin::FILEAREA_SUBMIT,
-            $student->id,
-            '', false, 0, 0, 1);
-        $newfile = reset($files);
+        $collaborafs = collabora_fs::get_instance_by_fileid($fileid, $accesstoken);
+        $newfile = $collaborafs->get_file();
 
         $this->assertEquals(strlen($postdata), $newfile->get_filesize());       // Size.
         $this->assertEquals(sha1($postdata), $newfile->get_contenthash());      // Contents.

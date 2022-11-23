@@ -23,6 +23,7 @@
  */
 
 namespace assignsubmission_collabora;
+use \assignsubmission_collabora\api\collabora_fs;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -56,14 +57,14 @@ class events_test extends \advanced_testcase {
         $this->setUser($student->id);
         $submission = $assign->get_user_submission($student->id, true);
         $plugin = $assign->get_submission_plugin_by_type('collabora');
-        $filearea = $plugin::FILEAREA_SUBMIT;
+        $filearea = collabora_fs::FILEAREA_SUBMIT;
 
         $fs = get_file_storage();
         $dummy = (object) array(
             'contextid' => $context->id,
             'component' => 'assignsubmission_collabora',
             'filearea' => $filearea,
-            'itemid' => $student->id,
+            'itemid' => $submission->id,
             'filepath' => '/',
             'filename' => 'myassignmnent.docx'
         );

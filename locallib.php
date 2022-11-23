@@ -66,7 +66,7 @@ class assign_submission_collabora extends assign_submission_plugin {
      * @param string $filepath - we don't use this for our plugin but might do in the future.
      * @return StdClass
      */
-    private function get_filerecord($filename = null, $filearea = null, $itemid = 0, $filepath = '/') {
+    public function get_filerecord($filename = null, $filearea = null, $itemid = 0, $filepath = '/') {
         if (empty($filearea)) {
             $filearea = collabora_fs::FILEAREA_INITIAL;
         }
@@ -178,6 +178,13 @@ class assign_submission_collabora extends assign_submission_plugin {
         $viewurl = $collabora->get_view_url();
         $id = uniqid();
         $widget = new \assignsubmission_collabora\output\content($id, $submissionfile->get_filename(), $viewurl, $config);
+
+        // If we are in testing mode, we have to modify the file because there is no real collabora to do that.
+        if (\assignsubmission_collabora\api\collabora_fs::is_testing()) {
+            $user = $DB->get_record('user', array('id' => $userid));
+            $collaborafs = new \assignsubmission_collabora\api\collabora_fs($user, $submissionfile);
+            $collaborafs->update_file(random_string(32));
+        }
 
         return $OUTPUT->render($widget);
     }
@@ -729,7 +736,9 @@ class assign_submission_collabora extends assign_submission_plugin {
     }
 
     /**
-     * Is this assignment plugin empty?(ie no submission)
+     * Is this assignment plugin empty?
+     * We check whether or not a submission file exists
+     * and if so whether or not the submission file is the same as the initial file.
      *
      * @param stdClass $submission assign_submission.
      * @return bool
@@ -740,17 +749,37 @@ class assign_submission_collabora extends assign_submission_plugin {
 
         $files = $fs->get_area_files($filerec->contextid, $filerec->component, $filerec->filearea,
             $filerec->itemid, '', false, 0, 0, 1);
-        return count($files) == 0;
+        if (count($files) == 0) { // No file yet.
+            return true;
+        }
+        $file = array_pop($files);
+        $initialfile = $this->get_initial_file($fs);
+        return $file->get_contenthash() == $initialfile->get_contenthash();
     }
 
     /**
-     * Determine if a submission is empty - only called on 1st submission always return false???
+     * Determine if a submission is empty before saving.
+     * Because the user file is saved in the background by collabora api
+     * we can check whether or not the content differs from the initial file. So in fact we do the same as ::is_empty().
      *
      * @param stdClass $data The submission data
      * @return bool
      */
     public function submission_is_empty(stdClass $data) {
-        return false;
+        if (empty($data->id)) {
+            return true;
+        }
+
+        list ($course, $cm) = get_course_and_cm_from_cmid($data->id, 'assign');
+        $context = \context_module::instance($cm->id);
+        $assign = new \assign($context, $cm, $course);
+
+        if (!empty($assign->get_instance($data->userid)->teamsubmission)) {
+            $submission = $assign->get_group_submission($data->userid, 0, false);
+        } else {
+            $submission = $assign->get_user_submission($data->userid, false);
+        }
+        return $this->is_empty($submission);
     }
 
     /**

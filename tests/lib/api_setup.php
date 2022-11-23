@@ -22,10 +22,7 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace assignsubmission_collabora;
-
-use mod_collabora\collabora;
-use stdClass;
+use assignsubmission_collabora\api\collabora_fs;
 
 /**
  * Test Setup Trait for callbacklib_test.php and locallib_test.php
@@ -34,7 +31,7 @@ use stdClass;
  * @copyright 2019 Benjamin Ellis, Synergy Learning, 2020 Justus Dieckmann WWU
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-trait test_setup_trait {
+trait assignsubmission_collabora_test_api_setup {
 
     /**
      * Test Setup method.
@@ -53,9 +50,9 @@ trait test_setup_trait {
         $teacher = $this->getDataGenerator()->create_and_enrol($course, 'teacher');
         $this->setUser($teacher->id);
 
-        $data = new stdClass();
+        $data = new \stdClass();
         // We use collabora::FORMAT_WORDPROCESSOR as example blank file.
-        $data->assignsubmission_collabora_format = \mod_collabora\api\collabora_fs::FORMAT_WORDPROCESSOR;
+        $data->assignsubmission_collabora_format = collabora_fs::FORMAT_WORDPROCESSOR;
         $data->assignsubmission_collabora_filename = 'test_handle_request';
         // Width never empty - required for all formats.
         $data->assignsubmission_collabora_width = 0;
@@ -68,7 +65,7 @@ trait test_setup_trait {
         $files = $fs->get_area_files(
             $assign->get_context()->id,
             'assignsubmission_collabora',
-            \mod_collabora\api\collabora_fs::FILEAREA_INITIAL,
+            collabora_fs::FILEAREA_INITIAL,
             0, '', false, 0, 0, 1);
         $initialfile = reset($files);
         $this->assertNotEmpty($initialfile, 'No initial file created');
@@ -83,7 +80,7 @@ trait test_setup_trait {
         $submissionfilerec = (object) [
             'contextid' => $initialfile->get_contextid(),
             'component' => $initialfile->get_component(),
-            'filearea' => $plugin::FILEAREA_SUBMIT,
+            'filearea' => collabora_fs::FILEAREA_SUBMIT,
             'itemid' => $submission->id,
             'filepath' => '/',
             'filename' => $initialfile->get_filename()
@@ -92,14 +89,15 @@ trait test_setup_trait {
         $file = $fs->create_file_from_storedfile($submissionfilerec, $initialfile);
         $this->assertNotEmpty($file, 'No user submission file created');
 
-        $data = new stdClass();
+        $data = new \stdClass();
         $data->submpathnamehash = $file->get_pathnamehash();
         $data->submfilename = $file->get_filename();
         $data->subnewsubmssn = $newassignment;
         $this->assertTrue($plugin->save($submission, $data));
 
         // Get the URL we need to call the editing.
-        $viewurl = $plugin->get_view_url($submission, $file, $student->id);
+        $collaborafs = new collabora_fs($student, $file);
+        $viewurl = $collaborafs->get_view_url();
 
         return array($viewurl->out(false), $file, $fs, $assign, $plugin, $student);
     }
