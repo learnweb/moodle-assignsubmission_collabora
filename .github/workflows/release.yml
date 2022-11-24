@@ -78,7 +78,7 @@ jobs:
           sudo locale-gen en_AU.UTF-8
 
       - name: Install mod_collabora
-        run:  moodle-plugin-ci add-plugin --branch ${{ matrix.mod-collabora-branch }} ${{ matrix.mod-collabora-repo }}
+        run:  moodle-plugin-ci add-plugin --branch $MOD_COLLABORA_BRANCH $MOD_COLLABORA_REPO
 
       - name: Install Moodle
         run:  moodle-plugin-ci install -vvv --plugin ./plugin --db-host=127.0.0.1
