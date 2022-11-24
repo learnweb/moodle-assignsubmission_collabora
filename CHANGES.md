@@ -4,6 +4,14 @@ moodle-assignsubmission_collabora
 Changes
 -------
 
+### v4.1-r1
+
+* 2022-11-24 -  Optimize github actions workflow
+* 2022-11-23 -  Adapt testing to the new data structure
+* 2022-11-21 -  Better access check. If an assign is closed, a file becomes automatically readonly even if the same iframe is used.
+* 2022-11-21 -  New data structure for collabora submissions in order to support backup/restore with userdata
+* 2022-11-19 -  New abstraction for filesystem which makes it easier to share the API code between mod_collabora and this plugin.
+
 ### v4.0-beta-3
 
 * 2022-04-04 -  Ensure LastModifiedTime is in UTC (#32)
