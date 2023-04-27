@@ -187,4 +187,17 @@ class collabora_fs extends \mod_collabora\api\base_filesystem {
     public function get_user_token() {
         return $this->accesstoken;
     }
+
+    /**
+     * Update the stored file
+     *
+     * @param string $content
+     * @return void
+     */
+    public function update_file($content) {
+        if (static::is_testing()) {
+            $this->writable = true;
+        }
+        parent::update_file($content);
+    }
 }

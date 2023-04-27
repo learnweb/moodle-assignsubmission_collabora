@@ -45,7 +45,7 @@ class submission_updated extends \mod_assign\event\submission_updated {
     public function get_description() {
         $descriptionstring = "The user with id '$this->userid' updated the collaborative submission file named "
             . "'{$this->other['submissionfilename']}' in the " . "assignment with course module id '$this->contextinstanceid'";
-        if (! empty ( $this->other ['groupid'] )) {
+        if (! empty ( $this->other['groupid'] )) {
             $descriptionstring .= " for the '{$this->other['groupname']}' group (ID: '{$this->other['groupid']}').";
         } else {
             $descriptionstring .= ".";

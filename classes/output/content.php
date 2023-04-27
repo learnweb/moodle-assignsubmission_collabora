@@ -52,6 +52,12 @@ class content implements \renderable, \templatable {
         $renderer = $PAGE->get_renderer('mod_collabora');
         $this->data->legacy = !$renderer->is_boost_based();
 
+        // Add a warning notice.
+        if (\assignsubmission_collabora\api\collabora_fs::is_testing()) {
+            $this->data->hasnotice = true;
+            $this->data->noticetype = \core\notification::WARNING;
+            $this->data->notice = get_string('collaboraurlnotset', 'mod_collabora');
+        }
     }
 
     /**

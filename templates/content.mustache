@@ -27,10 +27,18 @@
         "filename" : "example.docx",
         "name" : "example",
         "framewidth" : "900px",
-        "frameheight" : "500px"
+        "frameheight" : "500px",
+        "hasnotice" : 1,
+        "noticetype" : "warning",
+        "notice" : "Collabora URL is not configured for this site"
     }
 
 }}
+{{#hasnotice}}
+<div class="alert alert-{{noticetype}} alert-block " role="alert">
+    {{notice}}
+</div>
+{{/hasnotice}}
 <a href="#"
    title="{{#str}}fullscreen, mod_collabora{{/str}}"
    class="text-decoration-none text-primary collaboramodal"

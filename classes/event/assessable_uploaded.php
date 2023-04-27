@@ -69,7 +69,7 @@ class assessable_uploaded extends \core\event\assessable_uploaded {
      */
     protected function init() {
         parent::init ();
-        $this->data ['objecttable'] = 'assign_submission';
+        $this->data['objecttable'] = 'assign_submission';
     }
 
     /**

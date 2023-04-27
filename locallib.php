@@ -207,7 +207,7 @@ class assign_submission_collabora extends assign_submission_plugin {
 
         foreach ($assignpluginconfig as $assignsetting => $settingvalue) {
             if (in_array($assignsetting, $configkeys)) {
-                $thisplugincfg [$assignsetting] = $settingvalue;
+                $thisplugincfg[$assignsetting] = $settingvalue;
             }
         }
         return(object) $thisplugincfg; // Object to keep it consistent.
@@ -491,9 +491,9 @@ class assign_submission_collabora extends assign_submission_plugin {
            )
         );
         if (!empty($submission->userid) &&($submission->userid != $USER->id)) {
-            $params ['relateduserid'] = $submission->userid;
+            $params['relateduserid'] = $submission->userid;
         } else {
-            $params ['userid'] = $submission->userid;
+            $params['userid'] = $submission->userid;
         }
         $event = \assignsubmission_file\event\assessable_uploaded::create($params);
         $event->trigger();
@@ -511,9 +511,9 @@ class assign_submission_collabora extends assign_submission_plugin {
         // End BORROWED.
 
         // Unset the objectid and other field from params for use in submission events.
-        unset($params ['objectid']); // We do not use this as we do not have a separate table.
-        unset($params ['other']);
-        $params ['other'] = array(
+        unset($params['objectid']); // We do not use this as we do not have a separate table.
+        unset($params['other']);
+        $params['other'] = array(
             'submissionid' => $submission->id,
             'submissionattempt' => $submission->attemptnumber,
             'submissionstatus' => $submission->status,
@@ -562,9 +562,9 @@ class assign_submission_collabora extends assign_submission_plugin {
         if ($file = reset($files)) {
             // Do we return the full folder path or just the file name?
             if (isset($submission->exportfullpath) && $submission->exportfullpath == false) {
-                $result [$file->get_filename()] = $file;
+                $result[$file->get_filename()] = $file;
             } else {
-                $result [$file->get_filepath() . $file->get_filename()] = $file;
+                $result[$file->get_filepath() . $file->get_filename()] = $file;
             }
         }
         return $result;

@@ -4,6 +4,11 @@ moodle-assignsubmission_collabora
 Changes
 -------
 
+### v4.2-r1
+
+* 2023-04-27 -  Optimize testing mode.
+* 2023-04-27 -  Fix coding style.
+
 ### v4.1-r1
 
 * 2022-11-24 -  Optimize github actions workflow
