@@ -4,6 +4,10 @@ moodle-assignsubmission_collabora
 Changes
 -------
 
+### v4.3.1
+* 2024-01-07 -  Adding postmessage support which is used by the mod_collabora since v4.3.1!
+* 2024-01-07 -  Compatibility to Moodle 4.3
+
 ### v4.2-r1
 
 * 2023-04-27 -  Optimize testing mode.

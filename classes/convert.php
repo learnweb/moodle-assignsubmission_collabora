@@ -25,7 +25,7 @@
 namespace assignsubmission_collabora;
 
 /**
- * Test Setup Trait for callbacklib_test.php and locallib_test.php
+ * Test Setup Trait for callbacklib_test.php and locallib_test.php.
  *
  * @package   assignsubmission_collabora
  * @copyright 2019 Benjamin Ellis, Synergy Learning, 2020 Justus Dieckmann WWU
@@ -44,12 +44,12 @@ class convert {
         global $DB;
 
         // Get all assigns with enabled collabora submission.
-        $params = array(
-            'plugin' => 'collabora',
+        $params = [
+            'plugin'  => 'collabora',
             'subtype' => 'assignsubmission',
-            'name' => 'enabled',
-            'value' => 1,
-        );
+            'name'    => 'enabled',
+            'value'   => 1,
+        ];
         $sql = 'SELECT distinct assignment as id, assignment
                 FROM {assign_plugin_config}
                 WHERE plugin = :plugin AND subtype = :subtype AND name = :name AND value = :value';
@@ -58,13 +58,13 @@ class convert {
             return;
         }
         foreach ($assignids as $assignid) {
-            mtrace('Update submissions for assign: '.$assignid);
-            $assign = $DB->get_record('assign', array('id' => $assignid), 'id, teamsubmission');
+            mtrace('Update submissions for assign: ' . $assignid);
+            $assign = $DB->get_record('assign', ['id' => $assignid], 'id, teamsubmission');
             // Process the group submissions.
             if (!empty($assign->teamsubmission)) {
                 mtrace('    groupmode');
                 $sql = 'SELECT id, groupid FROM {assign_submission} WHERE assignment = :assignment AND groupid > 0';
-                if (!$submissions = $DB->get_records_sql($sql, array('assignment' => $assign->id))) {
+                if (!$submissions = $DB->get_records_sql($sql, ['assignment' => $assign->id])) {
                     continue;
                 }
                 // Now get the files by using the context instance and the groupid.
@@ -73,30 +73,30 @@ class convert {
                 }
                 $context = \context_module::instance($cm->id);
                 foreach ($submissions as $submission) {
-                    mtrace('        submission: '.$submission->id);
+                    mtrace('        submission: ' . $submission->id);
                     // Get the files.
                     if (!$files = $DB->get_records(
                         'files',
-                        array(
+                        [
                             'contextid' => $context->id,
-                            'filearea' => 'group',
-                            'itemid' => $submission->groupid,
-                        )
+                            'filearea'  => 'group',
+                            'itemid'    => $submission->groupid,
+                        ]
                     )) {
                         continue;
                     }
                     foreach ($files as $file) {
-                        mtrace('        fileid: '.$file->id.', submissionid: '.$submission->id);
+                        mtrace('        fileid: ' . $file->id . ', submissionid: ' . $submission->id);
                         // Set the new filearea and the itemid to $submission->id.
                         $file->filearea = \assignsubmission_collabora\api\collabora_fs::FILEAREA_SUBMIT;
-                        $file->itemid = $submission->id;
+                        $file->itemid   = $submission->id;
                         $DB->update_record('files', $file);
                     }
                     // Create an entry for assignsubmission_collabora.
-                    $rec = new \stdClass();
+                    $rec             = new \stdClass();
                     $rec->assignment = $assignid;
                     $rec->submission = $submission->id;
-                    $rec->numfiles = 1;
+                    $rec->numfiles   = 1;
                     if (!$DB->record_exists('assignsubmission_collabora', (array) $rec)) {
                         $DB->insert_record('assignsubmission_collabora', $rec);
                     }
@@ -105,7 +105,7 @@ class convert {
                 // Process the user submissions.
                 mtrace('    usermode');
                 $sql = 'SELECT id, userid FROM {assign_submission} WHERE assignment = :assignment';
-                if (!$submissions = $DB->get_records_sql($sql, array('assignment' => $assign->id))) {
+                if (!$submissions = $DB->get_records_sql($sql, ['assignment' => $assign->id])) {
                     continue;
                 }
                 // Now get the files by using the context instance and the groupid.
@@ -114,37 +114,35 @@ class convert {
                 }
                 $context = \context_module::instance($cm->id);
                 foreach ($submissions as $submission) {
-                    mtrace('        submission: '.$submission->id);
+                    mtrace('        submission: ' . $submission->id);
                     // Get the files.
                     if (!$files = $DB->get_records(
                         'files',
-                        array(
+                        [
                             'contextid' => $context->id,
-                            'filearea' => 'user',
-                            'itemid' => $submission->userid,
-                        )
+                            'filearea'  => 'user',
+                            'itemid'    => $submission->userid,
+                        ]
                     )) {
                         continue;
                     }
                     foreach ($files as $file) {
-                        mtrace('        fileid: '.$file->id.', submissionid: '.$submission->id);
+                        mtrace('        fileid: ' . $file->id . ', submissionid: ' . $submission->id);
                         // Set the new filearea and the itemid to $submission->id.
                         $file->filearea = \assignsubmission_collabora\api\collabora_fs::FILEAREA_SUBMIT;
-                        $file->itemid = $submission->id;
+                        $file->itemid   = $submission->id;
                         $DB->update_record('files', $file);
                     }
                     // Create an entry for assignsubmission_collabora.
-                    $rec = new \stdClass();
+                    $rec             = new \stdClass();
                     $rec->assignment = $assignid;
                     $rec->submission = $submission->id;
-                    $rec->numfiles = 1;
+                    $rec->numfiles   = 1;
                     if (!$DB->record_exists('assignsubmission_collabora', (array) $rec)) {
                         $DB->insert_record('assignsubmission_collabora', $rec);
                     }
                 }
-
             }
         }
-
     }
 }

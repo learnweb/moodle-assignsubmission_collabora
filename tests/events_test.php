@@ -23,9 +23,10 @@
  */
 
 namespace assignsubmission_collabora;
-use \assignsubmission_collabora\api\collabora_fs;
 
-defined('MOODLE_INTERNAL') || die();
+use assignsubmission_collabora\api\collabora_fs;
+
+defined('MOODLE_INTERNAL') || die;
 
 global $CFG;
 require_once($CFG->dirroot . '/mod/assign/tests/generator.php');
@@ -38,39 +39,39 @@ require_once($CFG->dirroot . '/mod/assign/tests/generator.php');
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class events_test extends \advanced_testcase {
-
     // Use the generator helper.
     use \mod_assign_test_generator;
 
     /**
-     * Setup Method for test_assessable_uploaded(), test_submission_created() and test_submission_updated()
+     * Setup Method for test_assessable_uploaded(), test_submission_created() and test_submission_updated().
      * @return array ($file, $plugin, $assign, $submission, $sink, $dummy, $course)
      */
     public function setup_submission() {
         $this->resetAfterTest();
 
-        $course = $this->getDataGenerator()->create_course();
+        $course  = $this->getDataGenerator()->create_course();
         $student = $this->getDataGenerator()->create_and_enrol($course, 'student');
-        $assign = $this->create_instance($course);
+        $assign  = $this->create_instance($course);
         $context = $assign->get_context();
 
         $this->setUser($student->id);
         $submission = $assign->get_user_submission($student->id, true);
-        $plugin = $assign->get_submission_plugin_by_type('collabora');
-        $filearea = collabora_fs::FILEAREA_SUBMIT;
+        $plugin     = $assign->get_submission_plugin_by_type('collabora');
+        $filearea   = collabora_fs::FILEAREA_SUBMIT;
 
-        $fs = get_file_storage();
-        $dummy = (object) array(
+        $fs    = get_file_storage();
+        $dummy = (object) [
             'contextid' => $context->id,
             'component' => 'assignsubmission_collabora',
-            'filearea' => $filearea,
-            'itemid' => $submission->id,
-            'filepath' => '/',
-            'filename' => 'myassignmnent.docx'
-        );
+            'filearea'  => $filearea,
+            'itemid'    => $submission->id,
+            'filepath'  => '/',
+            'filename'  => 'myassignmnent.docx',
+        ];
         $file = $fs->create_file_from_string($dummy, 'Content of ' . $dummy->filename);
         $sink = $this->redirectEvents();
-        return array($file, $plugin, $assign, $submission, $sink, $dummy, $course);
+
+        return [$file, $plugin, $assign, $submission, $sink, $dummy, $course];
     }
 
     /**
@@ -79,11 +80,11 @@ class events_test extends \advanced_testcase {
      */
     public function test_assessable_uploaded() {
         list($file, $plugin, $assign, $submission, $sink) = $this->setup_submission();
-        $data = new \stdClass();
-        $data->submpathnamehash = $file->get_pathnamehash();
-        $data->submfilename = $file->get_filename();
-        $data->submfileid = $file->get_id();
-        $data->subnewsubmssn = 1;
+        $data                                             = new \stdClass();
+        $data->submpathnamehash                           = $file->get_pathnamehash();
+        $data->submfilename                               = $file->get_filename();
+        $data->submfileid                                 = $file->get_id();
+        $data->subnewsubmssn                              = 1;
         $plugin->save($submission, $data);
         $events = $sink->get_events();
 
@@ -103,10 +104,10 @@ class events_test extends \advanced_testcase {
      */
     public function test_submission_created() {
         list($file, $plugin, $assign, $submission, $sink, $dummy) = $this->setup_submission();
-        $data = new \stdClass();
-        $data->submpathnamehash = $file->get_pathnamehash();
-        $data->submfilename = $dummy->filename;
-        $data->subnewsubmssn = 1;           // New file.
+        $data                                                     = new \stdClass();
+        $data->submpathnamehash                                   = $file->get_pathnamehash();
+        $data->submfilename                                       = $dummy->filename;
+        $data->subnewsubmssn                                      = 1;           // New file.
         $plugin->save($submission, $data);
         $events = $sink->get_events();
 
@@ -128,11 +129,11 @@ class events_test extends \advanced_testcase {
      */
     public function test_submission_updated() {
         list($file, , $assign, $submission, $sink, $dummy, $course) = $this->setup_submission();
-        $plugin = $assign->get_submission_plugin_by_type('collabora');
-        $data = new \stdClass();
-        $data->submpathnamehash = $file->get_pathnamehash();
-        $data->submfilename = $dummy->filename;
-        $data->subnewsubmssn = 1;           // New file.
+        $plugin                                                     = $assign->get_submission_plugin_by_type('collabora');
+        $data                                                       = new \stdClass();
+        $data->submpathnamehash                                     = $file->get_pathnamehash();
+        $data->submfilename                                         = $dummy->filename;
+        $data->subnewsubmssn                                        = 1;           // New file.
         // Create a submission.
         $plugin->save($submission, $data);
         // Update a submission.

@@ -15,17 +15,17 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Version information
+ * Version information.
  *
  * @package assignsubmission_collabora
  * @copyright 2019 Benjamin Ellis, Synergy Learning
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-defined ( 'MOODLE_INTERNAL' ) || die ();
+defined('MOODLE_INTERNAL') || die;
 
-$plugin->version = 2023042700;
-$plugin->release = 'v4.2-r1 (2023-04-27)';
-$plugin->requires = 2022011100; // Moodle 4.0.
-$plugin->dependencies = array('mod_collabora' => 2023042700);
-$plugin->component = 'assignsubmission_collabora';
-$plugin->maturity = MATURITY_BETA;
+$plugin->version      = 2024010700;
+$plugin->release      = 'v4.3.1 (2024-01-07)';
+$plugin->requires     = 2022111800; // Moodle 4.1.
+$plugin->dependencies = ['mod_collabora' => 2024010700];
+$plugin->component    = 'assignsubmission_collabora';
+$plugin->maturity     = MATURITY_BETA;

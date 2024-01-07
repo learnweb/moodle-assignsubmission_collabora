@@ -25,38 +25,37 @@ namespace assignsubmission_collabora\output;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class content implements \renderable, \templatable {
-    /** @var \stdClass $data */
+    /** @var \stdClass */
     private $data;
 
     /**
-     * Constructor
+     * Constructor.
      *
-     * @param string $id This is a unique css id used for the bootstrap modal.
-     * @param string $filename
+     * @param int         $id       this is submission id
+     * @param string      $filename
      * @param \moodle_url $viewurl
-     * @param \stdClass $config
+     * @param \stdClass   $config
      */
-    public function __construct(string $id, string $filename, \moodle_url $viewurl, \stdClass $config) {
+    public function __construct(int $id, string $filename, \moodle_url $viewurl, \stdClass $config) {
         global $PAGE;
 
-        $this->data = new \stdClass();
-        $this->data->id = $id;
+        $this->data           = new \stdClass();
+        $this->data->id       = $id;
         $this->data->filename = $filename;
 
         $this->data->viewurl = $viewurl->out(false);
 
-        $this->data->framewidth = empty($config->width) ? '100%' : $config->width . 'px';
-        $this->data->frameheight = empty($config->height) ? '60vh' : $config->height . 'px';
+        $this->data->frameheight = $config->height ?? false;
 
         /** @var \mod_collabora\output\renderer $renderer */
-        $renderer = $PAGE->get_renderer('mod_collabora');
+        $renderer           = $PAGE->get_renderer('mod_collabora');
         $this->data->legacy = !$renderer->is_boost_based();
 
         // Add a warning notice.
         if (\assignsubmission_collabora\api\collabora_fs::is_testing()) {
-            $this->data->hasnotice = true;
+            $this->data->hasnotice  = true;
             $this->data->noticetype = \core\notification::WARNING;
-            $this->data->notice = get_string('collaboraurlnotset', 'mod_collabora');
+            $this->data->notice     = get_string('collaboraurlnotset', 'mod_collabora');
         }
     }
 
@@ -64,7 +63,7 @@ class content implements \renderable, \templatable {
      * Function to export the renderer data in a format that is suitable for a
      * mustache template.
      *
-     * @param \renderer_base $output Used to do a final render of any components that need to be rendered for export.
+     * @param  \renderer_base $output used to do a final render of any components that need to be rendered for export
      * @return stdClass|array
      */
     public function export_for_template(\renderer_base $output) {

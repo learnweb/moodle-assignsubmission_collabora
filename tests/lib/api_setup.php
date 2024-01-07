@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Test Setup Trait for callbacklib_test.php and locallib_test.php
+ * Test Setup Trait for callbacklib_test.php and locallib_test.php.
  *
  * @package   assignsubmission_collabora
  * @copyright 2019 Benjamin Ellis, Synergy Learning, 2020 Justus Dieckmann WWU
@@ -23,19 +23,19 @@
  */
 
 use assignsubmission_collabora\api\collabora_fs;
+use mod_collabora\util as collabora_util;
 
 /**
- * Test Setup Trait for callbacklib_test.php and locallib_test.php
+ * Test Setup Trait for callbacklib_test.php and locallib_test.php.
  *
  * @package   assignsubmission_collabora
  * @copyright 2019 Benjamin Ellis, Synergy Learning, 2020 Justus Dieckmann WWU
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 trait assignsubmission_collabora_test_api_setup {
-
     /**
      * Test Setup method.
-     * @return array ($viewurl, $file, $fs, $assign, $plugin, $student).
+     * @return array ($viewurl, $file, $fs, $assign, $plugin, $student)
      */
     public function setup_and_basic_tests_for_view_url() {
         global $CFG;
@@ -52,16 +52,14 @@ trait assignsubmission_collabora_test_api_setup {
 
         $data = new \stdClass();
         // We use collabora::FORMAT_WORDPROCESSOR as example blank file.
-        $data->assignsubmission_collabora_format = collabora_fs::FORMAT_WORDPROCESSOR;
+        $data->assignsubmission_collabora_format   = collabora_util::FORMAT_WORDPROCESSOR;
         $data->assignsubmission_collabora_filename = 'test_handle_request';
-        // Width never empty - required for all formats.
-        $data->assignsubmission_collabora_width = 0;
         // Height never empty - required for all formats.
         $data->assignsubmission_collabora_height = 0;
         $this->assertTrue($plugin->save_settings($data));
 
         // Get Our initial file created above - which is an empty ods file.
-        $fs = get_file_storage();
+        $fs    = get_file_storage();
         $files = $fs->get_area_files(
             $assign->get_context()->id,
             'assignsubmission_collabora',
@@ -75,31 +73,30 @@ trait assignsubmission_collabora_test_api_setup {
         $this->setUser($student->id);
 
         $newassignment = true;
-        $submission = $assign->get_user_submission($student->id, $newassignment);
+        $submission    = $assign->get_user_submission($student->id, $newassignment);
         // We have to create the submission file - as per get_form_elements().
         $submissionfilerec = (object) [
             'contextid' => $initialfile->get_contextid(),
             'component' => $initialfile->get_component(),
-            'filearea' => collabora_fs::FILEAREA_SUBMIT,
-            'itemid' => $submission->id,
-            'filepath' => '/',
-            'filename' => $initialfile->get_filename()
+            'filearea'  => collabora_fs::FILEAREA_SUBMIT,
+            'itemid'    => $submission->id,
+            'filepath'  => '/',
+            'filename'  => $initialfile->get_filename(),
         ];
         // A copy of the empty ods file.
         $file = $fs->create_file_from_storedfile($submissionfilerec, $initialfile);
         $this->assertNotEmpty($file, 'No user submission file created');
 
-        $data = new \stdClass();
+        $data                   = new \stdClass();
         $data->submpathnamehash = $file->get_pathnamehash();
-        $data->submfilename = $file->get_filename();
-        $data->subnewsubmssn = $newassignment;
+        $data->submfilename     = $file->get_filename();
+        $data->subnewsubmssn    = $newassignment;
         $this->assertTrue($plugin->save($submission, $data));
 
         // Get the URL we need to call the editing.
         $collaborafs = new collabora_fs($student, $file);
-        $viewurl = $collaborafs->get_view_url();
+        $viewurl     = $collaborafs->get_view_url();
 
-        return array($viewurl->out(false), $file, $fs, $assign, $plugin, $student);
+        return [$viewurl->out(false), $file, $fs, $assign, $plugin, $student];
     }
-
 }

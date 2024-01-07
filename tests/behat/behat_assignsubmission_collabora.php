@@ -36,9 +36,8 @@ use Behat\Mink\Exception\ExpectationException;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class behat_assignsubmission_collabora extends behat_base {
-
     /**
-     * Pretend to edit our collabora document
+     * Pretend to edit our collabora document.
      *
      * @When /^I edit my collabora assign submission document$/
      */
@@ -48,16 +47,16 @@ class behat_assignsubmission_collabora extends behat_base {
 
         // Check the frame URL - Maybe???
         // Cannot do much more than that :(.
-
     }
 
     /**
      * Attempt to find the Collabora frame in the displayed page.
      *
-     * @return stdClass NodeElement.
+     * @return stdClass nodeElement
      */
     private function find_collabora_frame() {
         $exception = new ExpectationException('Collabora frame was not found', $this->getSession());
+
         return $this->find('css', '.collabora-frame iframe', $exception);
     }
 }

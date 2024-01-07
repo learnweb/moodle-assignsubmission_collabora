@@ -21,38 +21,38 @@
  * @copyright  2018 Adrian Greeve <adrian@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
 namespace assignsubmission_collabora\privacy;
 
-defined('MOODLE_INTERNAL') || die();
+use mod_collabora\util as collabora_util;
+
+defined('MOODLE_INTERNAL') || die;
 
 global $CFG;
 require_once($CFG->dirroot . '/mod/assign/tests/privacy/provider_test.php');
 
 /**
- * Unit tests for mod/assign/submission/file/classes/privacy/
+ * Unit tests for mod/assign/submission/file/classes/privacy/.
  *
  * @copyright  2018 Adrian Greeve <adrian@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class provider_test extends \mod_assign\privacy\provider_test {
-
     /** A fix structure to configure a assignment instance. */
-    public const COLLABORACFG = array(
-        'assignsubmission_collabora_enabled' => 1,
-        'assignsubmission_collabora_format' => \assignsubmission_collabora\api\collabora_fs::FORMAT_WORDPROCESSOR,
-        'assignsubmission_collabora_width' => 0,
-        'assignsubmission_collabora_height' => 0,
+    public const COLLABORACFG = [
+        'assignsubmission_collabora_enabled'  => 1,
+        'assignsubmission_collabora_format'   => collabora_util::FORMAT_WORDPROCESSOR,
+        'assignsubmission_collabora_height'   => 0,
         'assignsubmission_collabora_filename' => 'initialfile.docx',
-    );
-
+    ];
 
     /**
      * Convenience function for creating feedback data.
      *
-     * @param  object   $assign         assign object
-     * @param  stdClass $student        user object
-     * @param  string   $filename       filename for the collabora submission
-     * @return array    Submission plugin object and the submission object.
+     * @param  object   $assign   assign object
+     * @param  stdClass $student  user object
+     * @param  string   $filename filename for the collabora submission
+     * @return array    submission plugin object and the submission object
      */
     protected function create_collabora_submission($assign, $student, $filename) {
         global $CFG;
@@ -61,23 +61,23 @@ class provider_test extends \mod_assign\privacy\provider_test {
 
         $this->setUser($student->id);
 
-        $fs = get_file_storage();
-        $filesubmission = (object) array(
+        $fs             = get_file_storage();
+        $filesubmission = (object) [
             'contextid' => $assign->get_context()->id,
             'component' => 'assignsubmission_collabora',
-            'filearea' => \assignsubmission_collabora\api\collabora_fs::FILEAREA_SUBMIT,
-            'itemid' => $submission->id,
-            'filepath' => '/',
-            'filename' => $filename
-        );
+            'filearea'  => \assignsubmission_collabora\api\collabora_fs::FILEAREA_SUBMIT,
+            'itemid'    => $submission->id,
+            'filepath'  => '/',
+            'filename'  => $filename,
+        ];
         // The submission file must be unique or at least have another content than the initialfile.
         $filecontent = random_string(32);
-        $fi = $fs->create_file_from_string($filesubmission, $filecontent);
+        $fi          = $fs->create_file_from_string($filesubmission, $filecontent);
 
-        $data = new \stdClass();
+        $data                   = new \stdClass();
         $data->submpathnamehash = $fi->get_pathnamehash();
-        $data->submfilename = $fi->get_filename();
-        $plugin = $assign->get_submission_plugin_by_type('collabora');
+        $data->submfilename     = $fi->get_filename();
+        $plugin                 = $assign->get_submission_plugin_by_type('collabora');
         $plugin->save($submission, $data);
 
         return [$plugin, $submission];
@@ -108,13 +108,13 @@ class provider_test extends \mod_assign\privacy\provider_test {
         $this->getDataGenerator()->enrol_user($user1->id, $course->id, 'student');
         $this->getDataGenerator()->enrol_user($user2->id, $course->id, 'editingteacher');
 
-        $options = array_merge(array('course' => $course), self::COLLABORACFG);
+        $options = array_merge(['course' => $course], self::COLLABORACFG);
         /** @var \assign $assign */
         $assign = $this->create_instance($options);
 
         $context = $assign->get_context();
 
-        $studentfilename = 'user1file.docx';
+        $studentfilename           = 'user1file.docx';
         list($plugin, $submission) = $this->create_collabora_submission($assign, $user1, $studentfilename);
 
         /** @var \core_privacy\tests\request\content_writer $writer */
@@ -126,7 +126,7 @@ class provider_test extends \mod_assign\privacy\provider_test {
         \assignsubmission_collabora\privacy\provider::export_submission_user_data($exportdata);
 
         $storedfiles = $writer->get_files(['Attempt 1']);
-        $storedfile = array_pop($storedfiles);
+        $storedfile  = array_pop($storedfiles);
         $this->assertInstanceOf('stored_file', $storedfile);
         $this->assertEquals($studentfilename, $storedfile->get_filename());
     }
@@ -146,15 +146,15 @@ class provider_test extends \mod_assign\privacy\provider_test {
         $this->getDataGenerator()->enrol_user($user1->id, $course->id, 'student');
         $this->getDataGenerator()->enrol_user($user2->id, $course->id, 'student');
 
-        $options = array_merge(array('course' => $course), self::COLLABORACFG);
+        $options = array_merge(['course' => $course], self::COLLABORACFG);
         /** @var \assign $assign */
         $assign = $this->create_instance($options);
 
         $context = $assign->get_context();
 
-        $studentfilename = 'user1file.pdf';
-        list($plugin, $submission) = $this->create_collabora_submission($assign, $user1, $studentfilename);
-        $student2filename = 'user2file.pdf';
+        $studentfilename             = 'user1file.pdf';
+        list($plugin, $submission)   = $this->create_collabora_submission($assign, $user1, $studentfilename);
+        $student2filename            = 'user2file.pdf';
         list($plugin2, $submission2) = $this->create_collabora_submission($assign, $user2, $student2filename);
 
         // Only need the context and assign object in this plugin for this operation.
@@ -181,15 +181,15 @@ class provider_test extends \mod_assign\privacy\provider_test {
         $this->getDataGenerator()->enrol_user($user1->id, $course->id, 'student');
         $this->getDataGenerator()->enrol_user($user2->id, $course->id, 'student');
 
-        $options = array_merge(array('course' => $course), self::COLLABORACFG);
+        $options = array_merge(['course' => $course], self::COLLABORACFG);
         /** @var \assign $assign */
         $assign = $this->create_instance($options);
 
         $context = $assign->get_context();
 
-        $studentfilename = 'user1file.pdf';
-        list($plugin, $submission) = $this->create_collabora_submission($assign, $user1, $studentfilename);
-        $student2filename = 'user2file.pdf';
+        $studentfilename             = 'user1file.pdf';
+        list($plugin, $submission)   = $this->create_collabora_submission($assign, $user1, $studentfilename);
+        $student2filename            = 'user2file.pdf';
         list($plugin2, $submission2) = $this->create_collabora_submission($assign, $user2, $student2filename);
 
         // Only need the context and assign object in this plugin for this operation.
@@ -222,7 +222,7 @@ class provider_test extends \mod_assign\privacy\provider_test {
         $this->getDataGenerator()->enrol_user($user3->id, $course->id, 'student');
         $this->getDataGenerator()->enrol_user($user4->id, $course->id, 'student');
 
-        $options = array_merge(array('course' => $course), self::COLLABORACFG);
+        $options = array_merge(['course' => $course], self::COLLABORACFG);
         /** @var \assign $assign1 */
         $assign1 = $this->create_instance($options);
         /** @var \assign $assign2 */
@@ -231,20 +231,20 @@ class provider_test extends \mod_assign\privacy\provider_test {
         $context1 = $assign1->get_context();
         $context2 = $assign2->get_context();
 
-        $student1filename = 'user1file.pdf';
+        $student1filename            = 'user1file.pdf';
         list($plugin1, $submission1) = $this->create_collabora_submission($assign1, $user1, $student1filename);
-        $student2filename = 'user2file.pdf';
+        $student2filename            = 'user2file.pdf';
         list($plugin2, $submission2) = $this->create_collabora_submission($assign1, $user2, $student2filename);
-        $student3filename = 'user3file.pdf';
+        $student3filename            = 'user3file.pdf';
         list($plugin3, $submission3) = $this->create_collabora_submission($assign1, $user3, $student3filename);
-        $student4filename = 'user4file.pdf';
+        $student4filename            = 'user4file.pdf';
         list($plugin4, $submission4) = $this->create_collabora_submission($assign2, $user4, $student4filename);
-        $student5filename = 'user5file.pdf';
+        $student5filename            = 'user5file.pdf';
         list($plugin5, $submission5) = $this->create_collabora_submission($assign2, $user3, $student5filename);
 
         $submissionids = [
             $submission1->id,
-            $submission3->id
+            $submission3->id,
         ];
 
         $select = 'contextid = :contextid
@@ -252,11 +252,11 @@ class provider_test extends \mod_assign\privacy\provider_test {
                    AND filearea = :filearea
                    AND filesize > 0
         ';
-        $params = array(
+        $params = [
             'contextid' => $assign1->get_context()->id,
             'component' => 'assignsubmission_collabora',
-            'filearea' => \assignsubmission_collabora\api\collabora_fs::FILEAREA_SUBMIT,
-        );
+            'filearea'  => \assignsubmission_collabora\api\collabora_fs::FILEAREA_SUBMIT,
+        ];
         $data = $DB->get_records_select('files', $select, $params);
         $this->assertCount(3, $data);
 
@@ -269,7 +269,7 @@ class provider_test extends \mod_assign\privacy\provider_test {
 
         $userids = [
             $user1->id,
-            $user3->id
+            $user3->id,
         ];
 
         $deletedata = new \mod_assign\privacy\assign_plugin_request_data($context1, $assign1);
@@ -282,11 +282,11 @@ class provider_test extends \mod_assign\privacy\provider_test {
                    AND filearea = :filearea
                    AND filesize > 0
         ';
-        $params = array(
+        $params = [
             'contextid' => $assign1->get_context()->id,
             'component' => 'assignsubmission_collabora',
-            'filearea' => \assignsubmission_collabora\api\collabora_fs::FILEAREA_SUBMIT,
-        );
+            'filearea'  => \assignsubmission_collabora\api\collabora_fs::FILEAREA_SUBMIT,
+        ];
         $data = $DB->get_records_select('files', $select, $params);
         $this->assertCount(1, $data);
 

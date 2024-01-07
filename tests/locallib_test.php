@@ -15,67 +15,68 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Tests for mod/assign/submission/file/locallib.php
+ * Tests for mod/assign/submission/file/locallib.php.
  *
  * @package   assignsubmission_collabora
  * @copyright 2016 Cameron Ball
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-namespace assignsubmission_collabora;
-use assignsubmission_collabora\api\collabora_fs;
 
-defined('MOODLE_INTERNAL') || die();
+namespace assignsubmission_collabora;
+
+use assignsubmission_collabora\api\collabora_fs;
+use mod_collabora\util as collabora_util;
+
+defined('MOODLE_INTERNAL') || die;
 
 global $CFG;
 require_once($CFG->dirroot . '/mod/assign/tests/generator.php');
 
 /**
- * Unit tests for mod/assign/submission/file/locallib.php
+ * Unit tests for mod/assign/submission/file/locallib.php.
  *
  * @copyright  2016 Cameron Ball
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class locallib_test extends \advanced_testcase {
-
     // Use the generator helper.
     use \mod_assign_test_generator;
 
     /**
-     * Test submission_is_empty
+     * Test submission_is_empty.
      *
      * @covers \assignsubmission_collabora\assign_submission_collabora::submission_is_empty
      * @dataProvider submission_is_empty_testcases
-     * @param \stdClass $data The collabora submission data
+     * @param string $data The file submission data
      * @param bool $expected The expected return value
      */
     public function test_submission_is_empty($data, $expected) {
         $this->resetAfterTest();
 
-        $course = $this->getDataGenerator()->create_course();
+        $course  = $this->getDataGenerator()->create_course();
         $student = $this->getDataGenerator()->create_and_enrol($course, 'student');
 
         $assign = $this->create_instance(
             $course,
-            array(
-                'assignsubmission_collabora_enabled' => 1,
-                'assignsubmission_collabora_format' => collabora_fs::FORMAT_WORDPROCESSOR,
-                'assignsubmission_collabora_width' => 0,
-                'assignsubmission_collabora_height' => 0,
+            [
+                'assignsubmission_collabora_enabled'  => 1,
+                'assignsubmission_collabora_format'   => collabora_util::FORMAT_WORDPROCESSOR,
+                'assignsubmission_collabora_height'   => 0,
                 'assignsubmission_collabora_filename' => 'initialfile.docx',
-            )
+            ]
         );
 
         $this->setUser($student->id);
 
-        $submission = $assign->get_user_submission($student->id, true);
-        $plugin = $assign->get_submission_plugin_by_type('collabora');
-        $submissiondata = new \stdClass();
-        $submissiondata->id = $assign->get_context()->instanceid;
+        $submission             = $assign->get_user_submission($student->id, true);
+        $plugin                 = $assign->get_submission_plugin_by_type('collabora');
+        $submissiondata         = new \stdClass();
+        $submissiondata->id     = $assign->get_context()->instanceid;
         $submissiondata->userid = $student->id;
 
         if ($data) {
             $filerecord = $plugin->get_filerecord('test.txt', collabora_fs::FILEAREA_SUBMIT, $submission->id);
-            $fs = get_file_storage();
+            $fs         = get_file_storage();
             // Store the new file - This will change the ID and automtically unlock it.
             $fs->create_file_from_string($filerecord, $data['content']);
         }
@@ -85,42 +86,41 @@ class locallib_test extends \advanced_testcase {
     }
 
     /**
-     * Test submission form
+     * Test submission form.
      * @covers \assignsubmission_collabora\assign_submission_collabora::get_form_elements
      */
     public function test_submissionform() {
         global $CFG;
         $this->resetAfterTest();
 
-        $elementstocheck = array(
+        $elementstocheck = [
             'submfilename'     => 'hidden',
             'submpathnamehash' => 'hidden',
             'subnewsubmssn'    => 'hidden',
             'warning'          => 'static',
-        );
-        require_once($CFG->dirroot.'/mod/assign/submission/collabora/tests/lib/submissionform.php');
+        ];
+        require_once($CFG->dirroot . '/mod/assign/submission/collabora/tests/lib/submissionform.php');
 
-        $course = $this->getDataGenerator()->create_course();
+        $course  = $this->getDataGenerator()->create_course();
         $student = $this->getDataGenerator()->create_and_enrol($course, 'student');
 
         $assign = $this->create_instance(
             $course,
-            array(
-                'assignsubmission_collabora_enabled' => 1,
-                'assignsubmission_collabora_format' => collabora_fs::FORMAT_WORDPROCESSOR,
-                'assignsubmission_collabora_width' => 0,
-                'assignsubmission_collabora_height' => 0,
+            [
+                'assignsubmission_collabora_enabled'  => 1,
+                'assignsubmission_collabora_format'   => collabora_util::FORMAT_WORDPROCESSOR,
+                'assignsubmission_collabora_height'   => 0,
                 'assignsubmission_collabora_filename' => 'initialfile.docx',
-            )
+            ]
         );
 
         $this->setUser($student->id);
         $context = $assign->get_context();
-        $cm = get_coursemodule_from_id('assign', $context->instanceid);
+        $cm      = get_coursemodule_from_id('assign', $context->instanceid);
 
-        $data = new \stdClass();
+        $data         = new \stdClass();
         $data->userid = $student->id;
-        $form = new \assignsubmission_collabora\fixtures\submissionform(null, array($assign, $data));
+        $form         = new \assignsubmission_collabora\fixtures\submissionform(null, [$assign, $data]);
         $this->assertTrue(!empty($form));
 
         $mform = $form->test_get_form();
@@ -131,7 +131,7 @@ class locallib_test extends \advanced_testcase {
     }
 
     /**
-     * Dataprovider for the test_submission_is_empty testcase
+     * Dataprovider for the test_submission_is_empty testcase.
      *
      * @return array of testcases
      */
@@ -146,7 +146,7 @@ class locallib_test extends \advanced_testcase {
             'Without changed data' => [
                 null,
                 true, // Expected result.
-            ]
+            ],
         ];
     }
 }

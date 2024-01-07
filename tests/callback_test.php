@@ -23,10 +23,11 @@
  */
 
 namespace assignsubmission_collabora;
-use \mod_collabora\api\api;
-use \assignsubmission_collabora\api\collabora_fs;
 
-defined('MOODLE_INTERNAL') || die();
+use assignsubmission_collabora\api\collabora_fs;
+use mod_collabora\api\api;
+
+defined('MOODLE_INTERNAL') || die;
 
 global $CFG;
 require_once($CFG->dirroot . '/mod/assign/tests/generator.php');
@@ -40,10 +41,9 @@ require_once($CFG->dirroot . '/mod/assign/submission/collabora/tests/lib/api_set
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class callback_test extends \advanced_testcase {
-
+    use \assignsubmission_collabora_test_api_setup;
     // Use the generator helper.
     use \mod_assign_test_generator;
-    use \assignsubmission_collabora_test_api_setup;
 
     /**
      * Test the collabora api to see requests are handled right.
@@ -54,17 +54,17 @@ class callback_test extends \advanced_testcase {
     public function test_handle_request() {
         list($viewurl, $file, $fs, $assign, $plugin, $student) = $this->setup_and_basic_tests_for_view_url();
 
-        $qry = html_entity_decode(parse_url($viewurl, PHP_URL_QUERY));
-        $params = array();
+        $qry    = html_entity_decode(parse_url($viewurl, PHP_URL_QUERY), ENT_COMPAT);
+        $params = [];
         parse_str($qry, $params);
 
         $relativepath = urldecode(parse_url($params['WOPISrc'], PHP_URL_PATH));
-        $accesstoken = $params['access_token'];
-        $postdata = null;
+        $accesstoken  = $params['access_token'];
+        $postdata     = null;
 
         list($requesttyp, $fileid) = api::get_request_and_fileid_from_path($relativepath, $postdata);
-        $collaborafs = collabora_fs::get_instance_by_fileid($fileid, $accesstoken);
-        $api = new api($requesttyp, $collaborafs, $postdata);
+        $collaborafs               = collabora_fs::get_instance_by_fileid($fileid, $accesstoken);
+        $api                       = new api($requesttyp, $collaborafs, $postdata);
 
         /* Create the request - $relativepath, $accesstoken, $postdata. */
         // Get File Info JSON.
@@ -78,30 +78,30 @@ class callback_test extends \advanced_testcase {
         // Assert Get File 2nd - need to add contents onto the relative path.
         $relativepath .= '/contents';
         list($requesttyp, $fileid) = api::get_request_and_fileid_from_path($relativepath, $postdata);
-        $collaborafs = collabora_fs::get_instance_by_fileid($fileid, $accesstoken);
-        $api = new api($requesttyp, $collaborafs, $postdata);
-        $content = $api->handle_request(true);
-        $contentsize = strlen($content);
-        $filecontentshash = sha1($content);    // File contents hashed.
+        $collaborafs               = collabora_fs::get_instance_by_fileid($fileid, $accesstoken);
+        $api                       = new api($requesttyp, $collaborafs, $postdata);
+        $content                   = $api->handle_request(true);
+        $contentsize               = strlen($content);
+        $filecontentshash          = sha1($content);    // File contents hashed.
 
         $this->assertEquals($file->get_filesize(), $contentsize);   // Same Size.
         // Compare the contents.
-        $this->assertEquals(($fch = $file->get_contenthash()), $filecontentshash, "'$fch' NOT '$filecontentshash'");
+        $this->assertEquals($fch = $file->get_contenthash(), $filecontentshash, "'$fch' NOT '$filecontentshash'");
 
         // Assert PUT File last - Make out fixture file be the edited file.
         $uploadfile = __DIR__ . '/fixtures/test-upload.odt';
-        $postdata = file_get_contents($uploadfile);
+        $postdata   = file_get_contents($uploadfile);
 
         // Update our file record - note the filerecord is changed.
         list($requesttyp, $fileid) = api::get_request_and_fileid_from_path($relativepath, $postdata);
-        $collaborafs = collabora_fs::get_instance_by_fileid($fileid, $accesstoken);
-        $api = new api($requesttyp, $collaborafs, $postdata);
+        $collaborafs               = collabora_fs::get_instance_by_fileid($fileid, $accesstoken);
+        $api                       = new api($requesttyp, $collaborafs, $postdata);
         $api->handle_request(true);
 
         sleep(2);   // Give us some time to complete.
 
         $collaborafs = collabora_fs::get_instance_by_fileid($fileid, $accesstoken);
-        $newfile = $collaborafs->get_file();
+        $newfile     = $collaborafs->get_file();
 
         $this->assertEquals(strlen($postdata), $newfile->get_filesize());       // Size.
         $this->assertEquals(sha1($postdata), $newfile->get_contenthash());      // Contents.

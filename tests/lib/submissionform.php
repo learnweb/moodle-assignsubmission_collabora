@@ -15,29 +15,30 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Tests for mod/assign/submission/file/locallib.php
+ * Tests for mod/assign/submission/file/locallib.php.
  *
  * @package   assignsubmission_collabora
  * @copyright 2016 Cameron Ball
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
 namespace assignsubmission_collabora\fixtures;
 
-defined('MOODLE_INTERNAL') || die();
+defined('MOODLE_INTERNAL') || die;
 
 global $CFG;
 require_once($CFG->dirroot . '/mod/assign/locallib.php');
 require_once($CFG->dirroot . '/mod/assign/submission_form.php');
 
 /**
- * Submission form which can be used to see the \MoodleQuickForm
+ * Submission form which can be used to see the \MoodleQuickForm.
  *
  * @copyright  2022 Andreas Grabs <moodle@grabs-edv.de>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class submissionform extends \mod_assign_submission_form {
     /**
-     * Returns the \MoodleQuickForm
+     * Returns the \MoodleQuickForm.
      *
      * @return \MoodleQuickForm
      */

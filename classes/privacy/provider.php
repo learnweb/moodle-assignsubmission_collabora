@@ -24,17 +24,19 @@
 
 namespace assignsubmission_collabora\privacy;
 
-defined('MOODLE_INTERNAL') || die();
+defined('MOODLE_INTERNAL') || die;
 
 global $CFG;
 
 require_once($CFG->dirroot . '/mod/assign/locallib.php');
 
-use \core_privacy\local\metadata\collection;
-use \core_privacy\local\request\writer;
-use \core_privacy\local\request\contextlist;
-use \mod_assign\privacy\assign_plugin_request_data;
-
+use core_privacy\local\metadata\collection;
+use core_privacy\local\request\contextlist;
+use core_privacy\local\request\writer;
+use core_privacy\local\metadata\provider as metadata_provider;
+use mod_assign\privacy\assignsubmission_provider;
+use mod_assign\privacy\assignsubmission_user_provider;
+use mod_assign\privacy\assign_plugin_request_data;
 
 /**
  * Privacy class for requesting user data.
@@ -43,27 +45,24 @@ use \mod_assign\privacy\assign_plugin_request_data;
  * @copyright  2019 Benjamin Ellis, Synergy Learning
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class provider implements
-        \core_privacy\local\metadata\provider,
-        \mod_assign\privacy\assignsubmission_provider,
-        \mod_assign\privacy\assignsubmission_user_provider {
-
+class provider implements metadata_provider, assignsubmission_provider, assignsubmission_user_provider {
     /**
      * Return meta data about this plugin.
      *
-     * @param  collection $collection A list of information to add to.
-     * @return collection Return the collection after adding to it.
+     * @param  collection $collection a list of information to add to
+     * @return collection return the collection after adding to it
      */
-    public static function get_metadata(collection $collection) : collection {
+    public static function get_metadata(collection $collection): collection {
         $collection->link_subsystem('core_files', 'privacy:metadata:filepurpose');
+
         return $collection;
     }
 
     /**
      * This is covered by mod_assign provider and the query on assign_submissions.
      *
-     * @param  int $userid The user ID that we are finding contexts for.
-     * @param  contextlist $contextlist A context list to add sql and params to for contexts.
+     * @param int         $userid      the user ID that we are finding contexts for
+     * @param contextlist $contextlist a context list to add sql and params to for contexts
      */
     public static function get_context_for_userid_within_submission(int $userid, contextlist $contextlist) {
         // This is already fetched from mod_assign.
@@ -72,7 +71,7 @@ class provider implements
     /**
      * This is also covered by the mod_assign provider and it's queries.
      *
-     * @param  \mod_assign\privacy\useridlist $useridlist An object for obtaining user IDs of students.
+     * @param \mod_assign\privacy\useridlist $useridlist an object for obtaining user IDs of students
      */
     public static function get_student_user_ids(\mod_assign\privacy\useridlist $useridlist) {
         // No need.
@@ -91,8 +90,8 @@ class provider implements
     /**
      * Export all user data for this plugin.
      *
-     * @param  assign_plugin_request_data $exportdata Data used to determine which context and user to export and other useful
-     * information to help with exporting.
+     * @param assign_plugin_request_data $exportdata data used to determine which context and user to export and other useful
+     *                                               information to help with exporting
      */
     public static function export_submission_user_data(assign_plugin_request_data $exportdata) {
         // We currently don't show submissions to teachers when exporting their data.
@@ -100,9 +99,9 @@ class provider implements
         if ($exportdata->get_user() != null) {
             return null;
         }
-        $user = new \stdClass();
-        $assign = $exportdata->get_assign();
-        $plugin = $assign->get_plugin_by_type('assignsubmission', 'collabora');
+        $user       = new \stdClass();
+        $assign     = $exportdata->get_assign();
+        $plugin     = $assign->get_plugin_by_type('assignsubmission', 'collabora');
         $submission = $exportdata->get_pluginobject();
         // We can not use group submissions here!
         if (empty($submission->userid) && !empty($submission->groupid)) {
@@ -116,10 +115,10 @@ class provider implements
             // Plagiarism data.
             $coursecontext = $context->get_course_context();
             \core_plagiarism\privacy\provider::export_plagiarism_user_data($userid, $context, $exportdata->get_subcontext(), [
-                'cmid' => $context->instanceid,
+                'cmid'   => $context->instanceid,
                 'course' => $coursecontext->instanceid,
                 'userid' => $userid,
-                'file' => $file
+                'file'   => $file,
             ]);
         }
     }
@@ -127,22 +126,20 @@ class provider implements
     /**
      * Any call to this method should delete all user data for the context defined in the deletion_criteria.
      *
-     * @param  assign_plugin_request_data $requestdata Information useful for deleting user data.
+     * @param assign_plugin_request_data $requestdata information useful for deleting user data
      */
     public static function delete_submission_for_context(assign_plugin_request_data $requestdata) {
-
         \core_plagiarism\privacy\provider::delete_plagiarism_for_context($requestdata->get_context());
 
         $filearea = \assignsubmission_collabora\api\collabora_fs::FILEAREA_SUBMIT;
-        $fs = get_file_storage();
+        $fs       = get_file_storage();
         $fs->delete_area_files($requestdata->get_context()->id, 'assignsubmission_collabora', $filearea);
-
     }
 
     /**
      * A call to this method should delete user data (where practical) using the userid and submission.
      *
-     * @param  assign_plugin_request_data $deletedata Details about the user and context to focus the deletion.
+     * @param assign_plugin_request_data $deletedata details about the user and context to focus the deletion
      */
     public static function delete_submission_for_userid(assign_plugin_request_data $deletedata) {
         global $DB;
@@ -161,17 +158,17 @@ class provider implements
 
         $DB->delete_records(
             'assignsubmission_collabora',
-            array(
+            [
                 'assignment' => $deletedata->get_assignid(),
                 'submission' => $submissionid,
-            )
+            ]
         );
     }
 
     /**
      * Deletes all submissions for the userids provided in a context.
      *
-     * @param  assign_plugin_request_data $deletedata A class that contains the relevant information required for deletion.
+     * @param assign_plugin_request_data $deletedata a class that contains the relevant information required for deletion
      */
     public static function delete_submissions(assign_plugin_request_data $deletedata) {
         global $DB;
@@ -181,7 +178,7 @@ class provider implements
         if (empty($deletedata->get_submissionids())) {
             return;
         }
-        $fs = get_file_storage();
+        $fs                 = get_file_storage();
         list($sql, $params) = $DB->get_in_or_equal($deletedata->get_submissionids(), SQL_PARAMS_NAMED);
         $fs->delete_area_files_select(
             $deletedata->get_context()->id,

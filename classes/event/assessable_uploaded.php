@@ -21,6 +21,7 @@
  * @copyright 2019 Benjamin Ellis, Synergy Learning
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
 namespace assignsubmission_collabora\event;
 
 /**
@@ -31,7 +32,6 @@ namespace assignsubmission_collabora\event;
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class assessable_uploaded extends \core\event\assessable_uploaded {
-
     /**
      * Returns description of what happened.
      *
@@ -48,7 +48,7 @@ class assessable_uploaded extends \core\event\assessable_uploaded {
      * @return string
      */
     public static function get_name() {
-        return get_string ( 'eventassessableuploaded', 'assignsubmission_collabora' );
+        return get_string('eventassessableuploaded', 'assignsubmission_collabora');
     }
 
     /**
@@ -57,9 +57,9 @@ class assessable_uploaded extends \core\event\assessable_uploaded {
      * @return \moodle_url
      */
     public function get_url() {
-        return new \moodle_url ( '/mod/assign/view.php', array (
-            'id' => $this->contextinstanceid
-        ) );
+        return new \moodle_url('/mod/assign/view.php', [
+            'id' => $this->contextinstanceid,
+        ]);
     }
 
     /**
@@ -68,7 +68,7 @@ class assessable_uploaded extends \core\event\assessable_uploaded {
      * @return void
      */
     protected function init() {
-        parent::init ();
+        parent::init();
         $this->data['objecttable'] = 'assign_submission';
     }
 
@@ -78,9 +78,9 @@ class assessable_uploaded extends \core\event\assessable_uploaded {
      * @return array
      */
     public static function get_objectid_mapping() {
-        return array (
-            'db' => 'assign_submission',
-            'restore' => 'submission'
-        );
+        return [
+            'db'      => 'assign_submission',
+            'restore' => 'submission',
+        ];
     }
 }

@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * This file contains the class for backup of this submission plugin
+ * This file contains the class for backup of this submission plugin.
  *
  * @package assignsubmission_collabora
  * @copyright 2019 Synergy Learning {@link https://www.synergy-learning.com/}
@@ -23,7 +23,7 @@
  */
 
 /**
- * Provides the information to backup submission files
+ * Provides the information to backup submission files.
  *
  * This just adds its filearea to the annotations and records the number of files
  *
@@ -32,19 +32,17 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class backup_assignsubmission_collabora_subplugin extends backup_subplugin {
-
     /**
-     * Returns the subplugin information to attach to submission element
+     * Returns the subplugin information to attach to submission element.
      * @return backup_subplugin_element
      */
     protected function define_submission_subplugin_structure() {
-
         // Create XML elements.
-        $subplugin = $this->get_subplugin_element();
+        $subplugin        = $this->get_subplugin_element();
         $subpluginwrapper = new backup_nested_element($this->get_recommended_name());
         $subpluginelement = new backup_nested_element('submission_collabora',
-                                                      null,
-                                                      array('numfiles', 'submission'));
+            null,
+            ['numfiles', 'submission']);
 
         // Connect XML elements into the tree.
         $subplugin->add_child($subpluginwrapper);
@@ -52,13 +50,13 @@ class backup_assignsubmission_collabora_subplugin extends backup_subplugin {
 
         // Set source to populate the data.
         $subpluginelement->set_source_table('assignsubmission_collabora',
-                                            array('submission' => backup::VAR_PARENTID));
+            ['submission' => backup::VAR_PARENTID]);
 
         // The parent is the submission.
         $subpluginelement->annotate_files('assignsubmission_collabora',
-                                          \assignsubmission_collabora\api\collabora_fs::FILEAREA_SUBMIT,
-                                          'submission');
+            \assignsubmission_collabora\api\collabora_fs::FILEAREA_SUBMIT,
+            'submission');
+
         return $subplugin;
     }
-
 }

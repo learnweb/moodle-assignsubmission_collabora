@@ -17,7 +17,7 @@
 namespace assignsubmission_collabora\api;
 
 /**
- * Main support functions
+ * Main support functions.
  *
  * @package   assignsubmission_collabora
  * @copyright 2022 Andreas Grabs <moodle@grabs-edv.de>
@@ -39,9 +39,9 @@ class collabora_fs extends \mod_collabora\api\base_filesystem {
     private $assign;
 
     /**
-     * Get the moodle user id from the collabora_token table
+     * Get the moodle user id from the collabora_token table.
      *
-     * @param string $token
+     * @param  string $token
      * @return int
      */
     public static function get_userid_from_token($token) {
@@ -49,21 +49,22 @@ class collabora_fs extends \mod_collabora\api\base_filesystem {
         if ($shastr != md5($userid)) {
             throw new \moodle_exception('wrong accesstoken');
         }
+
         return $userid;
     }
 
     /**
      * Get an instance of this class by using the fileid and the accesstoken comming from the request (collabora server).
      *
-     * @param string $fileid
-     * @param string $accesstoken
+     * @param  string $fileid
+     * @param  string $accesstoken
      * @return static
      */
     public static function get_instance_by_fileid($fileid, $accesstoken) {
         global $DB;
 
         $userid = static::get_userid_from_token($accesstoken);
-        $user = $DB->get_record('user', array('id' => $userid), '*', MUST_EXIST);
+        $user   = $DB->get_record('user', ['id' => $userid], '*', MUST_EXIST);
 
         list($filehash, $writable) = explode('_', $fileid);
 
@@ -82,16 +83,17 @@ class collabora_fs extends \mod_collabora\api\base_filesystem {
         if (empty($writable)) {
             $instance->force_readonly();
         }
+
         return $instance;
     }
 
     /**
-     * Check the write permission
+     * Check the write permission.
      *
-     * @param \assign $assign
-     * @param \stdClass $submission
-     * @param int $userid
-     * @param \stored_file $file
+     * @param  \assign      $assign
+     * @param  \stdClass    $submission
+     * @param  int          $userid
+     * @param  \stored_file $file
      * @return bool
      */
     public static function check_writable($assign, $submission, $userid, $file) {
@@ -108,14 +110,14 @@ class collabora_fs extends \mod_collabora\api\base_filesystem {
         if ($assign->submissions_open($userid, null, $submission)) {
             return $file->get_itemid() == $submission->id;
         }
-        return false;
 
+        return false;
     }
 
     /**
-     * Constructor
+     * Constructor.
      *
-     * @param \stdClass $user
+     * @param \stdClass    $user
      * @param \stored_file $file
      */
     public function __construct($user, $file) {
@@ -124,8 +126,8 @@ class collabora_fs extends \mod_collabora\api\base_filesystem {
 
         $this->context = \context::instance_by_id($file->get_contextid());
 
-        list ($course, $cm) = get_course_and_cm_from_cmid($this->context->instanceid, 'assign');
-        $this->assign = new \assign($this->context, $cm, $course);
+        list($course, $cm) = get_course_and_cm_from_cmid($this->context->instanceid, 'assign');
+        $this->assign      = new \assign($this->context, $cm, $course);
         if ($this->assign->get_instance()->teamsubmission) {
             $this->submission = $this->assign->get_group_submission($user->id, 0, false);
         } else {
@@ -133,9 +135,9 @@ class collabora_fs extends \mod_collabora\api\base_filesystem {
         }
 
         // Userid is unique to our installation. - Id will always be the same.
-        $this->accesstoken = md5($user->id) . '_'. $user->id;
-        $callbackurl = new \moodle_url('/mod/assign/submission/collabora/callback.php');
-        parent::__construct($user, $file, $callbackurl);
+        $this->accesstoken = md5($user->id) . '_' . $user->id;
+        $callbackurl       = new \moodle_url('/mod/assign/submission/collabora/callback.php');
+        parent::__construct($user, $file, $callbackurl, 0, false); // This plugin does not use versions at all.
 
         $this->writable = $this->check_writable($this->assign, $this->submission, $user->id, $file);
     }
@@ -167,7 +169,7 @@ class collabora_fs extends \mod_collabora\api\base_filesystem {
      * @return string
      */
     public function get_file_id() {
-        return $this->file->get_pathnamehash().'_' . $this->writable;
+        return $this->file->get_pathnamehash() . '_' . $this->writable;
     }
 
     /**
@@ -189,9 +191,9 @@ class collabora_fs extends \mod_collabora\api\base_filesystem {
     }
 
     /**
-     * Update the stored file
+     * Update the stored file.
      *
-     * @param string $content
+     * @param  string $content
      * @return void
      */
     public function update_file($content) {

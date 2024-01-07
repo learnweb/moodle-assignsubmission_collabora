@@ -15,36 +15,36 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * The assign_submission_file class
+ * The assign_submission_file class.
  *
  * @package assignsubmission_collabora
  * @copyright 2019 Benjamin Ellis, Synergy Learning
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use \assignsubmission_collabora\api\collabora_fs;
+use assignsubmission_collabora\api\collabora_fs;
+use mod_collabora\util as collabora_util;
 
 /**
- * Library class for collabora submission plugin extending submission plugin base class
+ * Library class for collabora submission plugin extending submission plugin base class.
  *
  * @package assignsubmission_collabora
  * @copyright 2012 NetSpot {@link http://www.netspot.com.au}
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class assign_submission_collabora extends assign_submission_plugin {
-
     /**
      * The default file options.
      *
-     * @return array of file options.
+     * @return array of file options
      */
     private function get_default_fileoptions() {
-        return array(
-            'subdirs' => 0,
-            'maxbytes' => 0,
-            'maxfiles' => 1,
-            'accepted_types' => collabora_fs::get_accepted_types()
-        );
+        return [
+            'subdirs'        => 0,
+            'maxbytes'       => 0,
+            'maxfiles'       => 1,
+            'accepted_types' => collabora_fs::get_accepted_types(),
+        ];
     }
 
     /**
@@ -54,16 +54,16 @@ class assign_submission_collabora extends assign_submission_plugin {
      * @return array names of the fileareas, can be an empty array
      */
     public function get_config_file_areas() {
-        return array(collabora_fs::FILEAREA_INITIAL);
+        return [collabora_fs::FILEAREA_INITIAL];
     }
 
     /**
      * Function to return the file record object.
      *
-     * @param string $filename - might be empty to be filled by caller.
-     * @param string $filearea - the file area - default is the initial files area.
-     * @param int $itemid - usually the user or group id excpet for initial files.
-     * @param string $filepath - we don't use this for our plugin but might do in the future.
+     * @param  string   $filename - might be empty to be filled by caller
+     * @param  string   $filearea - the file area - default is the initial files area
+     * @param  int      $itemid   - usually the user or group id excpet for initial files
+     * @param  string   $filepath - we don't use this for our plugin but might do in the future
      * @return StdClass
      */
     public function get_filerecord($filename = null, $filearea = null, $itemid = 0, $filepath = '/') {
@@ -71,61 +71,65 @@ class assign_submission_collabora extends assign_submission_plugin {
             $filearea = collabora_fs::FILEAREA_INITIAL;
         }
         $contextid = $this->assignment->get_context()->id;
-        return(object) [
+
+        return (object) [
             'contextid' => $contextid,
             'component' => 'assignsubmission_collabora',
-            'filearea' => $filearea,
-            'itemid' => $itemid,
-            'filepath' => $filepath,
-            'filename' => $filename ? clean_filename($filename) : $filename
+            'filearea'  => $filearea,
+            'itemid'    => $itemid,
+            'filepath'  => $filepath,
+            'filename'  => $filename ? clean_filename($filename) : $filename,
         ];
     }
 
     /**
-     * Get file submission information from the database
+     * Get file submission information from the database.
      *
-     * @param int $submissionid
+     * @param  int   $submissionid
      * @return mixed
      */
     private function get_file_submission($submissionid) {
         global $DB;
-        return $DB->get_record('assignsubmission_collabora', array('submission' => $submissionid));
+
+        return $DB->get_record('assignsubmission_collabora', ['submission' => $submissionid]);
     }
 
     /**
      * Get the Initial file to be copied into the relevant filearea.
      *
-     * @param file_storage $fs
-     * @return stored_file $file
+     * @param  file_storage|null $fs
+     * @return stored_file
      */
-    private function get_initial_file(file_storage $fs = null) {
+    private function get_initial_file(?file_storage $fs = null) {
         $filerec = $this->get_filerecord();
-        if (is_null($fs)) {
+        if (null === $fs) {
             $fs = get_file_storage();
         }
         $files = $fs->get_area_files($filerec->contextid, $filerec->component, $filerec->filearea,
             $filerec->itemid, null, false, 0, 0, 1);
         $file = reset($files);
+
         return $file;
     }
 
     /**
-     * Returns a link to the initial or submitted file
+     * Returns a link to the initial or submitted file.
      *
      * NOT currently used but might be in a later version - NB the plugin_file function will need ...
      * ... to be implemented in lib.php
      *
-     * @return string error | html link.
+     * @return string error | html link
      */
     private function get_file_link() {
         $file = $this->get_initial_file();
         if ($file) {
             $url = moodle_url::make_pluginfile_url($file->get_contextid(), $file->get_component(), $file->get_filearea(),
                 $file->get_itemid(), $file->get_filepath(), $file->get_filename(), true);
+
             return html_writer::link($url, $file->get_filename());
-        } else {
-            return get_string('missingfile', 'assignsubmission_collabora');
         }
+
+        return get_string('missingfile', 'assignsubmission_collabora');
     }
 
     /**
@@ -133,12 +137,12 @@ class assign_submission_collabora extends assign_submission_plugin {
      *
      * Setting all the config settings to null values - there is no way to delete config settings.
      *
-     * @param string $setting - a config setting name.
-     * @return boolean - always true until we do the submissions check.
+     * @param  string $setting - a config setting name
+     * @return bool   - always true until we do the submissions check
      */
     private function unset_config($setting = null) {
         // TODO Should we really check if there are no submissions before doing this?
-        if (is_null($setting)) {
+        if (null === $setting) {
             // We are removing all our settings and any possible file saved.
             $localconfig = (array) $this->get_thisplugin_config();
             foreach (array_keys($localconfig) as $cfg) {
@@ -152,39 +156,62 @@ class assign_submission_collabora extends assign_submission_plugin {
             // We just delete the requested setting.
             $this->set_config($setting, null);
         }
+
         return true;
     }
 
     /**
      * Return the view url wrapped in the html frame.
      *
-     * @param stdClass $submission
-     * @param \stored_file $submissionfile - the file object.
-     * @param int $userid
-     * @param boolean $forcereadonly - If the file should be readonly.
-     * @return string - HTML
+     * @param  stdClass     $submission
+     * @param  \stored_file $submissionfile - the file object
+     * @param  int          $userid
+     * @param  bool         $forcereadonly  - If the file should be readonly
+     * @return string       - HTML
      */
     private function get_view_htmlframe($submission, $submissionfile, $userid, $forcereadonly = false) {
-        global $DB, $OUTPUT;
+        global $DB, $OUTPUT, $PAGE;
 
-        $user = $DB->get_record('user', array('id' => $userid), '*', MUST_EXIST);
+        $user = $DB->get_record('user', ['id' => $userid], '*', MUST_EXIST);
 
-        $config = $this->get_config();
-        $collabora = new \assignsubmission_collabora\api\collabora_fs($user, $submissionfile);
+        $config      = $this->get_config();
+        $collaborafs = new \assignsubmission_collabora\api\collabora_fs($user, $submissionfile);
         if ($forcereadonly) {
-            $collabora->force_readonly();
+            $collaborafs->force_readonly();
         }
 
-        $viewurl = $collabora->get_view_url();
-        $id = uniqid();
-        $widget = new \assignsubmission_collabora\output\content($id, $submissionfile->get_filename(), $viewurl, $config);
+        $viewurl = $collaborafs->get_view_url();
+        $widget  = new \assignsubmission_collabora\output\content(
+            $submission->id,
+            $submissionfile->get_filename(),
+            $viewurl,
+            $config
+        );
 
         // If we are in testing mode, we have to modify the file because there is no real collabora to do that.
         if (\assignsubmission_collabora\api\collabora_fs::is_testing()) {
-            $user = $DB->get_record('user', array('id' => $userid));
-            $collaborafs = new \assignsubmission_collabora\api\collabora_fs($user, $submissionfile);
-            $collaborafs->update_file(random_string(32));
+            $user            = $DB->get_record('user', ['id' => $userid]);
+            $collaborafstest = new \assignsubmission_collabora\api\collabora_fs($user, $submissionfile);
+            $collaborafstest->update_file(random_string(32));
         }
+
+        $opts = [
+            'id'              => $submission->id,
+            'component'       => 'assignsubmission_collabora',
+            'contextid'       => $submissionfile->get_contextid(),
+            'collaboraurl'    => $collaborafs->get_collabora_url()->out(),
+            'origincollabora' => $collaborafs->get_collabora_origin(),
+            'originmoodle'    => $collaborafs->get_moodle_origin(),
+            'courseurl'       => '', // The course url only is used in mod_collabora.
+            'aspopup'         => false,
+            'iframeid'        => 'collaboraiframe_' . $submission->id,
+            'versionviewerid' => 'version_viewer_' . $submission->id,
+            'versionmanager'  => false,
+            'strback'         => '', // This only is used in mod_collabora.
+            'imgbackurl'      => '', // This only is used in mod_collabora.
+            'uimode'          => $collaborafs->get_ui_mode(),
+        ];
+        $PAGE->requires->js_call_amd('mod_collabora/postmessage', 'init', [$opts]);
 
         return $OUTPUT->render($widget);
     }
@@ -192,17 +219,16 @@ class assign_submission_collabora extends assign_submission_plugin {
     /**
      * To ensure we always only deal with our own config settings.
      *
-     * @return StdClass - config object.
+     * @return stdClass - config object
      */
     private function get_thisplugin_config() {
-        $configkeys = array(
+        $configkeys = [
             'format',
-            'width',
             'height',
             'initialtext',
-            'filename'
-        );
-        $thisplugincfg = array();
+            'filename',
+        ];
+        $thisplugincfg      = [];
         $assignpluginconfig = (array) $this->get_config();
 
         foreach ($assignpluginconfig as $assignsetting => $settingvalue) {
@@ -210,7 +236,8 @@ class assign_submission_collabora extends assign_submission_plugin {
                 $thisplugincfg[$assignsetting] = $settingvalue;
             }
         }
-        return(object) $thisplugincfg; // Object to keep it consistent.
+
+        return (object) $thisplugincfg; // Object to keep it consistent.
     }
 
     /**
@@ -223,21 +250,21 @@ class assign_submission_collabora extends assign_submission_plugin {
     }
 
     /**
-     * Get the default setting for submission plugin
+     * Get the default setting for submission plugin.
      *
-     * @param MoodleQuickForm $mform - The form to add elements to
+     * @param  MoodleQuickForm $mform - The form to add elements to
      * @return void
      */
     public function get_settings(MoodleQuickForm $mform) {
         if ($this->assignment->has_instance()) {
             $pluginconfig = (array) $this->get_config();
         } else {
-            $pluginconfig = array();
+            $pluginconfig = [];
         }
 
         // Use the module's configuration as well as our own.
-        $config = (object) (array_merge((array) get_config('mod_collabora'),
-            (array) get_config('assignsubmission_collabora'), $pluginconfig));
+        $config = (object) array_merge((array) get_config('mod_collabora'),
+            (array) get_config('assignsubmission_collabora'), $pluginconfig);
 
         $isexisting = false;
         if (!empty($config->format)) {
@@ -257,7 +284,7 @@ class assign_submission_collabora extends assign_submission_plugin {
 
         // Format section.
         $mform->addElement('select', 'assignsubmission_collabora_format',
-            get_string('format', 'assignsubmission_collabora'), collabora_fs::format_menu());
+            get_string('format', 'assignsubmission_collabora'), collabora_util::format_menu());
         $mform->setDefault('assignsubmission_collabora_format',
             empty($config->format) ? $config->defaultformat : $config->format);
         if ($isexisting) {
@@ -266,11 +293,11 @@ class assign_submission_collabora extends assign_submission_plugin {
         $mform->hideif('assignsubmission_collabora_format', 'assignsubmission_collabora_enabled', 'notchecked');
 
         // Text File - initial text.
-        if (!$isexisting || $config->format === collabora_fs::FORMAT_TEXT) {
+        if (!$isexisting || $config->format === collabora_util::FORMAT_TEXT) {
             $mform->addElement('textarea', 'assignsubmission_collabora_initialtext',
                 get_string('initialtext', 'assignsubmission_collabora'));
             $mform->hideif('assignsubmission_collabora_initialtext',
-                'assignsubmission_collabora_format', 'neq', collabora_fs::FORMAT_TEXT);
+                'assignsubmission_collabora_format', 'neq', collabora_util::FORMAT_TEXT);
             $mform->setDefault('assignsubmission_collabora_initialtext',
                 empty($config->initialtext) ? '' : $config->initialtext);
             if ($isexisting) {
@@ -283,11 +310,11 @@ class assign_submission_collabora extends assign_submission_plugin {
         // Filename Requirement - added in the name for FORMAT_TEXT as we still need a name.
         if (!$isexisting) {
             $mform->addElement('text', 'assignsubmission_collabora_filename',
-                get_string('filename', 'assignsubmission_collabora'), array('size' => '60'));
+                get_string('filename', 'assignsubmission_collabora'), ['size' => '60']);
             $mform->setDefault('assignsubmission_collabora_filename', '');
             $mform->setType('assignsubmission_collabora_filename', PARAM_FILE);
             $mform->hideif('assignsubmission_collabora_filename',
-                'assignsubmission_collabora_format', 'eq', collabora_fs::FORMAT_UPLOAD);
+                'assignsubmission_collabora_format', 'eq', collabora_util::FORMAT_UPLOAD);
             if ($isexisting) {
                 $mform->freeze('assignsubmission_collabora_filename');
             }
@@ -299,22 +326,15 @@ class assign_submission_collabora extends assign_submission_plugin {
         if (!$isexisting) {
             $mform->addElement('filemanager', 'assignsubmission_collabora_initialfile_filemanager',
                 get_string('initialfile', 'assignsubmission_collabora'), null, $filemanageropts);
-            $mform->hideif ('assignsubmission_collabora_initialfile_filemanager',
-                'assignsubmission_collabora_format', 'neq', collabora_fs::FORMAT_UPLOAD);
-            $mform->hideif ('assignsubmission_collabora_initialfile_filemanager',
+            $mform->hideif('assignsubmission_collabora_initialfile_filemanager',
+                'assignsubmission_collabora_format', 'neq', collabora_util::FORMAT_UPLOAD);
+            $mform->hideif('assignsubmission_collabora_initialfile_filemanager',
                 'assignsubmission_collabora_enabled', 'notchecked');
         } else {
             $file = $this->get_initial_file();
             $mform->addElement('static', 'initialfile',
                 get_string('initialfile', 'assignsubmission_collabora'), $file->get_filename());
         }
-
-        // Width.
-        $mform->addElement('text', 'assignsubmission_collabora_width',
-            get_string('width', 'assignsubmission_collabora'));
-        $mform->setDefault('assignsubmission_collabora_width', 0);
-        $mform->setType('assignsubmission_collabora_width', PARAM_INT);
-        $mform->hideif('assignsubmission_collabora_width', 'assignsubmission_collabora_enabled', 'notchecked');
 
         // Height.
         $mform->addElement('text', 'assignsubmission_collabora_height', get_string('height', 'assignsubmission_collabora'));
@@ -331,24 +351,24 @@ class assign_submission_collabora extends assign_submission_plugin {
      * @return string
      */
     private function generaterandonfilename() {
-        return ('aaa' .
+        return 'aaa' .
             substr(str_shuffle(
                 str_repeat('abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ',
-                    mt_rand(1, 10))), 1, 7));
+                    mt_rand(1, 10))), 1, 7);
     }
 
     /**
      * Save the settings for submission plugin.
      *
-     * @param stdClass $data - the form data.
-     * @return bool - on error the subtype should call set_error and return false.
+     * @param  stdClass $data - the form data
+     * @return bool     - on error the subtype should call set_error and return false
      */
     public function save_settings(stdClass $data) {
         global $CFG;
         $noerror = true; // Track input errors.
 
         // Get our own local config settings - if we do not have any settings - this is a new record.
-        $newrecord = false;
+        $newrecord   = false;
         $localconfig = $this->get_thisplugin_config();
         if (empty($localconfig->format)) {
             $newrecord = true;
@@ -356,8 +376,6 @@ class assign_submission_collabora extends assign_submission_plugin {
 
         // Format cannot be empty as it is in the select - always data available -if enabled.
         $this->set_config('format', $data->assignsubmission_collabora_format);
-        // Width never empty - required for all formats.
-        $this->set_config('width', $data->assignsubmission_collabora_width);
         // Height never empty - required for all formats.
         $this->set_config('height', $data->assignsubmission_collabora_height);
 
@@ -367,7 +385,7 @@ class assign_submission_collabora extends assign_submission_plugin {
         if ($newrecord) {
             // Work out the filename for all types except Uploads.
             $filename = null;
-            if ($data->assignsubmission_collabora_format !== collabora_fs::FORMAT_UPLOAD) {
+            if ($data->assignsubmission_collabora_format !== collabora_util::FORMAT_UPLOAD) {
                 if (empty(trim($data->assignsubmission_collabora_filename))) {
                     $data->assignsubmission_collabora_filename = $this->generaterandonfilename();
                 }
@@ -381,10 +399,10 @@ class assign_submission_collabora extends assign_submission_plugin {
 
             // Create the initial file.
             if ($noerror) {
-                $fs = get_file_storage();
+                $fs      = get_file_storage();
                 $filerec = $this->get_filerecord($filename);
-                switch($data->assignsubmission_collabora_format) {
-                    case collabora_fs::FORMAT_UPLOAD :
+                switch ($data->assignsubmission_collabora_format) {
+                    case collabora_util::FORMAT_UPLOAD:
                         $info = file_get_draft_area_info($data->assignsubmission_collabora_initialfile_filemanager);
                         if ($info['filecount']) {
                             // Save the uploaded file as the initial file.
@@ -398,7 +416,7 @@ class assign_submission_collabora extends assign_submission_plugin {
                             $fs->create_file_from_pathname($filerec, $filepath);
                         }
                         break;
-                    case collabora_fs::FORMAT_TEXT :
+                    case collabora_util::FORMAT_TEXT:
                         if (empty($data->assignsubmission_collabora_initialtext)) {
                             $data->assignsubmission_collabora_initialtext = '';
                         }
@@ -406,61 +424,61 @@ class assign_submission_collabora extends assign_submission_plugin {
                         $filerec->filename .= '.txt';
                         $fs->create_file_from_string($filerec, $data->assignsubmission_collabora_initialtext);
                         break;
-                    case collabora_fs::FORMAT_WORDPROCESSOR :
+                    case collabora_util::FORMAT_WORDPROCESSOR:
                         $filerec->filename .= '.docx';
                         $filepath = $CFG->dirroot . '/mod/collabora/blankfiles/blankdocument.docx';
                         $fs->create_file_from_pathname($filerec, $filepath);
                         break;
-                    case collabora_fs::FORMAT_SPREADSHEET :
+                    case collabora_util::FORMAT_SPREADSHEET:
                         $filerec->filename .= '.xlsx';
                         $filepath = $CFG->dirroot . '/mod/collabora/blankfiles/blankspreadsheet.xlsx';
                         $fs->create_file_from_pathname($filerec, $filepath);
                         break;
-                    case collabora_fs::FORMAT_PRESENTATION :
+                    case collabora_util::FORMAT_PRESENTATION:
                         $filerec->filename .= '.pptx';
                         $filepath = $CFG->dirroot . '/mod/collabora/blankfiles/blankpresentation.pptx';
                         $fs->create_file_from_pathname($filerec, $filepath);
                         break;
-                    default :
+                    default:
                         // Should never happen.
                         throw new \coding_exception("Unknown format: {$data->assignsubmission_collabora_format}");
                         break; // Paranoia.
                 }
             }
         }
+
         return $noerror;
     }
 
     /**
      * View the submission summary and sets whether a view link be provided.
      *
-     * @param stdClass $submission
-     * @param bool $showviewlink - whether or not to have a link to view the submission file.
-     * @return string view text.
+     * @param  stdClass $submission
+     * @param  bool     $showviewlink - whether or not to have a link to view the submission file
+     * @return string   view text
      */
-    public function view_summary(stdClass $submission, & $showviewlink) {
+    public function view_summary(stdClass $submission, &$showviewlink) {
         global $USER, $DB;
         if (!empty($submission)) {
-            $submission = $DB->get_record('assign_submission', array('id' => $submission->id));
+            $submission = $DB->get_record('assign_submission', ['id' => $submission->id]);
         }
         $showviewlink = false;      // Default do not show view link.
         if (self::is_empty($submission)) {
             return get_string('nosubmission', 'assignsubmission_collabora');
-        } else {
-            // I do not want to show a link on the summary page where the user/group member is ...
-            // ... editing as the should use the Edit Submission Button.
-            if ($this->assignment->can_grade()) {       // Grader.
-                $showviewlink = true;
-            } else if (!$this->assignment->can_edit_submission($USER->id)) {
-                // If we cannot see the submission any other way - i.e. it is not editable.
-                $showviewlink = true;
-            }
-            if (empty($submission->status)) {   // Should not happen - but has!
-                return '**:' . get_string('submissionsubmitted', 'assignsubmission_collabora');
-            } else {
-                return ucfirst($submission->status);
-            }
         }
+        // I do not want to show a link on the summary page where the user/group member is ...
+        // ... editing as the should use the Edit Submission Button.
+        if ($this->assignment->can_grade()) {       // Grader.
+            $showviewlink = true;
+        } else if (!$this->assignment->can_edit_submission($USER->id)) {
+            // If we cannot see the submission any other way - i.e. it is not editable.
+            $showviewlink = true;
+        }
+        if (empty($submission->status)) {   // Should not happen - but has!
+            return '**:' . get_string('submissionsubmitted', 'assignsubmission_collabora');
+        }
+
+        return ucfirst($submission->status);
     }
 
     /**
@@ -469,9 +487,9 @@ class assign_submission_collabora extends assign_submission_plugin {
      * We do not have to save anything as it will have happened in the callback from the Collabora frame.
      * We will however generate an event for the save.
      *
-     * @param stdClass $submission
-     * @param stdClass $data - the data submitted from the form
-     * @return bool - on error then we set error and return false.
+     * @param  stdClass $submission
+     * @param  stdClass $data       - the data submitted from the form
+     * @return bool     - on error then we set error and return false
      */
     public function save(stdClass $submission, stdClass $data) {
         global $USER, $DB;
@@ -479,18 +497,18 @@ class assign_submission_collabora extends assign_submission_plugin {
         $filesubmission = $this->get_file_submission($submission->id);
 
         // The assessable_uploaded event.
-        $params = array(
-            'context' => context_module::instance($this->assignment->get_course_module()->id),
+        $params = [
+            'context'  => context_module::instance($this->assignment->get_course_module()->id),
             'courseid' => $this->assignment->get_course()->id,
             'objectid' => $submission->id,
-            'other' => array(
-                'content' => '',
-                'pathnamehashes' => array(
-                    $data->submpathnamehash
-               )
-           )
-        );
-        if (!empty($submission->userid) &&($submission->userid != $USER->id)) {
+            'other'    => [
+                'content'        => '',
+                'pathnamehashes' => [
+                    $data->submpathnamehash,
+                ],
+            ],
+        ];
+        if (!empty($submission->userid) && ($submission->userid != $USER->id)) {
             $params['relateduserid'] = $submission->userid;
         } else {
             $params['userid'] = $submission->userid;
@@ -500,28 +518,28 @@ class assign_submission_collabora extends assign_submission_plugin {
 
         // BORROWED from file submission code.
         $groupname = null;
-        $groupid = 0;
+        $groupid   = 0;
         // Get the group name as other fields are not transcribed in the logs and this information is important.
         if (empty($submission->userid) && !empty($submission->groupid)) {
-            $groupname = $DB->get_field('groups', 'name', array('id' => $submission->groupid), MUST_EXIST);
-            $groupid = $submission->groupid;
+            $groupname = $DB->get_field('groups', 'name', ['id' => $submission->groupid], MUST_EXIST);
+            $groupid   = $submission->groupid;
         } else {
             $params['relateduserid'] = $submission->userid;
         }
         // End BORROWED.
 
         // Unset the objectid and other field from params for use in submission events.
-        unset($params['objectid']); // We do not use this as we do not have a separate table.
-        unset($params['other']);
-        $params['other'] = array(
-            'submissionid' => $submission->id,
-            'submissionattempt' => $submission->attemptnumber,
-            'submissionstatus' => $submission->status,
+        unset($params['objectid'], $params['other']); // We do not use this as we do not have a separate table.
+
+        $params['other'] = [
+            'submissionid'       => $submission->id,
+            'submissionattempt'  => $submission->attemptnumber,
+            'submissionstatus'   => $submission->status,
             'submissionfilename' => $data->submfilename,
-            'submpathnamehash' => $data->submpathnamehash,
-            'groupid' => $groupid,
-            'groupname' => $groupname
-        );
+            'submpathnamehash'   => $data->submpathnamehash,
+            'groupid'            => $groupid,
+            'groupname'          => $groupname,
+        ];
 
         if ($filesubmission) {
             // An updated submission.
@@ -529,11 +547,11 @@ class assign_submission_collabora extends assign_submission_plugin {
             $event = \assignsubmission_collabora\event\submission_updated::create($params);
         } else {
             // A new submission.
-            $filesubmission = new stdClass();
-            $filesubmission->numfiles = 1; // We allways have only one file for a submission.
+            $filesubmission             = new stdClass();
+            $filesubmission->numfiles   = 1; // We allways have only one file for a submission.
             $filesubmission->submission = $submission->id;
             $filesubmission->assignment = $this->assignment->get_instance()->id;
-            $filesubmission->id = $DB->insert_record('assignsubmission_collabora', $filesubmission);
+            $filesubmission->id         = $DB->insert_record('assignsubmission_collabora', $filesubmission);
 
             /** @var \assignsubmission_collabora\event\submission_created $event */
             $event = \assignsubmission_collabora\event\submission_created::create($params);
@@ -547,14 +565,14 @@ class assign_submission_collabora extends assign_submission_plugin {
     /**
      * Produce a list of files suitable for export that represent this submission.
      *
-     * @param stdClass $submission
-     * @param stdClass $user
-     * @return array - return an array of files indexed by filename
+     * @param  stdClass $submission
+     * @param  stdClass $user
+     * @return array    - return an array of files indexed by filename
      */
     public function get_files(stdClass $submission, stdClass $user) {
-        $result = array();
+        $result = [];
 
-        $fs = get_file_storage();
+        $fs      = get_file_storage();
         $filerec = $this->get_filerecord(null, collabora_fs::FILEAREA_SUBMIT, $submission->id);
 
         $files = $fs->get_area_files($filerec->contextid, $filerec->component, $filerec->filearea,
@@ -567,42 +585,43 @@ class assign_submission_collabora extends assign_submission_plugin {
                 $result[$file->get_filepath() . $file->get_filename()] = $file;
             }
         }
+
         return $result;
     }
 
     /**
      * Get any additional fields for the submission form for this assignment.
      *
-     * @param stdClass $submission
-     * @param MoodleQuickForm $mform
-     * @param stdClass $data - the form data.
-     * @param int $userid
-     * @return boolean - true if we added anything to the form
+     * @param  stdClass        $submission
+     * @param  MoodleQuickForm $mform
+     * @param  stdClass        $data       - the form data
+     * @param  int             $userid
+     * @return bool            - true if we added anything to the form
      */
     public function get_form_elements($submission, MoodleQuickForm $mform, stdClass $data, $userid = null) {
         global $USER;
 
-        if (is_null($userid)) {
+        if (null === $userid) {
             $userid = empty($data->userid) ? $USER->id : $data->userid;
         }
 
         // Get or Create our submission file base record.
-        $fs = get_file_storage();
+        $fs      = get_file_storage();
         $filerec = $this->get_filerecord(null, collabora_fs::FILEAREA_SUBMIT, $submission->id);
 
         // For now we check for the submission file existance 1st.
         $isnewsubmission = 0;
-        $files = $fs->get_area_files($filerec->contextid, $filerec->component, $filerec->filearea,
+        $files           = $fs->get_area_files($filerec->contextid, $filerec->component, $filerec->filearea,
             $filerec->itemid, '', false, 0, 0, 1);
         if (!$submissionfile = reset($files)) {
             // Get the initial file to copy.
             if ($initialfile = $this->get_initial_file($fs)) {
                 $filerec->filename = $initialfile->get_filename();
-                $submissionfile = $fs->create_file_from_storedfile($filerec, $initialfile);
-                $isnewsubmission = 1;
+                $submissionfile    = $fs->create_file_from_storedfile($filerec, $initialfile);
+                $isnewsubmission   = 1;
             } else {
                 // Should never happen.
-                throw new \coding_exception("Missing Initial File.");
+                throw new \coding_exception('Missing Initial File.');
             }
         }
 
@@ -627,27 +646,27 @@ class assign_submission_collabora extends assign_submission_plugin {
     /**
      * View submission - the submission file will always be read only.
      *
-     * @param stdClass $submission
-     * @return string - html frame of the submitted file.
+     * @param  stdClass $submission
+     * @return string   - html frame of the submitted file
      */
     public function view(stdClass $submission) {
         global $USER;
 
         // Get or Create our submission file base record.
-        $fs = get_file_storage();
+        $fs      = get_file_storage();
         $filerec = $this->get_filerecord(null, collabora_fs::FILEAREA_SUBMIT, $submission->id);
 
         $files = $fs->get_area_files($filerec->contextid, $filerec->component, $filerec->filearea,
             $filerec->itemid, '', false, 0, 0, 1);
         if (!$submissionfile = reset($files)) {
             // Should never happen.
-            throw new \coding_exception("Missing Submission File.");
+            throw new \coding_exception('Missing Submission File.');
         }
         // All calls through here must be readonly.
         $forcereadonly = true;
 
         $userid = $USER->id;
-        $html = $this->get_view_htmlframe($submission, $submissionfile, $userid, $forcereadonly);
+        $html   = $this->get_view_htmlframe($submission, $submissionfile, $userid, $forcereadonly);
 
         return $html;
     }
@@ -656,56 +675,47 @@ class assign_submission_collabora extends assign_submission_plugin {
      * Return true if this plugin can upgrade an old Moodle 2.2 assignment of this type
      * and version.
      *
-     * @param string $type The old assignment subtype
-     * @param int $version The old assignment version
-     * @return bool True if upgrade is possible
+     * @param  string $type    The old assignment subtype
+     * @param  int    $version The old assignment version
+     * @return bool   True if upgrade is possible
      */
     public function can_upgrade($type, $version) {
         return false;
     }
 
     /**
-     * Formatting for log info.
-     *
-     * @param stdClass $submission The submission
-     * @return string
-     */
-    public function format_for_log(stdClass $submission) {
-        // Do we need to do any more than this?
-        return get_string('logmessage', 'assignsubmission_collabora');
-    }
-
-    /**
-     * Get file areas returns a list of areas this plugin stores files
+     * Get file areas returns a list of areas this plugin stores files.
      *
      * @return array - An array of fileareas(keys) and descriptions(values)
      */
     public function get_file_areas() {
-        return array(
-            collabora_fs::FILEAREA_INITIAL =>
-                ucfirst(get_string('fileareadesc', 'assignsubmission_collabora', collabora_fs::FILEAREA_INITIAL)),
-            collabora_fs::FILEAREA_SUBMIT =>
-                ucfirst(get_string('fileareadesc', 'assignsubmission_collabora', collabora_fs::FILEAREA_SUBMIT)),
-        );
+        return [
+            collabora_fs::FILEAREA_INITIAL => ucfirst(
+                get_string('fileareadesc', 'assignsubmission_collabora', collabora_fs::FILEAREA_INITIAL)
+            ),
+            collabora_fs::FILEAREA_SUBMIT  => ucfirst(
+                get_string('fileareadesc', 'assignsubmission_collabora', collabora_fs::FILEAREA_SUBMIT)
+            ),
+        ];
     }
 
     /**
      * Copy the plugin specific submission data to a new submission record.
      *
-     * @param stdClass $submission - Old submission record
-     * @param stdClass $newsubmission - New submission record
+     * @param  stdClass $submission    - Old submission record
+     * @param  stdClass $newsubmission - New submission record
      * @return bool
      */
     public function copy_submission(stdClass $submission, stdClass $newsubmission) {
         global $DB;
 
-        $fs = get_file_storage();
+        $fs      = get_file_storage();
         $filerec = $this->get_filerecord(null, collabora_fs::FILEAREA_SUBMIT, $submission->id);
 
         $files = $fs->get_area_files($filerec->contextid, $filerec->component, $filerec->filearea,
             $filerec->itemid, '', false, 0, 0, 1);
         if ($file = reset($files)) {
-            $fieldupdates = array('itemid' => $newsubmission->id);
+            $fieldupdates = ['itemid' => $newsubmission->id];
             $fs->create_file_from_storedfile($fieldupdates, $file);
         }
 
@@ -713,14 +723,14 @@ class assign_submission_collabora extends assign_submission_plugin {
     }
 
     /**
-     * The assignment has been deleted - remove the plugin specific data
+     * The assignment has been deleted - remove the plugin specific data.
      *
      * @return bool
      */
     public function delete_instance() {
         global $DB;
         $this->unset_config();
-        $DB->delete_records('assignsubmission_collabora', array('assignment' => $this->assignment->get_instance()->id));
+        $DB->delete_records('assignsubmission_collabora', ['assignment' => $this->assignment->get_instance()->id]);
 
         return true;
     }
@@ -740,11 +750,11 @@ class assign_submission_collabora extends assign_submission_plugin {
      * We check whether or not a submission file exists
      * and if so whether or not the submission file is the same as the initial file.
      *
-     * @param stdClass $submission assign_submission.
+     * @param  stdClass $submission assign_submission
      * @return bool
      */
     public function is_empty(stdClass $submission) {
-        $fs = get_file_storage();
+        $fs      = get_file_storage();
         $filerec = $this->get_filerecord(null, collabora_fs::FILEAREA_SUBMIT, $submission->id);
 
         $files = $fs->get_area_files($filerec->contextid, $filerec->component, $filerec->filearea,
@@ -752,8 +762,9 @@ class assign_submission_collabora extends assign_submission_plugin {
         if (count($files) == 0) { // No file yet.
             return true;
         }
-        $file = array_pop($files);
+        $file        = array_pop($files);
         $initialfile = $this->get_initial_file($fs);
+
         return $file->get_contenthash() == $initialfile->get_contenthash();
     }
 
@@ -762,7 +773,7 @@ class assign_submission_collabora extends assign_submission_plugin {
      * Because the user file is saved in the background by collabora api
      * we can check whether or not the content differs from the initial file. So in fact we do the same as ::is_empty().
      *
-     * @param stdClass $data The submission data
+     * @param  stdClass $data The submission data
      * @return bool
      */
     public function submission_is_empty(stdClass $data) {
@@ -770,15 +781,16 @@ class assign_submission_collabora extends assign_submission_plugin {
             return true;
         }
 
-        list ($course, $cm) = get_course_and_cm_from_cmid($data->id, 'assign');
-        $context = \context_module::instance($cm->id);
-        $assign = new \assign($context, $cm, $course);
+        list($course, $cm) = get_course_and_cm_from_cmid($data->id, 'assign');
+        $context           = \context_module::instance($cm->id);
+        $assign            = new \assign($context, $cm, $course);
 
         if (!empty($assign->get_instance($data->userid)->teamsubmission)) {
             $submission = $assign->get_group_submission($data->userid, 0, false);
         } else {
             $submission = $assign->get_user_submission($data->userid, false);
         }
+
         return $this->is_empty($submission);
     }
 
@@ -786,21 +798,19 @@ class assign_submission_collabora extends assign_submission_plugin {
      * Remove any saved data from this submission.
      *
      * @since Moodle 3.6
-     * @param stdClass $submission - assign_submission data
+     * @param  stdClass $submission - assign_submission data
      * @return void
      */
     public function remove(stdClass $submission) {
         global $DB;
 
-        $fs = get_file_storage();
+        $fs      = get_file_storage();
         $filerec = $this->get_filerecord(null, collabora_fs::FILEAREA_SUBMIT, $submission->id);
 
         // Delete the submission files.
         $fs->delete_area_files($filerec->contextid, $filerec->component, $filerec->filearea,
             $filerec->itemid);
 
-        $DB->delete_records('assignsubmission_collabora', array('submission' => $submission->id));
+        $DB->delete_records('assignsubmission_collabora', ['submission' => $submission->id]);
     }
-
-
 }

@@ -15,16 +15,17 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Upgrade code for install
+ * Upgrade code for install.
  *
  * @package   assignsubmission_collabora
  * @copyright Andreas Grabs <moodle@grabs-edv.de>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @param mixed $oldversion
  */
 
 /**
- * Stub for upgrade code
- * @param int $oldversion
+ * Stub for upgrade code.
+ * @param  int  $oldversion
  * @return bool
  */
 function xmldb_assignsubmission_collabora_upgrade($oldversion) {
@@ -33,7 +34,6 @@ function xmldb_assignsubmission_collabora_upgrade($oldversion) {
     $dbman = $DB->get_manager();
 
     if ($oldversion < 2022030604) {
-
         // Define table assignsubmission_collabora to be created.
         $table = new xmldb_table('assignsubmission_collabora');
 

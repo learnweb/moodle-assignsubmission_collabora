@@ -15,27 +15,19 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * The collabora callback file.
+ * Some hook functions.
  *
  * @package   assignsubmission_collabora
- * @copyright 2019 Synergy Learning
+ * @copyright 2024 Andreas Grabs
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use assignsubmission_collabora\api\collabora_fs;
-use mod_collabora\api\api;
-
-// This script is called by the Collabora server and does not need cookies!
-define('NO_MOODLE_COOKIES', true);
-
-require_once(__DIR__ . '/../../../../config.php');
-require_once($CFG->libdir . '/filelib.php');
-
-$relativepath = get_file_argument();
-$accesstoken  = required_param('access_token', PARAM_ALPHANUMEXT);
-$postdata     = file_get_contents('php://input');
-
-list($requesttyp, $fileid) = api::get_request_and_fileid_from_path($relativepath, $postdata);
-$collaborafs               = collabora_fs::get_instance_by_fileid($fileid, $accesstoken);
-$api                       = new api($requesttyp, $collaborafs, $postdata);
-$api->handle_request();
+/**
+ * Get an html fragment.
+ *
+ * @param  mixed  $args an array or object with context and parameters needed to get the data
+ * @return string The html fragment we want to use by ajax
+ */
+function assignsubmission_collabora_output_fragment_get_html($args) {
+    return \assignsubmission_collabora\fragment\util::get_html($args);
+}

@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * The index file
+ * The index file.
  *
  * @package   assignsubmission_collabora
  * @copyright 2019 Benjamin Ellis, Synergy Learning

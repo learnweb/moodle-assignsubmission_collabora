@@ -26,7 +26,6 @@
         "viewurl" : "https://nodomain.local",
         "filename" : "example.docx",
         "name" : "example",
-        "framewidth" : "900px",
         "frameheight" : "500px",
         "hasnotice" : 1,
         "noticetype" : "warning",
@@ -39,27 +38,27 @@
     {{notice}}
 </div>
 {{/hasnotice}}
-<a href="#"
-   title="{{#str}}fullscreen, mod_collabora{{/str}}"
-   class="text-decoration-none text-primary collaboramodal"
-   data-toggle="modal"
-   data-target="#collaboramodal_{{id}}"
->
+<a href="#" title="{{#str}}fullscreen, mod_collabora{{/str}}" class="text-decoration-none text-primary collaboramodal" data-toggle="modal" data-target="#collaboramodal_{{id}}">
     <span class="fa-stack" title="{{title}}">
         <i class="fa fa-square-o fa-stack-2x"></i>
         <i class="fa fa-expand fa-stack-1x"></i>
     </span>
 </a><span class="ml-1">{{filename}}</span>
-{{#legacy}}
-    {{> mod_collabora/iframe_legacy}}
-{{/legacy}}
-{{^legacy}}
-    {{> mod_collabora/iframe}}
-{{/legacy}}
+{{> mod_collabora/inline}}
 {{> mod_collabora/modal}}
 
 {{#js}}
-    require(['assignsubmission_collabora/modal_iframe'], function(mod) {
-        mod.init("{{{viewurl}}}", "{{{id}}}");
+    require(['mod_collabora/resizeiframe'], function(resizeiframe) {
+        {{^frameheight}}
+            resizeiframe.init();
+        {{/frameheight}}
+
+        setTimeout(function() {
+            let button = document.querySelector('.summary_assignsubmission_collabora_{{id}}');
+            let submission = document.querySelector('.full_assignsubmission_collabora_{{id}}');
+            button.style.display = 'none';
+            submission.removeAttribute('style');
+            submission.removeAttribute("hidden");
+        }, 100);
     });
 {{/js}}
