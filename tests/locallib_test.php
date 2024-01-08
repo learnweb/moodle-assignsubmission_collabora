@@ -133,9 +133,9 @@ class locallib_test extends \advanced_testcase {
     /**
      * Dataprovider for the test_submission_is_empty testcase.
      *
-     * @return array of testcases
+     * @return [] of testcases
      */
-    public function submission_is_empty_testcases() {
+    public static function submission_is_empty_testcases() : array {
         return [ // Cases.
             'With changed data' => [
                 [
