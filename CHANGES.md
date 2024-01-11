@@ -7,6 +7,7 @@ Changes
 ### v4.3.1
 * 2024-01-07 -  Adding postmessage support which is used by the mod_collabora since v4.3.1!
 * 2024-01-07 -  Compatibility to Moodle 4.3
+* 2024-01-11 -  Update github actions
 
 ### v4.2-r1
 
