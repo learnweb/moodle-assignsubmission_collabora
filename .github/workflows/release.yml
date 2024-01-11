@@ -4,8 +4,8 @@ on: [push, pull_request]
 
 env:
   # Additional mod_collabora plugin as requirement.
-  MOD_COLLABORA_REPO: $GITHUB_REPOSITORY_OWNER/moodle-mod_collabora
-  MOD_COLLABORA_BRANCH: $GITHUB_REF_NAME
+  MOD_COLLABORA_REPO: ${{ github.repository_owner }}/moodle-mod_collabora
+  MOD_COLLABORA_BRANCH: ${{ github.ref_name }}
 
 jobs:
   citest:
@@ -53,7 +53,7 @@ jobs:
 
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: plugin
 
