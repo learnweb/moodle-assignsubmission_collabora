@@ -38,7 +38,7 @@ require_once($CFG->dirroot . '/mod/assign/tests/generator.php');
  * @copyright  2016 Cameron Ball
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class locallib_test extends \advanced_testcase {
+final class locallib_test extends \advanced_testcase {
     // Use the generator helper.
     use \mod_assign_test_generator;
 
@@ -49,8 +49,9 @@ class locallib_test extends \advanced_testcase {
      * @dataProvider submission_is_empty_testcases
      * @param string $data The file submission data
      * @param bool $expected The expected return value
+     * @return void
      */
-    public function test_submission_is_empty($data, $expected) {
+    public function test_submission_is_empty($data, $expected): void {
         $this->resetAfterTest();
 
         $course  = $this->getDataGenerator()->create_course();
@@ -88,8 +89,9 @@ class locallib_test extends \advanced_testcase {
     /**
      * Test submission form.
      * @covers \assignsubmission_collabora\assign_submission_collabora::get_form_elements
+     * @return void
      */
-    public function test_submissionform() {
+    public function test_submissionform(): void {
         global $CFG;
         $this->resetAfterTest();
 
@@ -135,7 +137,7 @@ class locallib_test extends \advanced_testcase {
      *
      * @return [] of testcases
      */
-    public static function submission_is_empty_testcases() : array {
+    public static function submission_is_empty_testcases(): array {
         return [ // Cases.
             'With changed data' => [
                 [

@@ -38,7 +38,7 @@ require_once($CFG->dirroot . '/mod/assign/tests/generator.php');
  * @copyright 2019 Benjamin Ellis, Synergy Learning
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class events_test extends \advanced_testcase {
+final class events_test extends \advanced_testcase {
     // Use the generator helper.
     use \mod_assign_test_generator;
 
@@ -77,8 +77,9 @@ class events_test extends \advanced_testcase {
     /**
      * Test that the assessable_uploaded event is fired when a file submission has been made.
      * @covers \assignsubmission_collabora\event\assessable_uploaded
+     * @return void
      */
-    public function test_assessable_uploaded() {
+    public function test_assessable_uploaded(): void {
         list($file, $plugin, $assign, $submission, $sink) = $this->setup_submission();
         $data                                             = new \stdClass();
         $data->submpathnamehash                           = $file->get_pathnamehash();
@@ -101,8 +102,9 @@ class events_test extends \advanced_testcase {
     /**
      * Test that the submission_created event is fired when a file submission is saved.
      * @covers \assignsubmission_collabora\event\submission_created
+     * @return void
      */
-    public function test_submission_created() {
+    public function test_submission_created(): void {
         list($file, $plugin, $assign, $submission, $sink, $dummy) = $this->setup_submission();
         $data                                                     = new \stdClass();
         $data->submpathnamehash                                   = $file->get_pathnamehash();
@@ -126,8 +128,9 @@ class events_test extends \advanced_testcase {
     /**
      * Test that the submission_updated event is fired when a file submission is saved when an existing submission already exists.
      * @covers \assignsubmission_collabora\event\submission_updated
+     * @return void
      */
-    public function test_submission_updated() {
+    public function test_submission_updated(): void {
         list($file, , $assign, $submission, $sink, $dummy, $course) = $this->setup_submission();
         $plugin                                                     = $assign->get_submission_plugin_by_type('collabora');
         $data                                                       = new \stdClass();

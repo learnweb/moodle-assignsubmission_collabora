@@ -21,11 +21,12 @@
  * @copyright 2019 Benjamin Ellis, Synergy Learning
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-$string['pluginname']                   = 'Collaborative submissions';
+$string['couldnotstoreinitialfile']     = 'Could not store initial file (type: {$a})!';
 $string['display']                      = 'Display (Collabora)';
 $string['docreadonly']                  = 'File is readonly for you.';
-$string['enabled_help']                 = 'If enabled, students are able to use collabora for their submission.';
 $string['enabled']                      = 'Collaborative submissions';
+$string['enabled_help']                 = 'If enabled, students are able to use collabora for their submission.';
+$string['errormissingfilename']         = 'Filename is required.';
 $string['eventassessableuploaded']      = 'A file has been uploaded.';
 $string['externalparamdesc']            = 'The id of a draft area containing the file for this submission.';
 $string['fileareadesc']                 = '{$a} files Area';
@@ -38,13 +39,13 @@ $string['height']                       = 'Height (Collabora) (0 for automatic)'
 $string['initialfile']                  = 'Initial file (Collabora)';
 $string['initialtext']                  = 'Initial text (Collabora)';
 $string['invalidforfilename']           = 'Filename is invalid.';
-$string['errormissingfilename']         = 'Filename is required.';
 $string['invalidrequestfile']           = 'Requested File does not exist';
 $string['invalidrequestnofile']         = 'Requested File is not this submission plugin\'s file.';
 $string['invalidrequesttype']           = 'Invalid Request Type';
 $string['logmessage']                   = 'A submission file exists.';
 $string['missingfile']                  = 'File is missing for some reason.';
 $string['nosubmission']                 = 'No submission has been made yet.';
+$string['pluginname']                   = 'Collaborative submissions';
 $string['presentation']                 = 'Presentation';
 $string['privacy:metadata:filepurpose'] = 'The file for this assignment submission';
 $string['requiredforfilename']          = 'Filename is required for this format.';

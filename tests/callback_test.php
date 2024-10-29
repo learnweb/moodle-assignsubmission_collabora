@@ -40,7 +40,7 @@ require_once($CFG->dirroot . '/mod/assign/submission/collabora/tests/lib/api_set
  * @copyright 2019 Benjamin Ellis, Synergy Learning
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class callback_test extends \advanced_testcase {
+final class callback_test extends \advanced_testcase {
     use \assignsubmission_collabora_test_api_setup;
     // Use the generator helper.
     use \mod_assign_test_generator;
@@ -51,7 +51,7 @@ class callback_test extends \advanced_testcase {
      *
      * @return void
      */
-    public function test_handle_request() {
+    public function test_handle_request(): void {
         list($viewurl, $file, $fs, $assign, $plugin, $student) = $this->setup_and_basic_tests_for_view_url();
 
         $qry    = html_entity_decode(parse_url($viewurl, PHP_URL_QUERY), ENT_COMPAT);

@@ -38,7 +38,7 @@ Feature: In an assignment, students can use collabora to make a submission
     # Create our collabora assignment
     When I log in as "teacher1"
     And I am on "Course 1" course homepage with editing mode on
-    And I add a "Assignment" to section "1" and I fill the form with:
+    And I add a Assignment to course "Course 1" section "1" and I fill the form with:
       | Assignment name                     | Collabora Test Assignment                                 |
       | Description                         | "Lorem ipsum dolor sit amet, consectetur adipiscing elit" |
       | assignsubmission_onlinetext_enabled | 0                                                         |
@@ -62,8 +62,10 @@ Feature: In an assignment, students can use collabora to make a submission
     And I log in as "teacher1"
     And I am on "Course 1" course homepage
     And I click on "Collabora Test Assignment" "link" in the "#section-1" "css_element"
-    And I click on "View all submissions" "link" in the "#region-main" "css_element"
-    Then "Student 1" row "Status" column of "generaltable" table should contain "Submitted for grading"
+    And I click on "Grade" "link" in the "#region-main" "css_element"
+    And I should see "Student 1"
+    And I should see "Submitted for grading"
+    And I should see "testcollaborafile.xlsx"
     And I log out
 
   @javascript
@@ -71,7 +73,7 @@ Feature: In an assignment, students can use collabora to make a submission
     # Create our collabora assignment
     When I log in as "teacher1"
     And I am on "Course 1" course homepage with editing mode on
-    And I add a "Assignment" to section "1" and I fill the form with:
+    And I add a Assignment to course "Course 1" section "1" and I fill the form with:
       | Assignment name                     | Collabora Test Assignment                                 |
       | Description                         | "Lorem ipsum dolor sit amet, consectetur adipiscing elit" |
       | assignsubmission_onlinetext_enabled | 0                                                         |
@@ -98,6 +100,8 @@ Feature: In an assignment, students can use collabora to make a submission
     And I log in as "teacher1"
     And I am on "Course 1" course homepage
     And I click on "Collabora Test Assignment" "link" in the "#section-1" "css_element"
-    And I click on "View all submissions" "link" in the "#region-main" "css_element"
-    Then "Student 1" row "Status" column of "generaltable" table should contain "Submitted for grading"
+    And I click on "Grade" "link" in the "#region-main" "css_element"
+    And I should see "Student 1"
+    And I should see "Submitted for grading"
+    And I should see "testcollaborafile.xlsx"
     And I log out

@@ -31,3 +31,50 @@
 function assignsubmission_collabora_output_fragment_get_html($args) {
     return \assignsubmission_collabora\fragment\util::get_html($args);
 }
+
+/**
+ * Send a stored_file to the browser.
+ *
+ * @param  \stdClass|int  $course
+ * @param  \stdClass|null $cm
+ * @param  \context       $context
+ * @param  string         $filearea
+ * @param  array          $args
+ * @param  bool           $forcedownload
+ * @param  array          $options
+ * @return void
+ */
+function assignsubmission_collabora_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, array $options = []) {
+    if ($context->contextlevel != CONTEXT_MODULE) {
+        return;
+    }
+    require_login($course, false, $cm);
+    // File link only occurs on the edit settings page, so restrict access to teachers.
+    if (!has_capability('moodle/course:manageactivities', $context)) {
+        return;
+    }
+
+    if ($filearea !== \mod_collabora\api\collabora_fs::FILEAREA_INITIAL) {
+        return;
+    }
+
+    $itemid = (int) array_shift($args);
+    if ($itemid !== 0) {
+        return;
+    }
+
+    $filename = array_pop($args);
+    $filepath = '/' . implode('/', $args);
+    if ($filepath !== '/') {
+        $filepath .= '/';
+    }
+
+    $fs   = get_file_storage();
+    $file = $fs->get_file($context->id, 'assignsubmission_collabora', $filearea, $itemid, $filepath, $filename);
+
+    if (!$file) {
+        return;
+    }
+
+    send_stored_file($file, null, 0, $forcedownload, $options);
+}

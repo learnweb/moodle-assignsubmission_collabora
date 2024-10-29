@@ -23,6 +23,7 @@
  */
 
 use assignsubmission_collabora\api\collabora_fs;
+use assignsubmission_collabora\util;
 use mod_collabora\util as collabora_util;
 
 /**
@@ -33,20 +34,6 @@ use mod_collabora\util as collabora_util;
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class assign_submission_collabora extends assign_submission_plugin {
-    /**
-     * The default file options.
-     *
-     * @return array of file options
-     */
-    private function get_default_fileoptions() {
-        return [
-            'subdirs'        => 0,
-            'maxbytes'       => 0,
-            'maxfiles'       => 1,
-            'accepted_types' => collabora_fs::get_accepted_types(),
-        ];
-    }
-
     /**
      * Get a list of file areas associated with the plugin configuration.
      * This is used for backup/restore.
@@ -80,6 +67,30 @@ class assign_submission_collabora extends assign_submission_plugin {
             'filepath'  => $filepath,
             'filename'  => $filename ? clean_filename($filename) : $filename,
         ];
+    }
+
+    /**
+     * Get the file link to the document as an html fragment.
+     *
+     * @return string
+     */
+    private function get_initial_file_link() {
+        $fs    = get_file_storage();
+        $files = $fs->get_area_files(
+            contextid: $this->assignment->get_context()->id,
+            component: 'assignsubmission_collabora',
+            filearea: collabora_fs::FILEAREA_INITIAL,
+            includedirs: false,
+            limitnum: 1
+        );
+        $file = reset($files);
+        if (!$file) {
+            return get_string('missingfile', 'mod_collabora');
+        }
+        $url = moodle_url::make_pluginfile_url($file->get_contextid(), $file->get_component(), $file->get_filearea(),
+            $file->get_itemid(), $file->get_filepath(), $file->get_filename(), true);
+
+        return html_writer::link($url, $file->get_filename());
     }
 
     /**
@@ -141,8 +152,7 @@ class assign_submission_collabora extends assign_submission_plugin {
      * @return bool   - always true until we do the submissions check
      */
     private function unset_config($setting = null) {
-        // TODO Should we really check if there are no submissions before doing this?
-        if (null === $setting) {
+        if (is_null($setting)) {
             // We are removing all our settings and any possible file saved.
             $localconfig = (array) $this->get_thisplugin_config();
             foreach (array_keys($localconfig) as $cfg) {
@@ -280,15 +290,26 @@ class assign_submission_collabora extends assign_submission_plugin {
             $isexisting = !$this->unset_config();
         }
 
-        $filemanageropts = $this->get_default_fileoptions();
+        $filemanageropts = util::get_default_fileoptions();
 
         // Format section.
-        $mform->addElement('select', 'assignsubmission_collabora_format',
-            get_string('format', 'assignsubmission_collabora'), collabora_util::format_menu());
-        $mform->setDefault('assignsubmission_collabora_format',
-            empty($config->format) ? $config->defaultformat : $config->format);
-        if ($isexisting) {
-            $mform->freeze('assignsubmission_collabora_format');
+        if (!$isexisting) {
+            $mform->addElement(
+                'selectgroups',
+                'assignsubmission_collabora_format',
+                get_string('format', 'assignsubmission_collabora'),
+                collabora_util::grouped_format_menu()
+            );
+            $defaultformat = $config->defaultformat ?? collabora_util::FORMAT_WORDPROCESSOR;
+            $mform->setDefault('assignsubmission_collabora_format', $defaultformat);
+        } else {
+            $defaultformat = empty($config->format) ? $config->defaultformat : $config->format;
+            $mform->addElement(
+                'hidden',
+                'assignsubmission_collabora_format',
+                $defaultformat
+            );
+            $mform->setConstant('assignsubmission_collabora_format', $defaultformat);
         }
         $mform->hideif('assignsubmission_collabora_format', 'assignsubmission_collabora_enabled', 'notchecked');
 
@@ -331,9 +352,7 @@ class assign_submission_collabora extends assign_submission_plugin {
             $mform->hideif('assignsubmission_collabora_initialfile_filemanager',
                 'assignsubmission_collabora_enabled', 'notchecked');
         } else {
-            $file = $this->get_initial_file();
-            $mform->addElement('static', 'initialfile',
-                get_string('initialfile', 'assignsubmission_collabora'), $file->get_filename());
+            $mform->addElement('static', 'initialfile', get_string('initialfile', 'mod_collabora'), $this->get_initial_file_link());
         }
 
         // Height.
@@ -344,27 +363,12 @@ class assign_submission_collabora extends assign_submission_plugin {
     }
 
     /**
-     * Generate a filename where one is not provided.
-     *
-     * Moodle error for assignment plugins is a print_error() which is nasty for users.
-     *
-     * @return string
-     */
-    private function generaterandonfilename() {
-        return 'aaa' .
-            substr(str_shuffle(
-                str_repeat('abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ',
-                    mt_rand(1, 10))), 1, 7);
-    }
-
-    /**
      * Save the settings for submission plugin.
      *
      * @param  stdClass $data - the form data
      * @return bool     - on error the subtype should call set_error and return false
      */
     public function save_settings(stdClass $data) {
-        global $CFG;
         $noerror = true; // Track input errors.
 
         // Get our own local config settings - if we do not have any settings - this is a new record.
@@ -384,65 +388,30 @@ class assign_submission_collabora extends assign_submission_plugin {
          */
         if ($newrecord) {
             // Work out the filename for all types except Uploads.
-            $filename = null;
-            if ($data->assignsubmission_collabora_format !== collabora_util::FORMAT_UPLOAD) {
-                if (empty(trim($data->assignsubmission_collabora_filename))) {
-                    $data->assignsubmission_collabora_filename = $this->generaterandonfilename();
-                }
-                if (!$filename = clean_filename($data->assignsubmission_collabora_filename)) {
-                    $data->assignsubmission_collabora_filename = $this->generaterandonfilename();
-                }
-                if ($noerror) {
-                    $this->set_config('filename', $filename);
-                }
+            $filename = trim(clean_filename($data->assignsubmission_collabora_filename));
+            if (!$filename) {
+                $filename = util::generaterandonfilename();
+            }
+            if ($noerror) {
+                $this->set_config('filename', $filename);
             }
 
             // Create the initial file.
             if ($noerror) {
-                $fs      = get_file_storage();
                 $filerec = $this->get_filerecord($filename);
-                switch ($data->assignsubmission_collabora_format) {
-                    case collabora_util::FORMAT_UPLOAD:
-                        $info = file_get_draft_area_info($data->assignsubmission_collabora_initialfile_filemanager);
-                        if ($info['filecount']) {
-                            // Save the uploaded file as the initial file.
-                            file_save_draft_area_files($data->assignsubmission_collabora_initialfile_filemanager,
-                                $filerec->contextid, $filerec->component, $filerec->filearea, $filerec->itemid,
-                                $this->get_default_fileoptions());
-                        } else {
-                            // We will just save a default file instead - avoiding the print_error() in the calling function.
-                            $filerec->filename .= $this->generaterandonfilename() . '.docx';
-                            $filepath = $CFG->dirroot . '/mod/collabora/blankfiles/blankdocument.docx';
-                            $fs->create_file_from_pathname($filerec, $filepath);
-                        }
-                        break;
-                    case collabora_util::FORMAT_TEXT:
-                        if (empty($data->assignsubmission_collabora_initialtext)) {
-                            $data->assignsubmission_collabora_initialtext = '';
-                        }
-                        $this->set_config('initialtext', $data->assignsubmission_collabora_initialtext);
-                        $filerec->filename .= '.txt';
-                        $fs->create_file_from_string($filerec, $data->assignsubmission_collabora_initialtext);
-                        break;
-                    case collabora_util::FORMAT_WORDPROCESSOR:
-                        $filerec->filename .= '.docx';
-                        $filepath = $CFG->dirroot . '/mod/collabora/blankfiles/blankdocument.docx';
-                        $fs->create_file_from_pathname($filerec, $filepath);
-                        break;
-                    case collabora_util::FORMAT_SPREADSHEET:
-                        $filerec->filename .= '.xlsx';
-                        $filepath = $CFG->dirroot . '/mod/collabora/blankfiles/blankspreadsheet.xlsx';
-                        $fs->create_file_from_pathname($filerec, $filepath);
-                        break;
-                    case collabora_util::FORMAT_PRESENTATION:
-                        $filerec->filename .= '.pptx';
-                        $filepath = $CFG->dirroot . '/mod/collabora/blankfiles/blankpresentation.pptx';
-                        $fs->create_file_from_pathname($filerec, $filepath);
-                        break;
-                    default:
-                        // Should never happen.
-                        throw new \coding_exception("Unknown format: {$data->assignsubmission_collabora_format}");
-                        break; // Paranoia.
+                if ($data->assignsubmission_collabora_format == collabora_util::FORMAT_TEXT) {
+                    if (empty($data->assignsubmission_collabora_initialtext)) {
+                        $data->assignsubmission_collabora_initialtext = '';
+                    }
+                    $this->set_config('initialtext', $data->assignsubmission_collabora_initialtext);
+                }
+                if (!util::store_initial_file($filerec, $data)) {
+                    throw new \moodle_exception(
+                        'couldnotstoreinitialfile',
+                        'assignsubmission_collabora',
+                        '',
+                        $data->assignsubmission_collabora_format
+                    );
                 }
             }
         }
