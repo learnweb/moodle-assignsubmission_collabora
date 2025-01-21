@@ -4,6 +4,9 @@ moodle-assignsubmission_collabora
 Changes
 -------
 
+### v4.5.1
+* 2025-01-21 -  Adjust github workflow to be more restrictive
+
 ### v4.5.0
 * 2024-10-30 -  Add support for new templates from mod_collabora.
 

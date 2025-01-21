@@ -30,6 +30,11 @@ defined('MOODLE_INTERNAL') || die;
 
 global $CFG;
 require_once($CFG->dirroot . '/mod/assign/tests/privacy/provider_test.php');
+if (class_exists('\\mod_assign\\tests\\provider_testcase')) {
+    class_alias(\mod_assign\tests\provider_testcase::class, 'assign_provider_test');
+} else {
+    class_alias(\mod_assign\privacy\provider_test::class, 'assign_provider_test');
+}
 
 /**
  * Unit tests for mod/assign/submission/file/classes/privacy/.
@@ -37,7 +42,7 @@ require_once($CFG->dirroot . '/mod/assign/tests/privacy/provider_test.php');
  * @copyright  2018 Adrian Greeve <adrian@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-final class provider_test extends \mod_assign\privacy\provider_test {
+final class provider_test extends \assign_provider_test {
     /** A fix structure to configure a assignment instance. */
     public const COLLABORACFG = [
         'assignsubmission_collabora_enabled'  => 1,
