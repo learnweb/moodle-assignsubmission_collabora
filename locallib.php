@@ -313,6 +313,7 @@ class assign_submission_collabora extends assign_submission_plugin {
                 'assignsubmission_collabora_format',
                 $defaultformat
             );
+            $mform->setType('assignsubmission_collabora_format', PARAM_RAW);
             $mform->setConstant('assignsubmission_collabora_format', $defaultformat);
         }
         $mform->hideif('assignsubmission_collabora_format', 'assignsubmission_collabora_enabled', 'notchecked');
