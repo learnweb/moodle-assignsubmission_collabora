@@ -4,6 +4,9 @@ moodle-assignsubmission_collabora
 Changes
 -------
 
+### v5.0
+* adjust code for Moodle 5.0 using Bootstrap 5.3
+
 ### v4.5.1
 * 2025-01-21 -  Adjust github workflow to be more restrictive
 
