@@ -130,8 +130,15 @@ class util {
      */
     public static function generaterandonfilename() {
         return 'aaa' .
-            substr(str_shuffle(
-                str_repeat('abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ',
-                    mt_rand(1, 10))), 1, 7);
+            substr(
+                str_shuffle(
+                    str_repeat(
+                        'abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+                        mt_rand(1, 10)
+                    )
+                ),
+                1,
+                7
+            );
     }
 }

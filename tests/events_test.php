@@ -80,12 +80,12 @@ final class events_test extends \advanced_testcase {
      * @return void
      */
     public function test_assessable_uploaded(): void {
-        list($file, $plugin, $assign, $submission, $sink) = $this->setup_submission();
-        $data                                             = new \stdClass();
-        $data->submpathnamehash                           = $file->get_pathnamehash();
-        $data->submfilename                               = $file->get_filename();
-        $data->submfileid                                 = $file->get_id();
-        $data->subnewsubmssn                              = 1;
+        [$file, $plugin, $assign, $submission, $sink] = $this->setup_submission();
+        $data                                         = new \stdClass();
+        $data->submpathnamehash                       = $file->get_pathnamehash();
+        $data->submfilename                           = $file->get_filename();
+        $data->submfileid                             = $file->get_id();
+        $data->subnewsubmssn                          = 1;
         $plugin->save($submission, $data);
         $events = $sink->get_events();
 
@@ -105,11 +105,11 @@ final class events_test extends \advanced_testcase {
      * @return void
      */
     public function test_submission_created(): void {
-        list($file, $plugin, $assign, $submission, $sink, $dummy) = $this->setup_submission();
-        $data                                                     = new \stdClass();
-        $data->submpathnamehash                                   = $file->get_pathnamehash();
-        $data->submfilename                                       = $dummy->filename;
-        $data->subnewsubmssn                                      = 1;           // New file.
+        [$file, $plugin, $assign, $submission, $sink, $dummy] = $this->setup_submission();
+        $data                                                 = new \stdClass();
+        $data->submpathnamehash                               = $file->get_pathnamehash();
+        $data->submfilename                                   = $dummy->filename;
+        $data->subnewsubmssn                                  = 1;           // New file.
         $plugin->save($submission, $data);
         $events = $sink->get_events();
 
@@ -131,12 +131,12 @@ final class events_test extends \advanced_testcase {
      * @return void
      */
     public function test_submission_updated(): void {
-        list($file, , $assign, $submission, $sink, $dummy, $course) = $this->setup_submission();
-        $plugin                                                     = $assign->get_submission_plugin_by_type('collabora');
-        $data                                                       = new \stdClass();
-        $data->submpathnamehash                                     = $file->get_pathnamehash();
-        $data->submfilename                                         = $dummy->filename;
-        $data->subnewsubmssn                                        = 1;           // New file.
+        [$file, , $assign, $submission, $sink, $dummy, $course] = $this->setup_submission();
+        $plugin                                                 = $assign->get_submission_plugin_by_type('collabora');
+        $data                                                   = new \stdClass();
+        $data->submpathnamehash                                 = $file->get_pathnamehash();
+        $data->submfilename                                     = $dummy->filename;
+        $data->subnewsubmssn                                    = 1;           // New file.
         // Create a submission.
         $plugin->save($submission, $data);
         // Update a submission.

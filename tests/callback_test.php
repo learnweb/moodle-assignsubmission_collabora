@@ -52,7 +52,7 @@ final class callback_test extends \advanced_testcase {
      * @return void
      */
     public function test_handle_request(): void {
-        list($viewurl, $file, $fs, $assign, $plugin, $student) = $this->setup_and_basic_tests_for_view_url();
+        [$viewurl, $file, $fs, $assign, $plugin, $student] = $this->setup_and_basic_tests_for_view_url();
 
         $qry    = html_entity_decode(parse_url($viewurl, PHP_URL_QUERY), ENT_COMPAT);
         $params = [];
@@ -62,9 +62,9 @@ final class callback_test extends \advanced_testcase {
         $accesstoken  = $params['access_token'];
         $postdata     = null;
 
-        list($requesttyp, $fileid) = api::get_request_and_fileid_from_path($relativepath, $postdata);
-        $collaborafs               = collabora_fs::get_instance_by_fileid($fileid, $accesstoken);
-        $api                       = new api($requesttyp, $collaborafs, $postdata);
+        [$requesttyp, $fileid] = api::get_request_and_fileid_from_path($relativepath, $postdata);
+        $collaborafs           = collabora_fs::get_instance_by_fileid($fileid, $accesstoken);
+        $api                   = new api($requesttyp, $collaborafs, $postdata);
 
         /* Create the request - $relativepath, $accesstoken, $postdata. */
         // Get File Info JSON.
@@ -77,12 +77,12 @@ final class callback_test extends \advanced_testcase {
 
         // Assert Get File 2nd - need to add contents onto the relative path.
         $relativepath .= '/contents';
-        list($requesttyp, $fileid) = api::get_request_and_fileid_from_path($relativepath, $postdata);
-        $collaborafs               = collabora_fs::get_instance_by_fileid($fileid, $accesstoken);
-        $api                       = new api($requesttyp, $collaborafs, $postdata);
-        $content                   = $api->handle_request(true);
-        $contentsize               = strlen($content);
-        $filecontentshash          = sha1($content);    // File contents hashed.
+        [$requesttyp, $fileid] = api::get_request_and_fileid_from_path($relativepath, $postdata);
+        $collaborafs           = collabora_fs::get_instance_by_fileid($fileid, $accesstoken);
+        $api                   = new api($requesttyp, $collaborafs, $postdata);
+        $content               = $api->handle_request(true);
+        $contentsize           = strlen($content);
+        $filecontentshash      = sha1($content);    // File contents hashed.
 
         $this->assertEquals($file->get_filesize(), $contentsize);   // Same Size.
         // Compare the contents.
@@ -93,9 +93,9 @@ final class callback_test extends \advanced_testcase {
         $postdata   = file_get_contents($uploadfile);
 
         // Update our file record - note the filerecord is changed.
-        list($requesttyp, $fileid) = api::get_request_and_fileid_from_path($relativepath, $postdata);
-        $collaborafs               = collabora_fs::get_instance_by_fileid($fileid, $accesstoken);
-        $api                       = new api($requesttyp, $collaborafs, $postdata);
+        [$requesttyp, $fileid] = api::get_request_and_fileid_from_path($relativepath, $postdata);
+        $collaborafs           = collabora_fs::get_instance_by_fileid($fileid, $accesstoken);
+        $api                   = new api($requesttyp, $collaborafs, $postdata);
         $api->handle_request(true);
 
         sleep(2);   // Give us some time to complete.

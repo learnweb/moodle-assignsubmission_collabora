@@ -95,7 +95,7 @@ final class provider_test extends \assign_provider_test {
      */
     public function test_get_metadata(): void {
         $collection = new \core_privacy\local\metadata\collection('assignsubmission_collabora');
-        $collection = \assignsubmission_collabora\privacy\provider::get_metadata($collection);
+        $collection = provider::get_metadata($collection);
         $this->assertNotEmpty($collection);
     }
 
@@ -121,8 +121,8 @@ final class provider_test extends \assign_provider_test {
 
         $context = $assign->get_context();
 
-        $studentfilename           = 'user1file.docx';
-        list($plugin, $submission) = $this->create_collabora_submission($assign, $user1, $studentfilename);
+        $studentfilename       = 'user1file.docx';
+        [$plugin, $submission] = $this->create_collabora_submission($assign, $user1, $studentfilename);
 
         /** @var \core_privacy\tests\request\content_writer $writer */
         $writer = \core_privacy\local\request\writer::with_context($context);
@@ -130,7 +130,7 @@ final class provider_test extends \assign_provider_test {
 
         // The student should have a file submission.
         $exportdata = new \mod_assign\privacy\assign_plugin_request_data($context, $assign, $submission, ['Attempt 1']);
-        \assignsubmission_collabora\privacy\provider::export_submission_user_data($exportdata);
+        provider::export_submission_user_data($exportdata);
 
         $storedfiles = $writer->get_files(['Attempt 1']);
         $storedfile  = array_pop($storedfiles);
@@ -160,14 +160,14 @@ final class provider_test extends \assign_provider_test {
 
         $context = $assign->get_context();
 
-        $studentfilename             = 'user1file.pdf';
-        list($plugin, $submission)   = $this->create_collabora_submission($assign, $user1, $studentfilename);
-        $student2filename            = 'user2file.pdf';
-        list($plugin2, $submission2) = $this->create_collabora_submission($assign, $user2, $student2filename);
+        $studentfilename         = 'user1file.pdf';
+        [$plugin, $submission]   = $this->create_collabora_submission($assign, $user1, $studentfilename);
+        $student2filename        = 'user2file.pdf';
+        [$plugin2, $submission2] = $this->create_collabora_submission($assign, $user2, $student2filename);
 
         // Only need the context and assign object in this plugin for this operation.
         $requestdata = new \mod_assign\privacy\assign_plugin_request_data($context, $assign);
-        \assignsubmission_collabora\privacy\provider::delete_submission_for_context($requestdata);
+        provider::delete_submission_for_context($requestdata);
         // This checks that there are no files in this submission.
         $this->assertTrue($plugin->is_empty($submission));
         $this->assertTrue($plugin2->is_empty($submission2));
@@ -196,14 +196,14 @@ final class provider_test extends \assign_provider_test {
 
         $context = $assign->get_context();
 
-        $studentfilename             = 'user1file.pdf';
-        list($plugin, $submission)   = $this->create_collabora_submission($assign, $user1, $studentfilename);
-        $student2filename            = 'user2file.pdf';
-        list($plugin2, $submission2) = $this->create_collabora_submission($assign, $user2, $student2filename);
+        $studentfilename         = 'user1file.pdf';
+        [$plugin, $submission]   = $this->create_collabora_submission($assign, $user1, $studentfilename);
+        $student2filename        = 'user2file.pdf';
+        [$plugin2, $submission2] = $this->create_collabora_submission($assign, $user2, $student2filename);
 
         // Only need the context and assign object in this plugin for this operation.
         $requestdata = new \mod_assign\privacy\assign_plugin_request_data($context, $assign, $submission, [], $user1);
-        \assignsubmission_collabora\privacy\provider::delete_submission_for_userid($requestdata);
+        provider::delete_submission_for_userid($requestdata);
         // This checks that there are no files in this submission.
         $this->assertTrue($plugin->is_empty($submission));
         // There should be files here.
@@ -241,16 +241,16 @@ final class provider_test extends \assign_provider_test {
         $context1 = $assign1->get_context();
         $context2 = $assign2->get_context();
 
-        $student1filename            = 'user1file.pdf';
-        list($plugin1, $submission1) = $this->create_collabora_submission($assign1, $user1, $student1filename);
-        $student2filename            = 'user2file.pdf';
-        list($plugin2, $submission2) = $this->create_collabora_submission($assign1, $user2, $student2filename);
-        $student3filename            = 'user3file.pdf';
-        list($plugin3, $submission3) = $this->create_collabora_submission($assign1, $user3, $student3filename);
-        $student4filename            = 'user4file.pdf';
-        list($plugin4, $submission4) = $this->create_collabora_submission($assign2, $user4, $student4filename);
-        $student5filename            = 'user5file.pdf';
-        list($plugin5, $submission5) = $this->create_collabora_submission($assign2, $user3, $student5filename);
+        $student1filename        = 'user1file.pdf';
+        [$plugin1, $submission1] = $this->create_collabora_submission($assign1, $user1, $student1filename);
+        $student2filename        = 'user2file.pdf';
+        [$plugin2, $submission2] = $this->create_collabora_submission($assign1, $user2, $student2filename);
+        $student3filename        = 'user3file.pdf';
+        [$plugin3, $submission3] = $this->create_collabora_submission($assign1, $user3, $student3filename);
+        $student4filename        = 'user4file.pdf';
+        [$plugin4, $submission4] = $this->create_collabora_submission($assign2, $user4, $student4filename);
+        $student5filename        = 'user5file.pdf';
+        [$plugin5, $submission5] = $this->create_collabora_submission($assign2, $user3, $student5filename);
 
         $submissionids = [
             $submission1->id,
@@ -285,7 +285,7 @@ final class provider_test extends \assign_provider_test {
         $deletedata = new \mod_assign\privacy\assign_plugin_request_data($context1, $assign1);
         $deletedata->set_userids($userids);
         $deletedata->populate_submissions_and_grades();
-        \assignsubmission_collabora\privacy\provider::delete_submissions($deletedata);
+        provider::delete_submissions($deletedata);
 
         $select = 'contextid = :contextid
                    AND component = :component

@@ -45,7 +45,7 @@ class collabora_fs extends \mod_collabora\api\base_filesystem {
      * @return int
      */
     public static function get_userid_from_token($token) {
-        list($shastr, $userid) = explode('_', $token);
+        [$shastr, $userid] = explode('_', $token);
         if ($shastr != md5($userid)) {
             throw new \moodle_exception('wrong accesstoken');
         }
@@ -66,7 +66,7 @@ class collabora_fs extends \mod_collabora\api\base_filesystem {
         $userid = static::get_userid_from_token($accesstoken);
         $user   = $DB->get_record('user', ['id' => $userid], '*', MUST_EXIST);
 
-        list($filehash, $writable) = explode('_', $fileid);
+        [$filehash, $writable] = explode('_', $fileid);
 
         // Get the stored file.
         $fs = get_file_storage();
@@ -126,8 +126,8 @@ class collabora_fs extends \mod_collabora\api\base_filesystem {
 
         $this->context = \context::instance_by_id($file->get_contextid());
 
-        list($course, $cm) = get_course_and_cm_from_cmid($this->context->instanceid, 'assign');
-        $this->assign      = new \assign($this->context, $cm, $course);
+        [$course, $cm] = get_course_and_cm_from_cmid($this->context->instanceid, 'assign');
+        $this->assign  = new \assign($this->context, $cm, $course);
         if ($this->assign->get_instance()->teamsubmission) {
             $this->submission = $this->assign->get_group_submission($user->id, 0, false);
         } else {

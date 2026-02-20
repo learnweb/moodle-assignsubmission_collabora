@@ -45,8 +45,8 @@ class util extends \mod_collabora\fragment\util {
             throw new \moodle_exception('missing or wrong id');
         }
 
-        $submission        = $DB->get_record('assign_submission', ['id' => $id], '*', MUST_EXIST);
-        list($course, $cm) = get_course_and_cm_from_instance($submission->assignment, 'assign');
+        $submission    = $DB->get_record('assign_submission', ['id' => $id], '*', MUST_EXIST);
+        [$course, $cm] = get_course_and_cm_from_instance($submission->assignment, 'assign');
 
         if ((!empty($submission->userid)) && $submission->userid != $USER->id) {
             require_capability('mod/assign:viewgrades', $cm->context);
@@ -87,7 +87,7 @@ class util extends \mod_collabora\fragment\util {
             }
         }
 
-        $collaborafs = new \assignsubmission_collabora\api\collabora_fs($user, $submissionfile);
+        $collaborafs = new collabora_fs($user, $submissionfile);
         $params      = $collaborafs->get_view_params(false); // We don't show the close button at all.
 
         return json_encode($params);

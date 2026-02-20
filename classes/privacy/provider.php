@@ -31,12 +31,12 @@ global $CFG;
 require_once($CFG->dirroot . '/mod/assign/locallib.php');
 
 use core_privacy\local\metadata\collection;
+use core_privacy\local\metadata\provider as metadata_provider;
 use core_privacy\local\request\contextlist;
 use core_privacy\local\request\writer;
-use core_privacy\local\metadata\provider as metadata_provider;
+use mod_assign\privacy\assign_plugin_request_data;
 use mod_assign\privacy\assignsubmission_provider;
 use mod_assign\privacy\assignsubmission_user_provider;
-use mod_assign\privacy\assign_plugin_request_data;
 
 /**
  * Privacy class for requesting user data.
@@ -45,7 +45,7 @@ use mod_assign\privacy\assign_plugin_request_data;
  * @copyright  2019 Benjamin Ellis, Synergy Learning
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class provider implements metadata_provider, assignsubmission_provider, assignsubmission_user_provider {
+class provider implements assignsubmission_provider, assignsubmission_user_provider, metadata_provider {
     /**
      * Return meta data about this plugin.
      *
@@ -178,8 +178,8 @@ class provider implements metadata_provider, assignsubmission_provider, assignsu
         if (empty($deletedata->get_submissionids())) {
             return;
         }
-        $fs                 = get_file_storage();
-        list($sql, $params) = $DB->get_in_or_equal($deletedata->get_submissionids(), SQL_PARAMS_NAMED);
+        $fs             = get_file_storage();
+        [$sql, $params] = $DB->get_in_or_equal($deletedata->get_submissionids(), SQL_PARAMS_NAMED);
         $fs->delete_area_files_select(
             $deletedata->get_context()->id,
             'assignsubmission_collabora',

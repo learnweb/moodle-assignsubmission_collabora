@@ -65,10 +65,12 @@ class restore_assignsubmission_collabora_subplugin extends restore_subplugin {
 
         $DB->insert_record('assignsubmission_collabora', $data);
 
-        $this->add_related_files('assignsubmission_collabora',
+        $this->add_related_files(
+            'assignsubmission_collabora',
             \assignsubmission_collabora\api\collabora_fs::FILEAREA_SUBMIT,
             'submission',
             null,
-            $oldsubmissionid);
+            $oldsubmissionid
+        );
     }
 }
