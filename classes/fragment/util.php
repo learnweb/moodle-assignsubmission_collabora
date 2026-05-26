@@ -46,7 +46,7 @@ class util extends \mod_collabora\fragment\util {
         }
 
         $submission        = $DB->get_record('assign_submission', ['id' => $id], '*', MUST_EXIST);
-        list($course, $cm) = get_course_and_cm_from_instance($submission->assignment, 'assign');
+        [$course, $cm] = get_course_and_cm_from_instance($submission->assignment, 'assign');
 
         if ((!empty($submission->userid)) && $submission->userid != $USER->id) {
             require_capability('mod/assign:viewgrades', $cm->context);

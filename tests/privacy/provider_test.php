@@ -55,7 +55,7 @@ final class provider_test extends \assign_provider_test {
      * Convenience function for creating feedback data.
      *
      * @param  object   $assign   assign object
-     * @param  stdClass $student  user object
+     * @param  \stdClass $student  user object
      * @param  string   $filename filename for the collabora submission
      * @return array    submission plugin object and the submission object
      */
@@ -122,7 +122,7 @@ final class provider_test extends \assign_provider_test {
         $context = $assign->get_context();
 
         $studentfilename           = 'user1file.docx';
-        list($plugin, $submission) = $this->create_collabora_submission($assign, $user1, $studentfilename);
+        [$plugin, $submission] = $this->create_collabora_submission($assign, $user1, $studentfilename);
 
         /** @var \core_privacy\tests\request\content_writer $writer */
         $writer = \core_privacy\local\request\writer::with_context($context);
@@ -161,9 +161,9 @@ final class provider_test extends \assign_provider_test {
         $context = $assign->get_context();
 
         $studentfilename             = 'user1file.pdf';
-        list($plugin, $submission)   = $this->create_collabora_submission($assign, $user1, $studentfilename);
+        [$plugin, $submission]   = $this->create_collabora_submission($assign, $user1, $studentfilename);
         $student2filename            = 'user2file.pdf';
-        list($plugin2, $submission2) = $this->create_collabora_submission($assign, $user2, $student2filename);
+        [$plugin2, $submission2] = $this->create_collabora_submission($assign, $user2, $student2filename);
 
         // Only need the context and assign object in this plugin for this operation.
         $requestdata = new \mod_assign\privacy\assign_plugin_request_data($context, $assign);
@@ -197,9 +197,9 @@ final class provider_test extends \assign_provider_test {
         $context = $assign->get_context();
 
         $studentfilename             = 'user1file.pdf';
-        list($plugin, $submission)   = $this->create_collabora_submission($assign, $user1, $studentfilename);
+        [$plugin, $submission]   = $this->create_collabora_submission($assign, $user1, $studentfilename);
         $student2filename            = 'user2file.pdf';
-        list($plugin2, $submission2) = $this->create_collabora_submission($assign, $user2, $student2filename);
+        [$plugin2, $submission2] = $this->create_collabora_submission($assign, $user2, $student2filename);
 
         // Only need the context and assign object in this plugin for this operation.
         $requestdata = new \mod_assign\privacy\assign_plugin_request_data($context, $assign, $submission, [], $user1);
@@ -242,15 +242,15 @@ final class provider_test extends \assign_provider_test {
         $context2 = $assign2->get_context();
 
         $student1filename            = 'user1file.pdf';
-        list($plugin1, $submission1) = $this->create_collabora_submission($assign1, $user1, $student1filename);
+        [$plugin1, $submission1] = $this->create_collabora_submission($assign1, $user1, $student1filename);
         $student2filename            = 'user2file.pdf';
-        list($plugin2, $submission2) = $this->create_collabora_submission($assign1, $user2, $student2filename);
+        [$plugin2, $submission2] = $this->create_collabora_submission($assign1, $user2, $student2filename);
         $student3filename            = 'user3file.pdf';
-        list($plugin3, $submission3) = $this->create_collabora_submission($assign1, $user3, $student3filename);
+        [$plugin3, $submission3] = $this->create_collabora_submission($assign1, $user3, $student3filename);
         $student4filename            = 'user4file.pdf';
-        list($plugin4, $submission4) = $this->create_collabora_submission($assign2, $user4, $student4filename);
+        [$plugin4, $submission4] = $this->create_collabora_submission($assign2, $user4, $student4filename);
         $student5filename            = 'user5file.pdf';
-        list($plugin5, $submission5) = $this->create_collabora_submission($assign2, $user3, $student5filename);
+        [$plugin5, $submission5] = $this->create_collabora_submission($assign2, $user3, $student5filename);
 
         $submissionids = [
             $submission1->id,

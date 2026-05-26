@@ -75,14 +75,12 @@ class convert {
                 foreach ($submissions as $submission) {
                     mtrace('        submission: ' . $submission->id);
                     // Get the files.
-                    if (!$files = $DB->get_records(
-                        'files',
-                        [
-                            'contextid' => $context->id,
-                            'filearea'  => 'group',
-                            'itemid'    => $submission->groupid,
-                        ]
-                    )) {
+                    $params = [
+                        'contextid' => $context->id,
+                        'filearea'  => 'group',
+                        'itemid'    => $submission->groupid,
+                    ];
+                    if (!$files = $DB->get_records('files', $params)) {
                         continue;
                     }
                     foreach ($files as $file) {
@@ -116,14 +114,12 @@ class convert {
                 foreach ($submissions as $submission) {
                     mtrace('        submission: ' . $submission->id);
                     // Get the files.
-                    if (!$files = $DB->get_records(
-                        'files',
-                        [
-                            'contextid' => $context->id,
-                            'filearea'  => 'user',
-                            'itemid'    => $submission->userid,
-                        ]
-                    )) {
+                    $params = [
+                        'contextid' => $context->id,
+                        'filearea'  => 'user',
+                        'itemid'    => $submission->userid,
+                    ];
+                    if (!$files = $DB->get_records('files', $params)) {
                         continue;
                     }
                     foreach ($files as $file) {

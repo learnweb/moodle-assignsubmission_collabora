@@ -64,7 +64,13 @@ trait assignsubmission_collabora_test_api_setup {
             $assign->get_context()->id,
             'assignsubmission_collabora',
             collabora_fs::FILEAREA_INITIAL,
-            0, '', false, 0, 0, 1);
+            0,
+            '',
+            false,
+            0,
+            0,
+            1
+        );
         $initialfile = reset($files);
         $this->assertNotEmpty($initialfile, 'No initial file created');
 

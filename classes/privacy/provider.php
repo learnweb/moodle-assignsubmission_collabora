@@ -45,7 +45,7 @@ use mod_assign\privacy\assign_plugin_request_data;
  * @copyright  2019 Benjamin Ellis, Synergy Learning
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class provider implements metadata_provider, assignsubmission_provider, assignsubmission_user_provider {
+class provider implements assignsubmission_provider, assignsubmission_user_provider, metadata_provider {
     /**
      * Return meta data about this plugin.
      *
@@ -179,7 +179,7 @@ class provider implements metadata_provider, assignsubmission_provider, assignsu
             return;
         }
         $fs                 = get_file_storage();
-        list($sql, $params) = $DB->get_in_or_equal($deletedata->get_submissionids(), SQL_PARAMS_NAMED);
+        [$sql, $params] = $DB->get_in_or_equal($deletedata->get_submissionids(), SQL_PARAMS_NAMED);
         $fs->delete_area_files_select(
             $deletedata->get_context()->id,
             'assignsubmission_collabora',

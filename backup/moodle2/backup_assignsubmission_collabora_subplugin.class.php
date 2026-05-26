@@ -40,22 +40,28 @@ class backup_assignsubmission_collabora_subplugin extends backup_subplugin {
         // Create XML elements.
         $subplugin        = $this->get_subplugin_element();
         $subpluginwrapper = new backup_nested_element($this->get_recommended_name());
-        $subpluginelement = new backup_nested_element('submission_collabora',
+        $subpluginelement = new backup_nested_element(
+            'submission_collabora',
             null,
-            ['numfiles', 'submission']);
+            ['numfiles', 'submission']
+        );
 
         // Connect XML elements into the tree.
         $subplugin->add_child($subpluginwrapper);
         $subpluginwrapper->add_child($subpluginelement);
 
         // Set source to populate the data.
-        $subpluginelement->set_source_table('assignsubmission_collabora',
-            ['submission' => backup::VAR_PARENTID]);
+        $subpluginelement->set_source_table(
+            'assignsubmission_collabora',
+            ['submission' => backup::VAR_PARENTID]
+        );
 
         // The parent is the submission.
-        $subpluginelement->annotate_files('assignsubmission_collabora',
+        $subpluginelement->annotate_files(
+            'assignsubmission_collabora',
             \assignsubmission_collabora\api\collabora_fs::FILEAREA_SUBMIT,
-            'submission');
+            'submission'
+        );
 
         return $subplugin;
     }

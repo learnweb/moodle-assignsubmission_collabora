@@ -80,7 +80,7 @@ final class events_test extends \advanced_testcase {
      * @return void
      */
     public function test_assessable_uploaded(): void {
-        list($file, $plugin, $assign, $submission, $sink) = $this->setup_submission();
+        [$file, $plugin, $assign, $submission, $sink] = $this->setup_submission();
         $data                                             = new \stdClass();
         $data->submpathnamehash                           = $file->get_pathnamehash();
         $data->submfilename                               = $file->get_filename();
@@ -105,7 +105,7 @@ final class events_test extends \advanced_testcase {
      * @return void
      */
     public function test_submission_created(): void {
-        list($file, $plugin, $assign, $submission, $sink, $dummy) = $this->setup_submission();
+        [$file, $plugin, $assign, $submission, $sink, $dummy] = $this->setup_submission();
         $data                                                     = new \stdClass();
         $data->submpathnamehash                                   = $file->get_pathnamehash();
         $data->submfilename                                       = $dummy->filename;
@@ -131,7 +131,7 @@ final class events_test extends \advanced_testcase {
      * @return void
      */
     public function test_submission_updated(): void {
-        list($file, , $assign, $submission, $sink, $dummy, $course) = $this->setup_submission();
+        [$file, , $assign, $submission, $sink, $dummy, $course] = $this->setup_submission();
         $plugin                                                     = $assign->get_submission_plugin_by_type('collabora');
         $data                                                       = new \stdClass();
         $data->submpathnamehash                                     = $file->get_pathnamehash();
