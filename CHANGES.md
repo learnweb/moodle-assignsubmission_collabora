@@ -4,6 +4,10 @@ moodle-assignsubmission_collabora
 Changes
 -------
 
+### v4.5.2
+* remove unused cache definition
+* fix coding style
+
 ### v4.5.1
 * 2025-01-21 -  Adjust github workflow to be more restrictive
 
