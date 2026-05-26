@@ -4,6 +4,9 @@ moodle-assignsubmission_collabora
 Changes
 -------
 
+### v5.0.2
+* remove unused cache definition
+
 ### v5.0.1
 * adjust code for Moodle 5.1
 * apply new coding style
