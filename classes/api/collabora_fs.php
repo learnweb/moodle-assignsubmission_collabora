@@ -26,6 +26,8 @@ namespace assignsubmission_collabora\api;
 class collabora_fs extends \mod_collabora\api\base_filesystem {
     /** Define the filearea for submission files */
     public const FILEAREA_SUBMIT = 'submission_file';
+    /** Define the filearea for converted pdf files */
+    public const FILEAREA_PDFCONVERTED = 'pdfconverted';
 
     /** @var string */
     private $accesstoken;
@@ -37,6 +39,20 @@ class collabora_fs extends \mod_collabora\api\base_filesystem {
     private $submission;
     /** @var \assign */
     private $assign;
+
+    /**
+     * Retrieves the plugin configuration.
+     *
+     * @return \stdClass The plugin configuration object containing all settings
+     */
+    public static function get_global_config() {
+        static $config;
+
+        if (empty($config)) {
+            $config = get_config('assignsubmission_collabora');
+        }
+        return $config;
+    }
 
     /**
      * Get the moodle user id from the collabora_token table.
@@ -112,6 +128,48 @@ class collabora_fs extends \mod_collabora\api\base_filesystem {
         }
 
         return false;
+    }
+
+    /**
+     * Converts a file to PDF format and stores it as a new stored_file object.
+     *
+     * This method takes an existing stored file, converts it to PDF using the
+     * convert_to_pdf() method, and creates a new stored file with the PDF content
+     * in a separate file area.
+     *
+     * @param \stored_file $filetoconvert The file to be converted to PDF
+     * @return \stored_file|null The newly created PDF file or null if conversion failed
+     */
+    public static function convert_to_pdf_file(\stored_file $filetoconvert): ?\stored_file {
+        $pdffilename = $filetoconvert->get_filename() . '.pdf';
+        $pdffile = null;
+
+        // Get pdf as string and store it as file.
+        if ($pdfdata = static::convert_to_pdf($filetoconvert)) {
+            $filerecord = (object) [
+                'contextid' => $filetoconvert->get_contextid(),
+                'component' => 'assignsubmission_collabora',
+                'filearea'  => static::FILEAREA_PDFCONVERTED,
+                'itemid'    => $filetoconvert->get_itemid(),
+                'filepath'  => '/',
+                'filename'  => $pdffilename,
+            ];
+
+            $fs = get_file_storage();
+            $pdffile = $fs->create_file_from_string($filerecord, $pdfdata);
+        }
+
+        return $pdffile;
+    }
+
+    /**
+     * Checks whether PDF conversion is enabled in the global configuration.
+     *
+     * @return bool True if PDF conversion is enabled, false otherwise
+     */
+    public static function is_pdf_convert_enabled() {
+        $config = static::get_global_config();
+        return !empty($config->enablepdfconvert);
     }
 
     /**

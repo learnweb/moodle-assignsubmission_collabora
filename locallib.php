@@ -264,6 +264,7 @@ class assign_submission_collabora extends assign_submission_plugin {
             'height',
             'initialtext',
             'filename',
+            'converttopdf',
         ];
         $thisplugincfg      = [];
         $assignpluginconfig = (array) $this->get_config();
@@ -293,6 +294,8 @@ class assign_submission_collabora extends assign_submission_plugin {
      * @return void
      */
     public function get_settings(MoodleQuickForm $mform) {
+        global $OUTPUT;
+
         if ($this->assignment->has_instance()) {
             $pluginconfig = (array) $this->get_config();
         } else {
@@ -421,9 +424,37 @@ class assign_submission_collabora extends assign_submission_plugin {
             $mform->addElement('static', 'initialfile', get_string('initialfile', 'mod_collabora'), $this->get_initial_file_link());
         }
 
+        if (collabora_fs::get_convert_endpoint()) {
+            $mform->addElement(
+                'selectyesno',
+                'assignsubmission_collabora_converttopdf',
+                get_string('converttopdf', 'assignsubmission_collabora')
+            );
+            $mform->setDefault('assignsubmission_collabora_converttopdf', $config->converttopdf ?? true);
+            $mform->addHelpButton('assignsubmission_collabora_converttopdf', 'converttopdf', 'assignsubmission_collabora');
+            $mform->hideif(
+                'assignsubmission_collabora_converttopdf',
+                'assignsubmission_collabora_enabled',
+                'notchecked'
+            );
+            if (!empty($config->converttopdf)) {
+                $warning = $OUTPUT->render_from_template(
+                    'assignsubmission_collabora/warning',
+                    ['text' => get_string('pdfwarning', 'assignsubmission_collabora')]
+                );
+                $mform->addElement(
+                    'static',
+                    'assignsubmission_collabora_pdfwarning',
+                    get_string('pdfwarning_label', 'assignsubmission_collabora'),
+                    $warning
+                );
+                $mform->hideIf('assignsubmission_collabora_pdfwarning', 'assignsubmission_collabora_converttopdf', 'eq', '1');
+            }
+        }
+
         // Height.
         $mform->addElement('text', 'assignsubmission_collabora_height', get_string('height', 'assignsubmission_collabora'));
-        $mform->setDefault('assignsubmission_collabora_height', 0);
+        $mform->setDefault('assignsubmission_collabora_height', $config->height ?? 0);
         $mform->setType('assignsubmission_collabora_height', PARAM_INT);
         $mform->hideif('assignsubmission_collabora_height', 'assignsubmission_collabora_enabled', 'notchecked');
     }
@@ -435,6 +466,8 @@ class assign_submission_collabora extends assign_submission_plugin {
      * @return bool     - on error the subtype should call set_error and return false
      */
     public function save_settings(stdClass $data) {
+        global $DB;
+
         $noerror = true; // Track input errors.
 
         // Get our own local config settings - if we do not have any settings - this is a new record.
@@ -448,6 +481,29 @@ class assign_submission_collabora extends assign_submission_plugin {
         $this->set_config('format', $data->assignsubmission_collabora_format);
         // Height never empty - required for all formats.
         $this->set_config('height', $data->assignsubmission_collabora_height);
+
+        // The converttopdf might be empty.
+        $this->set_config('converttopdf', $data->assignsubmission_collabora_converttopdf ?? 0);
+        if (empty($data->assignsubmission_collabora_converttopdf)) {
+            // If we have the annotation plugin.
+            if (class_exists('\\assignfeedback_editpdf\\annotation')) {
+                // Delete old annotations.
+                if (!empty($data->coursemodule)) {
+                    // Delete annotation files.
+                    $context = \context_module::instance($data->coursemodule);
+                    $fs = get_file_storage();
+                    $fs->delete_area_files($context->id, 'assignfeedback_editpdf');
+                    // Delete annotation records from an existing instance.
+                    if (!empty($data->instance)) {
+                        if ($grades = $DB->get_records('assign_grades', ['assignment' => $data->instance])) {
+                            foreach ($grades as $grade) {
+                                $DB->delete_records('assignfeedback_editpdf_annot', ['gradeid' => $grade->id]);
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
         /*
          * We can save new settings.
@@ -548,7 +604,7 @@ class assign_submission_collabora extends assign_submission_plugin {
         } else {
             $params['userid'] = $submission->userid;
         }
-        $event = assignsubmission_file\event\assessable_uploaded::create($params);
+        $event = assignsubmission_collabora\event\assessable_uploaded::create($params);
         $event->trigger();
 
         // BORROWED from file submission code.
@@ -598,52 +654,183 @@ class assign_submission_collabora extends assign_submission_plugin {
     }
 
     /**
-     * Produce a list of files suitable for export that represent this submission.
+     * Retrieves the relevant files for a submission, handling PDF conversion if enabled.
      *
-     * @param  stdClass $submission
-     * @param  stdClass $user
-     * @return array    - return an array of files indexed by filename
+     * This method manages both the original submission file and its PDF conversion (if configured).
+     * It handles several scenarios:
+     * - Returns original file when PDF conversion is disabled
+     * - Returns PDF file when called by editpdf plugin
+     * - Manages PDF file lifecycle (creation, deletion, updates)
+     * - Ensures only the most recent version of files is returned
+     *
+     * @param stdClass $submission The submission object containing submission details
+     * @param stdClass $user The user object for whom files are being retrieved
+     * @return array Array of stored_file objects prepared for output
      */
     public function get_files(stdClass $submission, stdClass $user) {
+        // Initialize a few things.
+        $submissionfile = null;
+        $pdffile = null;
+        $pdfexists = false;
+        $config = $this->get_config();
+        $convertenabled = collabora_fs::is_pdf_convert_enabled();
         $result = [];
 
-        $fs      = get_file_storage();
-        $filerec = $this->get_filerecord(null, collabora_fs::FILEAREA_SUBMIT, $submission->id);
+        // Get both the original submission file and its PDF conversion (if exists).
+        $submissionfile = $this->get_user_file($submission, collabora_fs::FILEAREA_SUBMIT);
+        $pdffile = $this->get_user_file($submission, collabora_fs::FILEAREA_PDFCONVERTED);
 
-        $files = $fs->get_area_files(
-            $filerec->contextid,
-            $filerec->component,
-            $filerec->filearea,
-            $filerec->itemid,
-            '',
-            false,
-            0,
-            0,
-            1
-        );
-        if ($file = reset($files)) {
-            // Do we return the full folder path or just the file name?
-            if (isset($submission->exportfullpath) && $submission->exportfullpath == false) {
-                $result[$file->get_filename()] = $file;
-            } else {
-                $result[$file->get_filepath() . $file->get_filename()] = $file;
+        // Prepare initial file list with both files (if they exist).
+        $result = $this->prepare_get_files_list($submission->exportfullpath ?? true, $submissionfile, $pdffile);
+
+        // Skip PDF conversion if disabled in plugin configuration.
+        if ((!$convertenabled) || empty($config->converttopdf)) {
+            // Remove any existing PDF files when conversion is disabled.
+            if ($submissionfile instanceof \stored_file) {
+                $fs = get_file_storage();
+                $fs->delete_area_files(
+                    $submissionfile->get_contextid(),
+                    $submissionfile->get_component(),
+                    collabora_fs::FILEAREA_PDFCONVERTED,
+                    $submissionfile->get_itemid()
+                );
             }
+            return $result;
+        }
+
+        // Special handling when called by the assignfeedback_editpdf plugin.
+        if ($this->is_called_by_editpdf_ajax()) {
+            $result = []; // Editpdf only needs the PDF file, so we clear the file list.
+        } else {
+            return $result; // Return original files when not called by editpdf.
+        }
+
+        // Remove PDF file if no submission file exists.
+        if (empty($submissionfile)) {
+            if (!empty($pdffile)) {
+                $pdffile->delete();
+            }
+            return $result;
+        }
+
+        // Remove outdated PDF file if submission file is newer.
+        if (!empty($pdffile)) {
+            if ($pdffile->get_timemodified() < $submissionfile->get_timemodified()) {
+                $pdffile->delete();
+                $pdffile = null;
+            }
+        }
+
+        // Create new PDF conversion if none exists or was deleted.
+        if (empty($pdffile)) {
+            if ($submissionfile instanceof \stored_file) {
+                $pdffile = collabora_fs::convert_to_pdf_file($submissionfile);
+                $pdfexists = ($pdffile !== false);
+            }
+        } else {
+            $pdfexists = true;
+        }
+
+        // Prepare final result with PDF file if conversion was successful.
+        if ($pdfexists) {
+            $result = $this->prepare_get_files_list($submission->exportfullpath ?? true, $pdffile);
+        }
+        return $result;
+    }
+
+    /**
+     * Retrieves the most recent file submitted by a user for a specific file area.
+     *
+     * @param stdClass $submission The submission object containing submission details
+     * @param string $filearea The file area to search for files (e.g., 'submission_files')
+     * @return stored_file|null The most recent file if found, null otherwise
+     */
+    protected function get_user_file(\stdClass $submission, string $filearea) {
+        $file = null;
+        $fs = get_file_storage();
+
+        if ($filerec = $this->get_filerecord(null, $filearea, $submission->id)) {
+            $files = $fs->get_area_files(
+                $filerec->contextid,
+                $filerec->component,
+                $filerec->filearea,
+                $filerec->itemid,
+                'timemodified, id',
+                false,
+                0,
+                0,
+                1
+            );
+
+            // Get the last submission file if exist.
+            if (!empty($files)) {
+                $file = reset($files);
+            }
+        }
+
+        return $file;
+    }
+
+    /**
+     * Prepares an associative array of stored files for further processing.
+     *
+     * The array keys are either the full file path (including filename) or just
+     * the filename, depending on the $exportfullpath parameter. Empty files are skipped.
+     *
+     * @param bool $exportfullpath Whether to use full path (including filename) as array key
+     * @param \stored_file|null ...$files One or more stored_file objects to process
+     * @return array Associative array of files with keys based on $exportfullpath setting
+     */
+    protected function prepare_get_files_list(bool $exportfullpath, ?\stored_file ...$files): array {
+        $result = [];
+        foreach ($files as $file) {
+            if (empty($file)) {
+                continue;
+            }
+            if ($exportfullpath) {
+                $key = $file->get_filepath() . $file->get_filename();
+            } else {
+                $key = $file->get_filename();
+            }
+            $result[$key] = $file;
         }
 
         return $result;
     }
 
     /**
+     * Checks if the current call originates from the assignfeedback_editpdf AJAX functionality.
+     *
+     * This method examines the debug backtrace to determine if the call stack
+     * includes the editpdf document services method that generates combined documents.
+     *
+     * @return bool True if called by editpdf AJAX, false otherwise
+     */
+    protected function is_called_by_editpdf_ajax(): bool {
+        // This is an ugly hack to detect if the call is made by the editpdf ajax.
+        if ($calls = debug_backtrace(~DEBUG_BACKTRACE_PROVIDE_OBJECT | DEBUG_BACKTRACE_IGNORE_ARGS)) {
+            foreach ($calls as $call) {
+                if ($call['function'] === 'get_combined_document_for_attempt') {
+                    if ($call['class'] === 'assignfeedback_editpdf\\document_services') {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
      * Get any additional fields for the submission form for this assignment.
      *
-     * @param  stdClass        $submission
-     * @param  MoodleQuickForm $mform
-     * @param  stdClass        $data       - the form data
-     * @param  int             $userid
-     * @return bool            - true if we added anything to the form
+     * @param  \stdClass        $submission
+     * @param  \MoodleQuickForm $mform
+     * @param  \stdClass        $data       - the form data
+     * @param  int              $userid
+     * @return bool             - true if we added anything to the form
      */
-    public function get_form_elements($submission, MoodleQuickForm $mform, stdClass $data, $userid = null) {
-        global $USER;
+    public function get_form_elements($submission, \MoodleQuickForm $mform, stdClass $data, $userid = null) {
+        global $USER, $OUTPUT;
 
         if (null === $userid) {
             $userid = empty($data->userid) ? $USER->id : $data->userid;
@@ -689,12 +876,18 @@ class assign_submission_collabora extends assign_submission_plugin {
         $mform->setType('submpathnamehash', PARAM_RAW);
         $mform->addElement('hidden', 'subnewsubmssn', $isnewsubmission);
         $mform->setType('subnewsubmssn', PARAM_INT);
-        // Sometimes required to ensure changes are saved - particuarly for specified text.
+
+        // Add a warning to remind the user should save the file in the collabora frame first.
+        $notification = new \core\output\notification(
+            message: get_string('formsavewarming', 'assignsubmission_collabora'),
+            messagetype: \core\notification::WARNING,
+            title: get_string('formsavewarmingpmt', 'assignsubmission_collabora'),
+            titleicon: 'i/circleinfo'
+        );
+
         $mform->addElement(
-            'static',
-            'warning',
-            get_string('formsavewarmingpmt', 'assignsubmission_collabora'),
-            get_string('formsavewarming', 'assignsubmission_collabora')
+            'html',
+            $OUTPUT->render($notification)
         );
 
         return true;

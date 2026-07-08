@@ -21,6 +21,8 @@
  * @copyright 2019 Benjamin Ellis, Synergy Learning
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+$string['converttopdf']                 = 'Convert to pdf file';
+$string['converttopdf_help']            = 'If the submission is converted, it can be annotated by the "Annotate PDF" feedback. If the conversion is disabled, old annotations will be deleted!';
 $string['couldnotstoreinitialfile']     = 'Could not store initial file (type: {$a})!';
 $string['display']                      = 'Display (Collabora)';
 $string['docreadonly']                  = 'File is readonly for you.';
@@ -45,12 +47,16 @@ $string['invalidrequesttype']           = 'Invalid Request Type';
 $string['logmessage']                   = 'A submission file exists.';
 $string['missingfile']                  = 'File is missing for some reason.';
 $string['nosubmission']                 = 'No submission has been made yet.';
+$string['pdfwarning']                   = 'All PDF annotations will be deleted!';
+$string['pdfwarning_label']             = 'PDF hint';
 $string['pluginname']                   = 'Collaborative submissions';
 $string['presentation']                 = 'Presentation';
 $string['privacy:metadata:filepurpose'] = 'The file for this assignment submission';
 $string['requiredforfilename']          = 'Filename is required for this format.';
 $string['requiredfortext']              = 'Required when the format is \'Specified text\'';
 $string['requiredforupload']            = 'Required when the format is \'File upload\'';
+$string['setting_enablepdfconvert']     = 'Enable pdf conversion';
+$string['setting_enablepdfconvert_help'] = 'If this setting is enabled, the submitted documents will be converted to PDF and can be annotated.';
 $string['spreadsheet']                  = 'Spreadsheet';
 $string['submissionsubmitted']          = 'Submitted';
 $string['text']                         = 'Specified text';

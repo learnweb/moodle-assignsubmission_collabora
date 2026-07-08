@@ -91,7 +91,7 @@ final class events_test extends \advanced_testcase {
 
         $this->assertCount(2, $events);  // There are 2 events in the save() method.
         $event = $events[0];    // We want the 1st event.
-        $this->assertInstanceOf('\assignsubmission_file\event\assessable_uploaded', $event);
+        $this->assertInstanceOf('\assignsubmission_collabora\event\assessable_uploaded', $event);
         $this->assertEquals($assign->get_context()->id, $event->contextid);
         $this->assertEquals($submission->id, $event->objectid);
         $this->assertCount(1, $event->other['pathnamehashes']); // Only ever 1 file.

@@ -64,6 +64,7 @@ final class locallib_test extends \advanced_testcase {
                 'assignsubmission_collabora_format'   => collabora_util::FORMAT_WORDPROCESSOR,
                 'assignsubmission_collabora_height'   => 0,
                 'assignsubmission_collabora_filename' => 'initialfile.docx',
+                'assignsubmission_collabora_converttopdf' => 0,
             ]
         );
 
@@ -99,7 +100,6 @@ final class locallib_test extends \advanced_testcase {
             'submfilename'     => 'hidden',
             'submpathnamehash' => 'hidden',
             'subnewsubmssn'    => 'hidden',
-            'warning'          => 'static',
         ];
         require_once($CFG->dirroot . '/mod/assign/submission/collabora/tests/lib/submissionform.php');
 

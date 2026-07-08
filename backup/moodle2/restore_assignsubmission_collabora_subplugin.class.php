@@ -72,5 +72,12 @@ class restore_assignsubmission_collabora_subplugin extends restore_subplugin {
             null,
             $oldsubmissionid
         );
+        $this->add_related_files(
+            'assignsubmission_collabora',
+            \assignsubmission_collabora\api\collabora_fs::FILEAREA_PDFCONVERTED,
+            'submission',
+            null,
+            $oldsubmissionid
+        );
     }
 }

@@ -62,6 +62,11 @@ class backup_assignsubmission_collabora_subplugin extends backup_subplugin {
             \assignsubmission_collabora\api\collabora_fs::FILEAREA_SUBMIT,
             'submission'
         );
+        $subpluginelement->annotate_files(
+            'assignsubmission_collabora',
+            \assignsubmission_collabora\api\collabora_fs::FILEAREA_PDFCONVERTED,
+            'submission'
+        );
 
         return $subplugin;
     }
