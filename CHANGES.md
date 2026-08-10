@@ -4,6 +4,11 @@ moodle-assignsubmission_collabora
 Changes
 -------
 
+### v5.0.3
+* add pdf conversion for assignfeedback_editpdf
+* adjust github actions for Moodle 5.3
+* changed maturity to stable
+
 ### v5.0.2
 * remove unused cache definition
 
